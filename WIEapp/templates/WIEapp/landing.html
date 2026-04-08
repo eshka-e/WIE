@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>whoise</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="main-body">
+
+<div class="status-panel" id="statusPanel">
+
+    <div class="panel-section panel-clickable">
+        <a href="{% url 'login' %}" class="panel-clickable">ВХОД</a>
+    </div>
+</div>
+
+    <main class="main-content">
+{% block content %}
+<div class="main-content">
+    <div class="logo-wrapper">
+        <img class="main-img" src="{% static 'img/logo-main.png' %}" alt="Логотип WHOisE">
+    </div>
+    <div class="h-content">
+        <h1 class="main-h1">WHOisE</h1>
+        <h2>твоё пространство для творчества</h2>
+    </div>
+</div>
+{% endblock %}
+    </main>
+
+</body>
+</html>
