@@ -1,10 +1,53 @@
+
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHOisE — ВХОД</title>
+    <link rel="stylesheet" href="{% static 'WIEapp/css/auth.css' %}">
 </head>
 <body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <img src="{% static 'WIEapp/images/login.png' %}" alt="login">
+            </div>
 
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="id_username">ЛОГИН ИЛИ EMAIL</label>
+                    <input type="text" name="username" id="id_username"
+                           placeholder="username@example.com или @nickname" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_password">ПАРОЛЬ</label>
+                    <input type="password" name="password" id="id_password"
+                           placeholder="••••••••" required>
+                </div>
+
+                {% if form.errors %}
+                    <div class="form-errors">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <p class="error-text">{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="auth-btn">ВОЙТИ</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>НЕТ АККАУНТА? <a href="{% url 'WIEapp:register' %}">СТАТЬ СЛЕДОМ</a></p>
+                <p><a href="{% url 'WIEapp:password_reset' %}">ЗАБЫЛИ ПАРОЛЬ?</a></p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

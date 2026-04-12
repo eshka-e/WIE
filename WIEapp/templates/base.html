@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>whoise</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<div class="status-panel {% if user.is_authenticated %}auth{% else %}guest{% endif %}" id="statusPanel">
+    {% if user.is_authenticated %}
+        <div class="panel-section panel-space" onclick="switchSpace()">
+            ПРОСТРАНСТВО:[<a href="{% url 'WIEapp:stream' %}" class="panel-clickable">ПОТОК</a>]
+        </div>
+
+        <div class="panel-section">
+            СИГНАЛЫ:<a href="{% url 'WIEapp:notifications' %}" class="panel-clickable" id="notifications-count">0</a>
+        </div>
+
+        <div class="panel-section panel-clickable">
+            <a href="{% url 'WIEapp:profile' %}" class="panel-clickable">@{{ user.username }}</a>
+        </div>
+    {% else %}
+        <div class="panel-section panel-clickable">
+            <a href="{% url 'WIEapp:login' %}" class="panel-clickable">ВХОД</a>
+        </div>
+    {% endif %}
+</div>
+
+<main class="main-content">
+    {% block content %}
+
+
+    {% endblock content %}
+</main>
+
+{% if user.is_authenticated %}
+<script>
+    async function updateNotificationsCount() {
+    try {
+        const response = await fetch('{% url "WIEapp:unread_count" %}');
+        const data = await response.json();
+        const span = document.getElementById('notifications-count');
+        if (span) {
+            span.textContent = `${data.count}`;
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+    }
+}
+
+    function switchSpace() {
+        console.log('Switch space clicked');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateNotificationsCount();
+        setInterval(updateNotificationsCount, 30000);
+    });
+</script>
+{% endif %}
+
+</body>
+</html>

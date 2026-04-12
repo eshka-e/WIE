@@ -1,0 +1,136 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #ffffff;
+    font-family: 'Courier New', 'Fira Code', monospace;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 450px;
+}
+
+.auth-card {
+    background: #ffffff;
+    border: 1px solid #eef2f8;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.auth-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-logo img {
+    max-width: 100%;
+    height: auto;
+    max-height: 80px;
+}
+
+.auth-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.auth-form label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #e03a3a;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.auth-form input,
+.auth-form textarea {
+    width: 100%;
+    background: #f8fafc;
+    border: 1px solid #dce5ec;
+    padding: 0.8rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: #1a2c3e;
+    transition: all 0.2s;
+}
+
+.auth-form input:focus,
+.auth-form textarea:focus {
+    outline: none;
+    border-color: #e03a3a;
+    background: #ffffff;
+}
+
+.auth-form textarea {
+    resize: vertical;
+}
+
+.form-hint {
+    font-size: 0.6rem;
+    color: #8a9cb0;
+    margin-top: 0.3rem;
+    display: block;
+}
+
+.auth-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid #e03a3a;
+    color: #e03a3a;
+    padding: 0.8rem;
+    font-family: inherit;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+}
+
+.auth-btn:hover {
+    background: rgba(224, 58, 58, 0.05);
+}
+
+.form-errors {
+    background: rgba(224, 58, 58, 0.05);
+    border-left: 3px solid #e03a3a;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.error-text {
+    color: #e03a3a;
+    font-size: 0.75rem;
+    margin: 0.2rem 0;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eef2f8;
+}
+
+.auth-footer p {
+    font-size: 0.7rem;
+    color: #8a9cb0;
+    margin: 0.3rem 0;
+}
+
+.auth-footer a {
+    color: #e03a3a;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}

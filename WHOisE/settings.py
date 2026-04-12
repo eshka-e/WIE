@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'WIEapp.apps.WieappConfig',
+    'WIEapp.apps.WIEappConfig',
 ]
 
 MIDDLEWARE = [
@@ -100,6 +100,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # для админки
+    'WIEapp.backends.EmailOrUsernameBackend',     # для пользователей
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
@@ -127,3 +131,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'WIEapp:stream'
 LOGOUT_REDIRECT_URL = 'WIEapp:home'
+
+# РЕАЛЬНАЯ ОТПРАВКА ЧЕРЕЗ ЯНДЕКС
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'whoise.proj@yandex.ru'  # твой логин
+EMAIL_HOST_PASSWORD = 'btzzcbhvedtnmhag'  # скопированный пароль
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

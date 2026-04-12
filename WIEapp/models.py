@@ -1,21 +1,20 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils import timezone
 
 
-# ПРОФИЛЬ
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     bio = models.TextField(max_length=500, blank=True)
-    telegram = models.CharField(max_length=100, blank=True)
+    display_name = models.CharField(max_length=100, blank=True)  # ← если ещё нет
+    is_email_verified = models.BooleanField(default=False)  # ← НОВОЕ
+    email_verification_token = models.CharField(max_length=100, blank=True, null=True)  # ← НОВОЕ
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"СЛЕД: {self.user.username}"
 
 
-# ТЕГИ
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
@@ -23,7 +22,6 @@ class Tag(models.Model):
         return self.name
 
 
-# ПРОСТРАНСТВА (РАЗДЕЛЫ)
 class Space(models.Model):
     SPACE_TYPES = [
         ('vision', 'ВИДЕНИЕ'),
@@ -43,7 +41,6 @@ class Space(models.Model):
         return self.get_name_display()
 
 
-# ИМПУЛЬСЫ (ПОСТЫ)
 class Impulse(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='impulses')
     space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name='impulses')
@@ -51,7 +48,6 @@ class Impulse(models.Model):
     content = models.TextField()
     tags = models.ManyToManyField(Tag, related_name='impulses', blank=True)
 
-    # Медиа (в зависимости от пространства)
     image = models.ImageField(upload_to='impulses/images/', blank=True, null=True)
     video_url = models.URLField(blank=True, null=True)
 
@@ -66,7 +62,6 @@ class Impulse(models.Model):
         return f"{self.title} — {self.author.user.username}"
 
 
-# ОТКЛИКИ (КОММЕНТАРИИ)
 class Comment(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='comments')
     impulse = models.ForeignKey(Impulse, on_delete=models.CASCADE, related_name='comments')
@@ -81,7 +76,6 @@ class Comment(models.Model):
         return f"Отклик от {self.author.user.username}"
 
 
-# РЕЗОНАНСЫ (РЕАКЦИИ)
 class Resonance(models.Model):
     RESONANCE_TYPES = [
         ('heart', 'СЕРДЦЕ'),
@@ -89,13 +83,12 @@ class Resonance(models.Model):
     ]
 
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='resonances')
-    impulse = models.ForeignKey('Impulse', on_delete=models.CASCADE, related_name='resonances', null=True, blank=True)
-    comment = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='resonances', null=True, blank=True)
+    impulse = models.ForeignKey(Impulse, on_delete=models.CASCADE, related_name='resonances', null=True, blank=True)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='resonances', null=True, blank=True)
     resonance_type = models.CharField(max_length=10, choices=RESONANCE_TYPES)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        # Исправленный unique_together
         unique_together = [
             ('user', 'impulse', 'resonance_type'),
             ('user', 'comment', 'resonance_type'),
@@ -105,7 +98,7 @@ class Resonance(models.Model):
         target = self.impulse if self.impulse else self.comment
         return f"{self.user.user.username} → {self.get_resonance_type_display()} → {target}"
 
-# ОРИЕНТИРЫ (ПОДПИСКИ)
+
 class Landmark(models.Model):
     TARGET_TYPES = [
         ('profile', 'СЛЕД'),
@@ -124,7 +117,6 @@ class Landmark(models.Model):
         return f"{self.follower.user.username} → {self.target_type}#{self.target_id}"
 
 
-# СИГНАЛЫ
 class Notification(models.Model):
     NOTIFICATION_TYPES = [
         ('comment', 'НОВЫЙ ОТКЛИК'),
@@ -140,6 +132,7 @@ class Notification(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, blank=True)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    metadata = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ['-created_at']

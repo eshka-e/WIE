@@ -1,0 +1,11 @@
+{% load static %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2 style="text-align: center;">❌ НЕВЕРНАЯ ССЫЛКА</h2>
+        <p style="text-align: center;">Ссылка подтверждения недействительна.</p>
+        <div class="auth-footer"><a href="{% url 'WIEapp:login' %}">ВОЙТИ</a></div>
+    </div>
+</div>
+{% endblock %}

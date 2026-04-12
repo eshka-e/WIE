@@ -1,0 +1,20 @@
+
+{% load static %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <img src="{% static 'WIEapp/images/auto.png' %}" alt="mail">
+        </div>
+
+        <h2 style="text-align: center; margin-bottom: 1rem;">📧 ПРОВЕРЬТЕ ПОЧТУ</h2>
+        <p style="text-align: center;">Мы отправили ссылку для подтверждения на ваш email.</p>
+        <p style="text-align: center; margin-top: 1rem;">Перейдите по ней, чтобы завершить регистрацию.</p>
+
+        <div class="auth-footer">
+            <p><a href="{% url 'WIEapp:login' %}">ВЕРНУТЬСЯ КО ВХОДУ</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

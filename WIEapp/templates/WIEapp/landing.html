@@ -1,34 +1,39 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>whoise</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body class="main-body">
 
-<div class="status-panel" id="statusPanel">
-
-    <div class="panel-section panel-clickable">
-        <a href="{% url 'login' %}" class="panel-clickable">ВХОД</a>
-    </div>
-</div>
-
-    <main class="main-content">
 {% block content %}
-<div class="main-content">
-    <div class="logo-wrapper">
-        <img class="main-img" src="{% static 'img/logo-main.png' %}" alt="Логотип WHOisE">
-    </div>
-    <div class="h-content">
-        <h1 class="main-h1">WHOisE</h1>
-        <h2>твоё пространство для творчества</h2>
-    </div>
-</div>
-{% endblock %}
-    </main>
 
-</body>
-</html>
+    <div class="content-view">
+        <div class="logo-wrapper">
+            <img class="main-img" src="{% static 'img/main.png' %}" alt="Логотип WHOisE">
+        </div>
+        <div class="h-content">
+            <h4>тво<span class="accent">е</span></h4>
+            <h4>пространство</h4>
+            <h4>для творч<span class="accent">е</span>ства</h4>
+        </div>
+    </div>
+    <div class="content">
+        <div class="cmi-container">
+            <h1 class="cmih1">в чем суть</h1>
+            <h2 class="cmih2">[проекта]</h2>
+        </div>
+        <p class="informain"> WHOisE - цифровое арт-пространство , стирающее границы между привычным пониманием форума и
+            платформой
+            для креативного самовыражения.</p>
+
+        <p class="informain">Именно здесь, в процессе создания
+            и интерпретации художественных [ОБРАЗОВ], мы приглашаем вас
+            к глубокому погружению
+            в собственную [ИДЕНТИЧНОСТЬ]. Каждый штрих, каждое слово, каждая задуманная форма становятся зеркалом,
+            отражающим слои нашего "Я", позволяя нам заново открыть себя и задаться вопросом: "WHO?", находя ответы в
+            мозаике нашего уникального внутреннего мира.
+        </p>
+        <p class="informain">
+            WHOisE — это не просто «хузе». Это <strong>WE</strong> — «мы».
+            Здесь одиночный вопрос «Кто я?» превращается в общий поиск «Кто мы?».<br>
+            Потому что идентичность не рождается в вакууме. Она собирается из импульсов, откликов и резонансов — вместе.<br>
+        <p class="add-informain">Добро пожаловать в общность исследователей</p>
+        </p>
+    </div>
+{% endblock content %}
