@@ -1,10 +1,306 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block content %}
+<div class="notifications-container">
+    <div class="notifications-header">
+        <h1>СИГНАЛЫ</h1>
+        {% if unread_notifications %}
+        <button id="markAllRead" class="mark-all-btn">ПОМЕТИТЬ ВСЁ ПРОЧИТАННЫМ</button>
+        {% endif %}
+    </div>
+
+    <div class="notifications-list">
+        {% for notification in notifications %}
+        <div class="notification-item {% if not notification.is_read %}unread{% endif %}" data-id="{{ notification.id }}">
+            <div class="notification-icon">
+                {% if notification.notification_type == 'comment' %}💬
+                {% elif notification.notification_type == 'reply' %}↩️
+                {% elif notification.notification_type == 'resonance' %}
+                    {% if notification.metadata.resonance_type == 'heart' %}🫀
+                    {% else %}💥
+                    {% endif %}
+                {% elif notification.notification_type == 'landmark' %}👁️
+                {% else %}📢
+                {% endif %}
+            </div>
+            <div class="notification-content">
+                <div class="notification-text">
+                    <strong>@{{ notification.sender.user.username }}</strong>
+                    {% if notification.notification_type == 'comment' %}
+                        оставил(а) отклик на ваш импульс
+                        <a href="{% url 'WIEapp:impulse_detail' notification.impulse.id %}">
+                            «{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»
+                        </a>
+                    {% elif notification.notification_type == 'reply' %}
+                        ответил(а) на ваш отклик в теме
+                        <a href="{% url 'WIEapp:impulse_detail' notification.impulse.id %}#comment-{{ notification.comment.id }}">
+                            «{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»
+                        </a>
+                    {% elif notification.notification_type == 'resonance' %}
+                        {% if notification.metadata.resonance_type == 'heart' %}
+                            в сердечном резонансе с вашим импульсом
+                        {% else %}
+                            во взрывном резонансе с вашим импульсом
+                        {% endif %}
+                        <a href="{% url 'WIEapp:impulse_detail' notification.impulse.id %}">
+                            «{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»
+                        </a>
+                    {% elif notification.notification_type == 'landmark' %}
+                        теперь ваш последователь
+                    {% endif %}
+                </div>
+                <div class="notification-meta">
+                    <span class="time">{{ notification.created_at|timesince }} назад</span>
+                </div>
+            </div>
+            <div class="notification-actions">
+                <button class="delete-notification" data-id="{{ notification.id }}">🗑 УДАЛИТЬ</button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-notifications">
+            <p>→ НЕТ УВЕДОМЛЕНИЙ</p>
+            <p class="empty-hint">КОГДА ПОЯВЯТСЯ ОТКЛИКИ ИЛИ РЕЗОНАНСЫ, ОНИ БУДУТ ЗДЕСЬ</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .notifications-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 2rem;
+        border-left: 4px solid #e03a3a;
+        padding-left: 1.5rem;
+    }
+
+    .notifications-header h1 {
+        font-size: 1.8rem;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #1a2c3e;
+    }
+
+    .mark-all-btn {
+        background: transparent;
+        border: 1px solid #e03a3a;
+        color: #e03a3a;
+        padding: 0.3rem 1rem;
+        font-family: inherit;
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .mark-all-btn:hover {
+        background: #e03a3a;
+        color: white;
+    }
+
+    .notifications-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .notification-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.2rem;
+        border: 1px solid #eef2f8;
+        background: #ffffff;
+        transition: all 0.2s;
+    }
+
+    .notification-item:hover {
+        border-color: #e03a3a;
+    }
+
+    .notification-item.unread {
+        background: #fef8f5;
+        border-left: 3px solid #e03a3a;
+    }
+
+    .notification-icon {
+        width: 32px;
+        height: 32px;
+        background: #f0f4fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .notification-content {
+        flex: 1;
+    }
+
+    .notification-text {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: #334454;
+    }
+
+    .notification-text strong {
+        color: #1a2c3e;
+    }
+
+    .notification-text a {
+        color: #e03a3a;
+        text-decoration: none;
+        border-bottom: 1px dotted #e03a3a;
+    }
+
+    .notification-text a:hover {
+        border-bottom: 1px solid #e03a3a;
+    }
+
+    .notification-meta {
+        margin-top: 0.5rem;
+        font-size: 0.7rem;
+        color: #8a9cb0;
+    }
+
+    .notification-actions {
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .notification-item:hover .notification-actions {
+        opacity: 1;
+    }
+
+    .delete-notification {
+        background: transparent;
+        border: none;
+        color: #b4c4d4;
+        font-family: inherit;
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .delete-notification:hover {
+        color: #e03a3a;
+    }
+
+    .empty-notifications {
+        text-align: center;
+        padding: 4rem 2rem;
+        border: 1px dashed #eef2f8;
+        color: #b4c4d4;
+    }
+
+    .empty-notifications p {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.8rem;
+    }
+
+    .empty-hint {
+        margin-top: 0.5rem;
+        font-size: 0.7rem;
+        color: #d0d8e0;
+    }
+
+    @media (max-width: 768px) {
+        .notifications-container {
+            padding: 1rem;
+        }
+        .notification-item {
+            flex-wrap: wrap;
+        }
+        .notification-actions {
+            opacity: 1;
+            margin-left: 48px;
+        }
+    }
+</style>
+
+<script>
+    // Получение CSRF-токена
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Удаление уведомления
+    document.querySelectorAll('.delete-notification').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const item = this.closest('.notification-item');
+
+            fetch(`/api/notifications/${id}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    item.remove();
+                    // Если уведомлений не осталось — перезагрузить страницу
+                    if (document.querySelectorAll('.notification-item').length === 0) {
+                        location.reload();
+                    }
+                    // Проверить, остались ли непрочитанные, если нет — скрыть кнопку
+                    const remainingUnread = document.querySelectorAll('.notification-item.unread').length;
+                    const markAllBtn = document.getElementById('markAllRead');
+                    if (markAllBtn && remainingUnread === 0) {
+                        markAllBtn.style.display = 'none';
+                    }
+                }
+            });
+        });
+    });
+
+    // Пометить всё прочитанным
+    const markAllBtn = document.getElementById('markAllRead');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function() {
+            fetch('/api/notifications/mark-all-read/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                    });
+                    // Скрыть кнопку после того, как всё помечено прочитанным
+                    markAllBtn.style.display = 'none';
+                }
+            });
+        });
+    }
+</script>
+{% endblock %}

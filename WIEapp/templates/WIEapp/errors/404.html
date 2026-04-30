@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-code">404</div>
+    <div class="error-title">СЛЕД ПОТЕРЯН</div>
+    <div class="error-message">
+        Страница, которую вы ищете, не существует.<br>
+        Возможно, она ушла в архив или её никогда не было.
+    </div>
+    <div class="error-actions">
+        <a href="{% url 'WIEapp:stream' %}" class="btn">В ПОТОК</a>
+        <a href="{% url 'WIEapp:spaces_list' %}" class="btn btn-secondary">В ПРОСТРАНСТВА</a>
+    </div>
+</div>
+
+<style>
+    .error-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 4rem 2rem;
+        text-align: center;
+        border-left: 4px solid #e03a3a;
+    }
+    .error-code {
+        font-size: 5rem;
+        color: #e03a3a;
+        font-weight: bold;
+    }
+    .error-title {
+        font-size: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin: 1rem 0;
+    }
+    .error-message {
+        color: #8a9cb0;
+        margin: 1.5rem 0;
+        line-height: 1.5;
+    }
+    .error-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    .btn {
+        background: transparent;
+        border: 1px solid #e03a3a;
+        color: #e03a3a;
+        padding: 0.5rem 1.5rem;
+        text-decoration: none;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+    .btn-secondary {
+        border-color: #dce5ec;
+        color: #8a9cb0;
+    }
+    .btn-secondary:hover {
+        border-color: #e03a3a;
+        color: #e03a3a;
+    }
+</style>
+{% endblock %}

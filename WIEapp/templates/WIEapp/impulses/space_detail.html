@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="stream-container">
+    <div class="stream-header">
+        <h1>{{ current_space.get_name_display }}</h1>
+        <a href="{% url 'WIEapp:create_impulse' %}" class="create-btn">+ НОВЫЙ ИМПУЛЬС</a>
+    </div>
+
+    <div class="impulses-list" id="impulses-list">
+        {% include 'WIEapp/include/impulse_cards.html' with impulses=impulses %}
+    </div>
+
+    {% if impulses.has_next %}
+    <div class="loading-trigger" data-next-page="{{ impulses.next_page_number }}" style="text-align: center; padding: 2rem;">
+        <span class="loader">ЗАГРУЗКА...</span>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .stream-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .stream-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 2rem;
+        border-left: 4px solid #e03a3a;
+        padding-left: 1.5rem;
+    }
+
+    .stream-header h1 {
+        font-size: 2rem;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #1a2c3e;
+    }
+
+    .create-btn {
+        background: transparent;
+        border: 1px solid #e03a3a;
+        color: #e03a3a;
+        padding: 0.5rem 1rem;
+        font-family: inherit;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .loader {
+        font-size: 0.7rem;
+        color: #8a9cb0;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+</style>
+{% endblock %}

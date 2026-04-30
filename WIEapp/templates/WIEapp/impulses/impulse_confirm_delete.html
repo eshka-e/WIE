@@ -1,1 +1,96 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="delete-card">
+        <h1>УДАЛИТЬ ИМПУЛЬС?</h1>
+
+        <div class="impulse-preview">
+            <div class="impulse-title">{{ impulse.title|upper }}</div>
+            <div class="impulse-meta">
+                {{ impulse.space.get_name_display }} • @{{ impulse.author.user.username }}
+            </div>
+        </div>
+
+        <p class="warning-text">Это действие нельзя отменить. Импульс и все отклики будут удалены навсегда.</p>
+
+        <form method="post" class="delete-form">
+            {% csrf_token %}
+            <div class="delete-actions">
+                <button type="submit" class="btn-delete">ДА, УДАЛИТЬ</button>
+                <a href="{% url 'WIEapp:impulse_detail' impulse.id %}" class="btn-cancel">ОТМЕНА</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .delete-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 4rem 2rem;
+    }
+
+    .delete-card {
+        border: 1px solid #eef2f8;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #e03a3a;
+        margin-bottom: 1.5rem;
+    }
+
+    .impulse-preview {
+        background: #f8fafc;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .impulse-title {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .impulse-meta {
+        font-size: 0.7rem;
+        color: #8a9cb0;
+    }
+
+    .warning-text {
+        color: #cc0000;
+        font-size: 0.8rem;
+        margin-bottom: 2rem;
+    }
+
+    .delete-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn-delete {
+        background: transparent;
+        border: 1px solid #cc0000;
+        color: #cc0000;
+        padding: 0.6rem 1.5rem;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        color: #8a9cb0;
+        padding: 0.6rem 1.5rem;
+        text-decoration: none;
+        text-transform: uppercase;
+    }
+</style>
+{% endblock %}

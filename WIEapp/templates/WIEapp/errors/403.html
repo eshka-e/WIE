@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-code">403</div>
+    <div class="error-title">ДОСТУП ЗАКРЫТ</div>
+    <div class="error-message">
+        У вас нет прав для просмотра этой страницы.<br>
+        Возможно, вы не тот След.
+    </div>
+    <div class="error-actions">
+        <a href="{% url 'WIEapp:stream' %}" class="btn">В ПОТОК</a>
+        <a href="{% url 'WIEapp:login' %}" class="btn btn-secondary">ВОЙТИ</a>
+    </div>
+</div>
+{% endblock %}

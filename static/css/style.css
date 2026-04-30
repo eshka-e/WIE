@@ -102,6 +102,7 @@ html {
 
 body {
     font-family: 'Non Bureau', sans-serif;
+    color: #171A2A;
     margin: 50px;
     padding: 0;
     display: flex;
@@ -111,6 +112,7 @@ body {
     min-height: 100vh;
     text-align: center;
     padding-top: 0;
+
 }
 
 .status-panel {
@@ -120,7 +122,7 @@ body {
     right: 0;
     margin-left: auto;
     margin-right: auto;
-    max-width: 700px;
+    max-width: 1050px;
     height: 50px;
     background: rgba(255, 255, 255, 0.62);
     backdrop-filter: blur(4px);
@@ -355,7 +357,7 @@ body {
 }
 
 .add-informain {
-    font-size: 32px;
+    font-size: 38px;
     font-weight: 400;
     font-style: italic;
 }
@@ -415,3 +417,66 @@ body {
         top: -10px;
     }
 }
+
+.form-impuls-btn {
+    background: white;
+    color: #05026C;
+    border: 3px solid #05026C;
+    border-radius: 4px;
+    padding: 3px 120px;
+    font-size: 44px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: 1.5px;
+    transition: all 0.2s ease;
+    margin-top: 16px;
+    font-family: inherit;
+    text-decoration: none;
+}
+
+
+.form-impuls-btn:hover {
+    border: solid #304361;
+    color: #304361;
+    transform: scale(0.98);
+}
+
+
+    .profile-stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1rem 0;
+    }
+
+    .stat-item {
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 38px;
+        font-weight: 900;
+        color: #171A2A;
+    }
+
+    .stat-label {
+        font-size: 24px;
+        color: #171A2A;
+        text-transform: lowercase;
+        letter-spacing: 0.05em;
+    }
+
+        .btn-edit {
+        background: none;
+        border: 1px solid #171A2A;
+        color: #171A2A;
+        border-radius: 3px;
+        padding: 4px 25px;
+        font-family: inherit;
+        font-size: 15px;
+        text-decoration: none;
+        display: inline-block;
+        font-style: italic;
+    }

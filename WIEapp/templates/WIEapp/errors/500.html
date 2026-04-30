@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-code">500</div>
+    <div class="error-title">СБОЙ СИГНАЛА</div>
+    <div class="error-message">
+        Что-то пошло не так. Система временно потеряла устойчивость.<br>
+        Попробуйте позже — мы уже чиним.
+    </div>
+    <div class="error-actions">
+        <a href="{% url 'WIEapp:stream' %}" class="btn">В ПОТОК</a>
+        <button onclick="location.reload()" class="btn btn-secondary">ПОВТОРИТЬ</button>
+    </div>
+</div>
+{% endblock %}

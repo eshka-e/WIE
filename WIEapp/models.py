@@ -5,15 +5,12 @@ from django.db import models
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    banner = models.ImageField(upload_to='covers/', blank=True, null=True)  # ← НОВОЕ
     bio = models.TextField(max_length=500, blank=True)
-    display_name = models.CharField(max_length=100, blank=True)  # ← если ещё нет
-    is_email_verified = models.BooleanField(default=False)  # ← НОВОЕ
-    email_verification_token = models.CharField(max_length=100, blank=True, null=True)  # ← НОВОЕ
+    display_name = models.CharField(max_length=100, blank=True)
+    is_email_verified = models.BooleanField(default=False)
+    email_verification_token = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"СЛЕД: {self.user.username}"
-
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -25,7 +22,7 @@ class Tag(models.Model):
 class Space(models.Model):
     SPACE_TYPES = [
         ('vision', 'ВИДЕНИЕ'),
-        ('nerve', 'ЧУТКОСТЬ'),
+        ('nerve', 'ЧУВСТВО'),
         ('craft', 'РЕМЕСЛО'),
         ('stream', 'ПОТОК'),
     ]
@@ -108,14 +105,11 @@ class Landmark(models.Model):
     follower = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='landmarks')
     target_type = models.CharField(max_length=20, choices=TARGET_TYPES)
     target_id = models.PositiveIntegerField()
+    is_muted = models.BooleanField(default=False)  # ← ДОБАВИТЬ
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ['follower', 'target_type', 'target_id']
-
-    def __str__(self):
-        return f"{self.follower.user.username} → {self.target_type}#{self.target_id}"
-
 
 class Notification(models.Model):
     NOTIFICATION_TYPES = [

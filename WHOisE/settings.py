@@ -132,11 +132,14 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'WIEapp:stream'
 LOGOUT_REDIRECT_URL = 'WIEapp:home'
 
-# РЕАЛЬНАЯ ОТПРАВКА ЧЕРЕЗ ЯНДЕКС
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'whoise.proj@yandex.ru'  # твой логин
-EMAIL_HOST_PASSWORD = 'btzzcbhvedtnmhag'  # скопированный пароль
+EMAIL_HOST_USER = 'whoise.proj@yandex.ru'
+EMAIL_HOST_PASSWORD = 'btzzcbhvedtnmhag'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+CSRF_FAILURE_VIEW = 'WIEapp.views.csrf_failure'

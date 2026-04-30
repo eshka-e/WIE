@@ -1,1 +1,259 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="stream-container">
+    <div class="stream-header">
+        <h1>ПОТОК</h1>
+        <a href="{% url 'WIEapp:create_impulse' %}" class="create-btn">+ НОВЫЙ ИМПУЛЬС</a>
+    </div>
+
+
+
+    <!-- ЛЕНТА ИМПУЛЬСОВ -->
+    <div class="impulses-list" id="impulses-list">
+        {% include 'WIEapp/include/impulse_cards.html' with impulses=impulses %}
+    </div>
+
+    <!-- ПАГИНАЦИЯ ДЛЯ БЕСКОНЕЧНОГО СКРОЛЛА -->
+    {% if impulses.has_next %}
+    <div class="loading-trigger" data-next-page="{{ impulses.next_page_number }}" style="text-align: center; padding: 2rem;">
+        <span class="loader">ЗАГРУЗКА...</span>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .stream-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .stream-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 2rem;
+        border-left: 4px solid #e03a3a;
+        padding-left: 1.5rem;
+    }
+
+    .stream-header h1 {
+        font-size: 2rem;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #1a2c3e;
+    }
+
+    .create-btn {
+        background: transparent;
+        border: 1px solid #e03a3a;
+        color: #e03a3a;
+        padding: 0.5rem 1rem;
+        font-family: inherit;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .create-btn:hover {
+        background: rgba(224, 58, 58, 0.05);
+    }
+
+    .filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #eef2f8;
+        padding-bottom: 1rem;
+    }
+
+    .filter-btn {
+        background: transparent;
+        border: none;
+        color: #8a9cb0;
+        font-family: inherit;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        padding: 0.3rem 0;
+        transition: color 0.2s;
+    }
+
+    .filter-btn.active {
+        color: #e03a3a;
+        border-bottom: 2px solid #e03a3a;
+    }
+
+    .filter-btn:hover {
+        color: #e03a3a;
+    }
+
+    .loader {
+        font-size: 0.7rem;
+        color: #8a9cb0;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+</style>
+
+<script>
+  // ==================== CSRF-ТОКЕН ====================
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+// ==================== РЕЗОНАНСЫ ====================
+function attachResonanceListeners() {
+    document.querySelectorAll('.resonate-btn').forEach(btn => {
+        btn.removeEventListener('click', resonanceHandler);
+        btn.addEventListener('click', resonanceHandler);
+    });
+}
+
+function resonanceHandler(e) {
+    e.preventDefault();
+    const btn = e.currentTarget;
+    const impulseId = btn.dataset.impulseId;
+    const type = btn.dataset.type;
+
+    fetch('/api/resonate/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken
+        },
+        credentials: 'same-origin',
+        body: `impulse_id=${impulseId}&resonance_type=${type}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        const card = btn.closest('.impulse-card');
+        const heartBtn = card.querySelector('.heart-btn');
+        const blastBtn = card.querySelector('.blast-btn');
+        if (heartBtn) heartBtn.innerHTML = `❤️ ${data.heart_count}`;
+        if (blastBtn) blastBtn.innerHTML = `💥 ${data.blast_count}`;
+
+        // Обновляем активное состояние кнопок
+        if (data.user_heart !== undefined) {
+            if (data.user_heart) heartBtn.classList.add('active');
+            else heartBtn.classList.remove('active');
+        }
+        if (data.user_blast !== undefined) {
+            if (data.user_blast) blastBtn.classList.add('active');
+            else blastBtn.classList.remove('active');
+        }
+    })
+    .catch(error => console.error('Ошибка резонанса:', error));
+}
+
+// ==================== ФИЛЬТРАЦИЯ ====================
+function initFilters() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const impulsesList = document.getElementById('impulses-list');
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const space = this.dataset.space;
+
+            fetch(`?space=${space}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => {
+                impulsesList.innerHTML = html;
+                attachResonanceListeners();
+                initInfiniteScroll();
+            });
+        });
+    });
+}
+
+// ==================== БЕСКОНЕЧНЫЙ СКРОЛЛ ====================
+let loading = false;
+let nextPage = null;
+let loaderElement = null;
+
+function initInfiniteScroll() {
+    const trigger = document.querySelector('.loading-trigger');
+    if (trigger) {
+        nextPage = trigger.dataset.nextPage || null;
+        loaderElement = trigger;
+    } else {
+        nextPage = null;
+        loaderElement = null;
+    }
+    loading = false;
+}
+
+function loadMore() {
+    if (loading || !nextPage) return;
+
+    loading = true;
+    if (loaderElement) loaderElement.style.display = 'block';
+
+    fetch(`?page=${nextPage}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.text())
+    .then(html => {
+        const impulsesList = document.getElementById('impulses-list');
+        impulsesList.insertAdjacentHTML('beforeend', html);
+
+        // Обновляем nextPage из нового триггера
+        const newTrigger = document.querySelector('.loading-trigger');
+        if (newTrigger && newTrigger.dataset.nextPage) {
+            nextPage = newTrigger.dataset.nextPage;
+            if (loaderElement) loaderElement.dataset.nextPage = nextPage;
+        } else {
+            nextPage = null;
+            if (loaderElement) loaderElement.remove();
+        }
+
+        attachResonanceListeners();
+        loading = false;
+        if (loaderElement) loaderElement.style.display = 'none';
+    })
+    .catch(error => {
+        console.error('Ошибка загрузки:', error);
+        loading = false;
+    });
+}
+
+// Обработчик скролла
+function handleScroll() {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+        loadMore();
+    }
+}
+
+// ==================== ИНИЦИАЛИЗАЦИЯ ====================
+document.addEventListener('DOMContentLoaded', function() {
+    attachResonanceListeners();
+    initFilters();
+    initInfiniteScroll();
+    window.addEventListener('scroll', handleScroll);
+});
+</script>
+{% endblock %}

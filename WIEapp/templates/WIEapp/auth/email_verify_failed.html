@@ -1,10 +1,20 @@
-{% load static %}
 
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHOisE — ВХОД</title>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
 {% block content %}
 <div class="auth-container">
     <div class="auth-card">
-        <h2 style="text-align: center;">❌ НЕВЕРНАЯ ССЫЛКА</h2>
-        <p style="text-align: center;">Ссылка подтверждения недействительна.</p>
+        <div class="auth-logo">
+            <img src="{% static 'img/dislink.png' %}" alt="mail">
+        </div>
+         <p class="inf" >Ссылка подтверждения недействительна.</p>
         <div class="auth-footer"><a href="{% url 'WIEapp:login' %}">ВОЙТИ</a></div>
     </div>
 </div>

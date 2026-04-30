@@ -1,1 +1,283 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="form-container">
+    <h1>{% if editing %}РЕДАКТИРОВАТЬ ИМПУЛЬС{% else %}НОВЫЙ ИМПУЛЬС{% endif %}</h1>
+
+    <form method="post" enctype="multipart/form-data" class="impulse-form" id="impulse-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="id_space">ПРОСТРАНСТВО</label>
+            {{ form.space }}
+            <div class="form-hint" id="space-hint"></div>
+        </div>
+
+        <!-- ГРУППА ЗАГОЛОВКА -->
+        <div class="form-group" id="title-group">
+            <label for="id_title">ЗАГОЛОВОК</label>
+            {{ form.title }}
+            <div class="form-error" id="title-error"></div>
+        </div>
+
+        <!-- ГРУППА ТЕКСТА -->
+        <div class="form-group" id="content-group">
+            <label for="id_content">ТЕКСТ</label>
+            {{ form.content }}
+            <div class="form-error" id="content-error"></div>
+        </div>
+
+        <!-- ГРУППА МЕДИА -->
+        <div class="form-group" id="media-group" style="display: none;">
+            <label id="media-label">МЕДИА</label>
+            <div id="image-group" style="display: none;">
+                {{ form.image }}
+            </div>
+            <div id="video-group" style="display: none;">
+                {{ form.video_url }}
+            </div>
+            <div class="form-hint" id="media-hint"></div>
+            <div class="form-error" id="media-error"></div>
+            <div class="media-preview" id="media-preview" style="display: none;">
+                <img id="preview-image" src="" alt="preview">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_tags">ТЕГИ (через запятую)</label>
+            {{ form.tags }}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">
+                {% if editing %}СОХРАНИТЬ{% else %}ОПУБЛИКОВАТЬ{% endif %}
+            </button>
+            <a href="{% if editing %}{% url 'WIEapp:impulse_detail' impulse.id %}{% else %}{% url 'WIEapp:stream' %}{% endif %}" class="cancel-btn">ОТМЕНА</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 2rem;
+        border-left: 4px solid #e03a3a;
+        padding-left: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #e03a3a;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        background: #f8fafc;
+        border: 1px solid #dce5ec;
+        padding: 0.8rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+    }
+
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        outline: none;
+        border-color: #e03a3a;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 150px;
+    }
+
+    .form-hint {
+        font-size: 0.7rem;
+        color: #8a9cb0;
+        margin-top: 0.3rem;
+    }
+
+    .form-error {
+        font-size: 0.7rem;
+        color: #e03a3a;
+        margin-top: 0.3rem;
+    }
+
+    .media-preview {
+        margin-top: 1rem;
+        background: #f8fafc;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .media-preview img {
+        max-width: 100%;
+        max-height: 200px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .submit-btn {
+        background: transparent;
+        border: 1px solid #e03a3a;
+        color: #e03a3a;
+        padding: 0.8rem 2rem;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .submit-btn:hover {
+        background: #e03a3a;
+        color: white;
+    }
+
+    .cancel-btn {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        color: #8a9cb0;
+        padding: 0.8rem 2rem;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .cancel-btn:hover {
+        border-color: #e03a3a;
+        color: #e03a3a;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Находим все нужные элементы
+        const spaceSelect = document.getElementById('id_space');
+        const titleGroup = document.getElementById('title-group');
+        const contentGroup = document.getElementById('content-group');
+        const mediaGroup = document.getElementById('media-group');
+        const imageGroup = document.getElementById('image-group');
+        const videoGroup = document.getElementById('video-group');
+        const mediaLabel = document.getElementById('media-label');
+        const mediaHint = document.getElementById('media-hint');
+        const imageInput = document.getElementById('media-image');
+        const videoInput = document.getElementById('media-video');
+        const previewDiv = document.getElementById('media-preview');
+        const previewImage = document.getElementById('preview-image');
+        const spaceHint = document.getElementById('space-hint');
+
+        // ПРАВИЛА по ID пространств (посмотри ID в своей базе)
+        // Обычно: vision=1, nerve=2, craft=3
+        const rules = {
+            '1': {  // ВИДЕНИЕ (vision)
+                type: 'image',
+                label: 'ИЗОБРАЖЕНИЕ',
+                hint: 'Обязательно загрузите изображение. Заголовок и описание — по желанию.'
+            },
+            '2': {  // ЧУВСТВО (nerve)
+                type: 'none',
+                label: '',
+                hint: 'Только текст. Заголовок и описание обязательны.'
+            },
+            '3': {  // РЕМЕСЛО (craft)
+                type: 'video',
+                label: 'ВИДЕО (URL)',
+                hint: 'Обязательно укажите ссылку на видео. Заголовок и описание обязательны.'
+            }
+        };
+
+        // Функция, которая показывает/скрывает поля
+        function updateForm() {
+            const selectedSpace = spaceSelect.value;
+            const rule = rules[selectedSpace];
+
+            console.log('Выбрано пространство ID:', selectedSpace);  // Для отладки
+
+            if (!rule) return;
+
+            // Определяем, что нужно показывать
+            if (rule.type === 'none') {
+                // Для ЧУВСТВО - скрываем всё медиа
+                mediaGroup.style.display = 'none';
+                if (imageInput) imageInput.value = '';
+                if (videoInput) videoInput.value = '';
+                if (previewDiv) previewDiv.style.display = 'none';
+            } else {
+                // Для ВИДЕНИЕ и РЕМЕСЛО - показываем медиа
+                mediaGroup.style.display = 'block';
+                mediaLabel.textContent = rule.label;
+                mediaHint.textContent = rule.hint;
+
+                if (rule.type === 'image') {
+                    imageGroup.style.display = 'block';
+                    videoGroup.style.display = 'none';
+                    if (videoInput) videoInput.value = '';
+                    if (previewDiv) previewDiv.style.display = 'none';
+                } else if (rule.type === 'video') {
+                    imageGroup.style.display = 'none';
+                    videoGroup.style.display = 'block';
+                    if (imageInput) imageInput.value = '';
+                    if (previewDiv) previewDiv.style.display = 'none';
+                }
+            }
+
+            // Показываем подсказку вверху
+            if (spaceHint) {
+                spaceHint.innerHTML = rule.hint;
+            }
+
+            // Меняем цвет label для обязательных полей
+            const titleLabel = titleGroup.querySelector('label');
+            const contentLabel = contentGroup.querySelector('label');
+
+            if (selectedSpace === '2' || selectedSpace === '3') {  // nerve или craft
+                titleLabel.style.color = '#e03a3a';
+                contentLabel.style.color = '#e03a3a';
+            } else {
+                titleLabel.style.color = '';
+                contentLabel.style.color = '';
+            }
+        }
+
+        // Показываем превью картинки
+        if (imageInput) {
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewDiv.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewDiv.style.display = 'none';
+                    previewImage.src = '';
+                }
+            });
+        }
+
+        // Запускаем при загрузке и при смене пространства
+        updateForm();
+        spaceSelect.addEventListener('change', updateForm);
+    });
+</script>
+{% endblock %}

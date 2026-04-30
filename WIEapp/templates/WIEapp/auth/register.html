@@ -1,32 +1,36 @@
-
 {% load static %}
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHOisE — ВХОД</title>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
 {% block content %}
 <div class="auth-container">
     <div class="auth-card">
         <div class="auth-logo">
-            <img src="{% static 'WIEapp/images/auto.png' %}" alt="auto">
+            <img src="{% static 'img/auto.png' %}" alt="auto">
         </div>
 
         <form method="post" class="auth-form">
             {% csrf_token %}
 
             <div class="form-group">
-                <label for="id_email">EMAIL</label>
+
                 <input type="email" name="email" id="id_email"
                        placeholder="you@example.com" required>
             </div>
 
             <div class="form-group">
-                <label for="id_password1">ПАРОЛЬ</label>
                 <input type="password" name="password1" id="id_password1"
                        placeholder="••••••••" required>
             </div>
 
             <div class="form-group">
-                <label for="id_password2">ПОДТВЕРЖДЕНИЕ ПАРОЛЯ</label>
                 <input type="password" name="password2" id="id_password2"
-                       placeholder="••••••••" required>
+                       placeholder="ПОДТВЕРДИТЬ ПАРОЛЬ" required>
             </div>
 
             {% if form.errors %}

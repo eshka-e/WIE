@@ -1,1 +1,373 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="impulse-detail-container">
+    <div class="impulse-detail-header">
+        <div class="impulse-meta">
+            <span class="impulse-space">{{ impulse.space.get_name_display }}</span>
+            <span class="impulse-author">@{{ impulse.author.user.username }}</span>
+            <span class="impulse-date">{{ impulse.created_at|date:"d.m.Y" }}</span>
+        </div>
+
+        <h1 class="impulse-title">{{ impulse.title|upper }}</h1>
+
+        {% if impulse.author == user.profile %}
+        <div class="impulse-actions">
+            <a href="{% url 'WIEapp:edit_impulse' impulse.id %}" class="btn-edit">РЕДАКТИРОВАТЬ</a>
+            <a href="{% url 'WIEapp:delete_impulse' impulse.id %}" class="btn-delete">УДАЛИТЬ</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- МЕДИА (если есть) -->
+    {% if impulse.image %}
+    <div class="impulse-media">
+        <img src="{{ impulse.image.url }}" alt="{{ impulse.title }}">
+    </div>
+    {% elif impulse.video_url %}
+    <div class="impulse-media video-wrapper">
+        <video controls src="{{ impulse.video_url }}"></video>
+    </div>
+    {% endif %}
+
+    <!-- ТЕКСТ ИМПУЛЬСА -->
+    <div class="impulse-content">
+        {{ impulse.content|linebreaks }}
+    </div>
+
+    <!-- ТЕГИ -->
+    {% if impulse.tags.all %}
+    <div class="impulse-tags">
+        {% for tag in impulse.tags.all %}
+        <span class="tag">#{{ tag.name }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- РЕЗОНАНСЫ -->
+    <div class="resonance-section">
+        <div class="resonance-buttons">
+            <button class="resonate-btn heart-btn {% if user_heart %}active{% endif %}"
+                    data-type="heart" data-impulse-id="{{ impulse.id }}">
+                🫀 {{ heart_count }}
+            </button>
+            <button class="resonate-btn blast-btn {% if user_blast %}active{% endif %}"
+                    data-type="blast" data-impulse-id="{{ impulse.id }}">
+                💥 {{ blast_count }}
+            </button>
+        </div>
+    </div>
+
+    <!-- ОТКЛИКИ -->
+    <div class="comments-section">
+        <h2 class="section-title">ОТКЛИКИ ({{ impulse.comments.count }})</h2>
+
+        {% for comment in comments %}
+        <div class="comment" id="comment-{{ comment.id }}">
+            <div class="comment-meta">
+                <a href="{% url 'WIEapp:user_profile' comment.author.user.username %}">
+                    @{{ comment.author.user.username }}
+                </a>
+                <span class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            <div class="comment-content">{{ comment.content|linebreaks }}</div>
+            <div class="comment-actions">
+                <button class="reply-toggle" data-comment-id="{{ comment.id }}">↩️ ОТВЕТИТЬ</button>
+            </div>
+
+            <!-- ВЛОЖЕННЫЕ ОТВЕТЫ -->
+            {% if comment.replies.all %}
+            <div class="replies">
+                {% for reply in comment.replies.all %}
+                <div class="reply" id="comment-{{ reply.id }}">
+                    <div class="comment-meta">
+                        <a href="{% url 'WIEapp:user_profile' reply.author.user.username %}">
+                            @{{ reply.author.user.username }}
+                        </a>
+                        <span class="comment-date">{{ reply.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    <div class="comment-content">{{ reply.content|linebreaks }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- ФОРМА ОТВЕТА -->
+            <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
+                <textarea rows="3" placeholder="ВАШ ОТВЕТ..."></textarea>
+                <button class="submit-reply" data-parent-id="{{ comment.id }}">ОТВЕТИТЬ</button>
+            </div>
+        </div>
+        {% empty %}
+        <p class="placeholder-text">[ ПОКА НЕТ ОТКЛИКОВ. БУДЬ ПЕРВЫМ ]</p>
+        {% endfor %}
+    </div>
+
+    <!-- ФОРМА НОВОГО ОТКЛИКА -->
+    <div class="new-comment">
+        <h2 class="section-title">ОСТАВИТЬ ОТКЛИК</h2>
+        <form method="post" class="comment-form">
+            {% csrf_token %}
+            {{ form.content }}
+            <button type="submit" class="submit-btn">ОТПРАВИТЬ</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .impulse-detail-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .impulse-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: #8a9cb0;
+        margin-bottom: 1rem;
+    }
+
+    .impulse-space {
+        color: #e03a3a;
+        font-weight: bold;
+    }
+
+    .impulse-title {
+        font-size: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1.5rem;
+    }
+
+    .impulse-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-edit, .btn-delete {
+        background: transparent;
+        border: 1px solid #e03a3a;
+        color: #e03a3a;
+        padding: 0.3rem 1rem;
+        text-decoration: none;
+        font-size: 0.7rem;
+    }
+
+    .btn-delete {
+        border-color: #cc0000;
+        color: #cc0000;
+    }
+
+    .impulse-media {
+        margin: 1.5rem 0;
+    }
+
+    .impulse-media img {
+        width: 100%;
+        height: auto;
+    }
+
+    .impulse-content {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #334454;
+        margin: 1.5rem 0;
+    }
+
+    .impulse-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin: 1rem 0;
+    }
+
+    .tag {
+        font-size: 0.7rem;
+        color: #8a9cb0;
+        background: #f0f4fa;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+    }
+
+    .resonance-section {
+        margin: 1.5rem 0;
+        padding: 1rem 0;
+        border-top: 1px solid #eef2f8;
+        border-bottom: 1px solid #eef2f8;
+    }
+
+    .resonance-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .resonate-btn {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        padding: 0.5rem 1rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .resonate-btn.active {
+        border-color: #e03a3a;
+        background: rgba(224, 58, 58, 0.1);
+    }
+
+    .comments-section {
+        margin: 2rem 0;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #e03a3a;
+        margin-bottom: 1.5rem;
+    }
+
+    .comment {
+        border-bottom: 1px solid #eef2f8;
+        padding: 1rem 0;
+    }
+
+    .comment-meta {
+        font-size: 0.75rem;
+        color: #8a9cb0;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-meta a {
+        color: #e03a3a;
+        text-decoration: none;
+    }
+
+    .comment-content {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-actions {
+        font-size: 0.7rem;
+    }
+
+    .comment-actions button {
+        background: none;
+        border: none;
+        color: #8a9cb0;
+        cursor: pointer;
+    }
+
+    .replies {
+        margin-left: 1.5rem;
+        margin-top: 1rem;
+        border-left: 2px solid #eef2f8;
+        padding-left: 1rem;
+    }
+
+    .reply-form {
+        margin-top: 0.5rem;
+        margin-left: 1.5rem;
+    }
+
+    .reply-form textarea {
+        width: 100%;
+        background: #f8fafc;
+        border: 1px solid #dce5ec;
+        padding: 0.5rem;
+        font-family: inherit;
+    }
+
+    .new-comment {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eef2f8;
+    }
+
+    .new-comment textarea {
+        width: 100%;
+        background: #f8fafc;
+        border: 1px solid #dce5ec;
+        padding: 1rem;
+        font-family: inherit;
+        margin-bottom: 1rem;
+    }
+
+    .submit-btn {
+        background: transparent;
+        border: 1px solid #e03a3a;
+        color: #e03a3a;
+        padding: 0.5rem 1.5rem;
+        cursor: pointer;
+    }
+
+    .placeholder-text {
+        color: #b4c4d4;
+        text-align: center;
+        padding: 2rem;
+    }
+</style>
+
+<script>
+    // Резонансы
+    document.querySelectorAll('.resonate-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const impulseId = this.dataset.impulseId;
+            const type = this.dataset.type;
+
+            fetch('{% url "WIEapp:toggle_resonance" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `impulse_id=${impulseId}&resonance_type=${type}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('.heart-btn').innerHTML = `❤️ ${data.heart_count}`;
+                document.querySelector('.blast-btn').innerHTML = `💥 ${data.blast_count}`;
+            });
+        });
+    });
+
+    // Показать/скрыть форму ответа
+    document.querySelectorAll('.reply-toggle').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const commentId = this.dataset.commentId;
+            const form = document.getElementById(`reply-form-${commentId}`);
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+        });
+    });
+
+    // Отправка ответа AJAX
+    document.querySelectorAll('.submit-reply').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const parentId = this.dataset.parentId;
+            const content = this.previousElementSibling.value;
+
+            fetch('{% url "WIEapp:add_reply_ajax" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `parent_id=${parentId}&content=${encodeURIComponent(content)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

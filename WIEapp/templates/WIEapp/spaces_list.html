@@ -1,0 +1,237 @@
+
+{% load static %}
+
+{% block content %}
+<div class="spaces-container">
+    <div class="spaces-row">
+        <!-- ВИДЕНИЕ -->
+        <a href="{% url 'WIEapp:space_detail' 'vision' %}" class="space-card" data-original-img="{% static 'img/vision-placeholder.png' %}" data-hover-img="{% static 'img/vision-hover.png' %}">
+            <div class="space-image">
+                <img src="{% static 'img/vision-placeholder.png' %}" alt="ВИДЕНИЕ" class="card-img">
+            </div>
+            <h2>ВИДЕНИЕ</h2>
+        </a>
+
+        <!-- ЧУТКОСТЬ -->
+        <a href="{% url 'WIEapp:space_detail' 'nerve' %}" class="space-card" data-original-img="{% static 'img/nerve-placeholder.png' %}" data-hover-img="{% static 'img/nerve-hover.png' %}">
+            <div class="space-image">
+                <img src="{% static 'img/nerve-placeholder.png' %}" alt="ЧУТКОСТЬ" class="card-img">
+            </div>
+            <h2>ЧУТКОСТЬ</h2>
+        </a>
+
+        <!-- РЕМЕСЛО -->
+        <a href="{% url 'WIEapp:space_detail' 'craft' %}" class="space-card" data-original-img="{% static 'img/craft-placeholder.png' %}" data-hover-img="{% static 'img/craft-hover.png' %}">
+            <div class="space-image">
+                <img src="{% static 'img/craft-placeholder.png' %}" alt="РЕМЕСЛО" class="card-img">
+            </div>
+            <h2>РЕМЕСЛО</h2>
+        </a>
+
+        <!-- ПОТОК -->
+        <a href="{% url 'WIEapp:stream' %}" class="space-card" data-original-img="{% static 'img/stream-placeholder.png' %}" data-hover-img="{% static 'img/stream-hover.png' %}">
+            <div class="space-image">
+                <img src="{% static 'img/stream-placeholder.png' %}" alt="ПОТОК" class="card-img">
+            </div>
+            <h2>ПОТОК</h2>
+        </a>
+    </div>
+</div>
+
+<style>
+    .spaces-container {
+        font-family: 'Non Bureau', sans-serif;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 5px;
+        overflow-x: auto;
+    }
+
+    .spaces-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 25px;
+        align-items: flex-start;
+        flex-wrap: nowrap; /* Запрещаем перенос на новую строку */
+        min-width: min-content;
+    }
+
+    /* КАРТОЧКА — исходное состояние */
+    .space-card {
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: inherit;
+        background: transparent;
+        width: 320px;
+        height: 740px;
+        border-radius: 5px;
+        transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        overflow: hidden;
+        border: none;
+        box-shadow: none;
+        position: relative;
+        flex-shrink: 0; /* Запрещаем сжатие карточек */
+    }
+
+    /* Увеличение при наведении */
+    .space-card:hover {
+        width: 404px;
+        height: 800px;
+        border-radius: 5px;
+    }
+
+    /* Блок изображения — отступы 5px сверху, слева, справа */
+    .space-image {
+        margin: 5px 5px 0 5px;
+        border-radius: 3px;
+        overflow: hidden;
+        background-color: #f4f7fc;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    .space-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: all 0.2s;
+        border-radius: 5px;
+    }
+
+    /* Заголовок — размер 70px, центрирование */
+    .space-card h2 {
+        font-size: 60px;
+        font-weight: 400;
+        text-align: center;
+        margin: 0;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #171A2A;
+        line-height: 1.1;
+        transition: font-size 0.3s ease-out;
+        width: 100%;
+    }
+
+    /* При наведении шрифт заголовка 90px */
+    .space-card:hover h2 {
+        font-size: 80px;
+    }
+
+    /* Адаптив для мобильных устройств - горизонтальная прокрутка */
+    @media (max-width: 780px) {
+        .spaces-container {
+            overflow-x: auto;
+        }
+        .spaces-row {
+            gap: 1rem;
+            justify-content: flex-start;
+            padding-bottom: 1rem;
+        }
+    }
+
+    .space-card:hover {
+        cursor: pointer;
+    }
+</style>
+
+<script>
+// Скрипт для смены изображений при наведении
+(function() {
+    // Функция для проверки загрузки изображений и создания fallback при необходимости
+    function handleImageFallback(imgElement, originalSrc, hoverSrc, cardTitle) {
+        // Проверяем, загрузилось ли оригинальное изображение
+        imgElement.onerror = function() {
+            if (!imgElement.getAttribute('data-fallback-set')) {
+                imgElement.setAttribute('data-fallback-set', 'true');
+                // Создаем canvas-заглушку, если изображение не найдено
+                const canvas = document.createElement('canvas');
+                canvas.width = 400;
+                canvas.height = 500;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#3a6ea5';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 36px system-ui, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(cardTitle, canvas.width/2, canvas.height/2);
+                
+                const fallbackSrc = canvas.toDataURL('image/png');
+                imgElement.src = fallbackSrc;
+                
+                // Также обновляем data-атрибуты для hover
+                const parentCard = imgElement.closest('.space-card');
+                if (parentCard && !parentCard.getAttribute('data-hover-fallback-set')) {
+                    parentCard.setAttribute('data-hover-fallback-set', 'true');
+                    const hoverCanvas = document.createElement('canvas');
+                    hoverCanvas.width = 400;
+                    hoverCanvas.height = 500;
+                    const hoverCtx = hoverCanvas.getContext('2d');
+                    hoverCtx.fillStyle = '#c23b22';
+                    hoverCtx.fillRect(0, 0, hoverCanvas.width, hoverCanvas.height);
+                    hoverCtx.fillStyle = '#f9e0a0';
+                    hoverCtx.font = 'bold 36px system-ui, sans-serif';
+                    hoverCtx.textAlign = 'center';
+                    hoverCtx.textBaseline = 'middle';
+                    hoverCtx.fillText(cardTitle + ' ✨', hoverCanvas.width/2, hoverCanvas.height/2);
+                    const hoverFallback = hoverCanvas.toDataURL('image/png');
+                    parentCard.setAttribute('data-hover-img', hoverFallback);
+                }
+            }
+        };
+        
+        // Устанавливаем оригинальное изображение
+        imgElement.src = originalSrc;
+    }
+    
+    // Инициализация всех карточек
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.space-card');
+        
+        cards.forEach(function(card) {
+            const imgElement = card.querySelector('.space-image img');
+            if (!imgElement) return;
+            
+            const title = card.querySelector('h2')?.innerText || 'Пространство';
+            
+            // Получаем пути к изображениям из data-атрибутов (которые уже заполнены тегами static)
+            let originalSrc = card.getAttribute('data-original-img');
+            let hoverSrc = card.getAttribute('data-hover-img');
+            
+            // Если пути не заданы, генерируем заглушки
+            if (!originalSrc || originalSrc === '') {
+                originalSrc = '';
+            }
+            if (!hoverSrc || hoverSrc === '') {
+                hoverSrc = '';
+            }
+            
+            // Сохраняем пути в data-атрибуты
+            card.setAttribute('data-original-img', originalSrc);
+            card.setAttribute('data-hover-img', hoverSrc);
+            
+            // Обрабатываем fallback для изображений
+            handleImageFallback(imgElement, originalSrc, hoverSrc, title);
+            
+            // Обработчики наведения для смены изображения
+            card.addEventListener('mouseenter', function() {
+                const hoverImg = this.getAttribute('data-hover-img');
+                if (hoverImg && hoverImg !== '' && imgElement.src !== hoverImg) {
+                    imgElement.src = hoverImg;
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const originalImg = this.getAttribute('data-original-img');
+                if (originalImg && originalImg !== '' && imgElement.src !== originalImg) {
+                    imgElement.src = originalImg;
+                }
+            });
+        });
+    });
+})();
+</script>
+{% endblock %}

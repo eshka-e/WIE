@@ -1,16 +1,14 @@
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.crypto import get_random_string
-from .models import Profile
 
 
 def generate_verification_token():
     return get_random_string(64)
 
 
-def send_verification_email(user):
+def send_verification_email(user, token):
     """Отправляет письмо с ссылкой подтверждения"""
-    token = user.profile.email_verification_token
     verification_url = f"http://127.0.0.1:8000/verify-email/{token}/"
 
     send_mail(

@@ -1,7 +1,14 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.conf.urls.static import static
+from django.urls import include, path
+from django.conf import settings
+from django.conf.urls import handler404, handler403, handler500
 
+handler404 = 'WIEapp.views.error_404'
+handler403 = 'WIEapp.views.error_403'
+handler500 = 'WIEapp.views.error_500'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -11,3 +18,5 @@ urlpatterns = [
 
 ]
 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

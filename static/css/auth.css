@@ -1,136 +1,284 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Thin'), local('NonBureau-Thin');
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Light'), local('NonBureau-Light');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Regular'), local('NonBureau-Regular');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Medium'), local('NonBureau-Medium');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau SemiBold'), local('NonBureau-SemiBold');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Bold'), local('NonBureau-Bold');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Black'), local('NonBureau-Black');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Thin Italic'), local('NonBureau-ThinItalic');
+    font-weight: 100;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Light Italic'), local('NonBureau-LightItalic');
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Regular Italic'), local('NonBureau-RegularItalic');
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Medium Italic'), local('NonBureau-MediumItalic');
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau SemiBold Italic'), local('NonBureau-SemiBoldItalic');
+    font-weight: 600;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Bold Italic'), local('NonBureau-BoldItalic');
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Non Bureau';
+    src: local('Non Bureau Black Italic'), local('NonBureau-BlackItalic');
+    font-weight: 900;
+    font-style: italic;
+}
+
+html {
+    font-size: 16px;
 }
 
 body {
-    background: #ffffff;
-    font-family: 'Courier New', 'Fira Code', monospace;
-    min-height: 100vh;
+    font-family: 'Non Bureau', sans-serif;
+    color: #171A2A;
+    margin: 50px;
+    padding: 0;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    padding: 2rem;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding-top: 0;
 }
+
 
 .auth-container {
     width: 100%;
-    max-width: 450px;
-}
-
-.auth-card {
-    background: #ffffff;
-    border: 1px solid #eef2f8;
-    padding: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    max-width: 700px;
+    padding: 20px;
 }
 
 .auth-logo {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 40px;
+
 }
 
 .auth-logo img {
-    max-width: 100%;
-    height: auto;
-    max-height: 80px;
+    height: 270px;
+    width: auto;
+    display: inline-block;
+    object-fit: contain;
 }
 
-.auth-form .form-group {
-    margin-bottom: 1.5rem;
+/* Form styles */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
 }
 
-.auth-form label {
-    display: block;
-    font-size: 0.7rem;
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #4a5568;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #e03a3a;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
 }
 
-.auth-form input,
-.auth-form textarea {
+.form-group input {
     width: 100%;
-    background: #f8fafc;
-    border: 1px solid #dce5ec;
-    padding: 0.8rem;
-    font-family: inherit;
-    font-size: 0.9rem;
-    color: #1a2c3e;
-    transition: all 0.2s;
-}
-
-.auth-form input:focus,
-.auth-form textarea:focus {
-    outline: none;
-    border-color: #e03a3a;
-    background: #ffffff;
-}
-
-.auth-form textarea {
-    resize: vertical;
-}
-
-.form-hint {
-    font-size: 0.6rem;
-    color: #8a9cb0;
-    margin-top: 0.3rem;
-    display: block;
-}
-
-.auth-btn {
-    width: 100%;
+    font-size: 55px;
+    font-style: italic;
+    font-weight: 300;
+    color: #304361;
     background: transparent;
-    border: 1px solid #e03a3a;
-    color: #e03a3a;
-    padding: 0.8rem;
+    border: none;
+    border-bottom: 2px solid #171A2A;
+    padding: 12px 0 8px 0;
+    outline: none;
+    transition: all 0.2s ease;
     font-family: inherit;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 0.5rem;
 }
 
-.auth-btn:hover {
-    background: rgba(224, 58, 58, 0.05);
+.form-group input::placeholder {
+    color: #a0aec0;
+    font-style: italic;
+    font-size: 55px;
+    opacity: 0.5;
 }
 
+.form-group input:focus {
+    border-bottom-color: #05026C;
+}
+
+.form-group input:-webkit-autofill,
+.form-group input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #304361;
+    transition: background-color 0s 600000s, color 0s 600000s;
+}
+
+/* Error messages */
 .form-errors {
-    background: rgba(224, 58, 58, 0.05);
-    border-left: 3px solid #e03a3a;
-    padding: 0.8rem;
-    margin-bottom: 1rem;
+    margin-top: -12px;
 }
 
 .error-text {
-    color: #e03a3a;
-    font-size: 0.75rem;
-    margin: 0.2rem 0;
+    color: #e53e3e;
+    font-size: 14px;
+    font-style: italic;
+    margin-top: 8px;
 }
 
+/* Submit button */
+.auth-btn {
+    background: #171A2A;
+    color: white;
+    border: none;
+    padding: 3px 120px;
+    font-size: 48px;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 16px;
+    font-family: inherit;
+}
+
+.auth-btn:hover {
+    background: #251111;
+    transform: scale(0.98);
+}
+
+
+
+/* Footer links */
 .auth-footer {
+    margin-top: 40px;
     text-align: center;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eef2f8;
+    display: flex;
+
+    flex-direction: column;
+    gap: 12px;
 }
 
 .auth-footer p {
-    font-size: 0.7rem;
-    color: #8a9cb0;
-    margin: 0.3rem 0;
+    font-size: 20px;
+    font-weight: 400;
+    font-style: normal;
+    color: #171A2A;
 }
 
 .auth-footer a {
-    color: #e03a3a;
-    text-decoration: none;
+    color: #05026C;
+    font-size: 20px;
+    font-style: italic;
+    font-weight: 400;
+    text-decoration: underline;
+    transition: opacity 0.2s ease;
 }
 
 .auth-footer a:hover {
-    text-decoration: underline;
+    opacity: 0.7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .auth-card {
+        padding: 32px 24px;
+    }
+
+    .auth-logo img {
+        height: 200px;
+    }
+
+    .form-group input {
+        font-size: 32px;
+    }
+
+    .form-group input::placeholder {
+        font-size: 32px;
+    }
+
+    .auth-footer p,
+    .auth-footer a {
+        font-size: 16px;
+    }
+}
+
+.inf {
+     font-weight: 300;
+    font-size: 30px;
+    margin: 15px 50px;
+    text-align: start;
 }

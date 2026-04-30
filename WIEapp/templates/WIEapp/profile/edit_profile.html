@@ -1,10 +1,261 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block content %}
+<div class="edit-profile-wrapper">
+    <form method="POST" enctype="multipart/form-data" class="edit-form">
+        {% csrf_token %}
+
+        <!-- БАННЕР -->
+        <div class="banner-section">
+            <label class="banner-label">БАННЕР</label>
+            <div class="banner-container">
+                {% if profile.banner %}
+                    <img src="{{ profile.banner.url }}" class="current-banner" id="currentBanner">
+                {% else %}
+                    <div class="banner-placeholder" id="currentBanner">
+                        <span>[ НЕТ БАННЕРА ]</span>
+                    </div>
+                {% endif %}
+                <label class="custom-file-upload banner-upload">
+                    <input type="file" name="banner" accept="image/*" onchange="previewBanner(event)">
+                    ЗАГРУЗИТЬ БАННЕР
+                </label>
+            </div>
+        </div>
+
+        <!-- АВАТАР И ОСНОВНЫЕ ПОЛЯ -->
+        <div class="header-section">  <!-- ← ДОБАВЛЕН ОТСУТСТВУЮЩИЙ КОНТЕЙНЕР -->
+            <div class="avatar-container">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" class="edit-avatar" id="currentAvatar">
+                {% else %}
+                    <img src="{% static 'img/logo-main.png' %}" class="edit-avatar" id="currentAvatar">
+                {% endif %}
+                <label class="custom-file-upload avatar-upload">
+                    <input type="file" name="avatar" accept="image/*" onchange="previewAvatar(event)">
+                    ОБНОВИТЬ
+                </label>
+            </div>
+
+            <div class="main-inputs">
+                <div class="input-group">
+                    <input type="text" name="display_name" placeholder="ИМЯ" value="{{ profile.display_name|default:'' }}">
+                    <div class="line"></div>
+                </div>
+                <div class="input-group" style="margin-top: 15px;">
+    <input type="text" name="username" placeholder="USERNAME" value="{{ user.username }}" required>
+    <div class="line"></div>
+    <small style="font-size: 0.6rem; color: #8a9cb0;">Только буквы, цифры и @/./+/-/_</small>
+</div>
+            </div>
+        </div>  <!-- ← ЗАКРЫВАЕМ header-section -->
+
+        <div class="bio-section">
+            <h2 class="section-title">О СЕБЕ</h2>
+            <div class="textarea-wrapper">
+                <textarea name="bio" rows="6">{{ profile.bio|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">ПОДТВЕРДИТЬ</button>
+    </form>
+</div>
+
+<style>
+    /* ваш стиль без изменений */
+    .banner-section {
+        margin-bottom: 2rem;
+    }
+
+    .banner-label {
+        display: block;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #e03a3a;
+        margin-bottom: 0.5rem;
+    }
+
+    .banner-container {
+        position: relative;
+        width: 100%;
+        height: 150px;
+        background: #f0f4fa;
+        border: 1px solid #eef2f8;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .current-banner {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .banner-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #8a9cb0;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+    }
+
+    .banner-upload {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 2px;
+        font-size: 0.7rem;
+        cursor: pointer;
+    }
+
+    .avatar-container {
+        position: relative;
+        width: 100px;
+        height: 100px;
+    }
+
+    .edit-avatar {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #e03a3a;
+    }
+
+    .avatar-upload {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 2px;
+        font-size: 0.6rem;
+        cursor: pointer;
+    }
+
+    .custom-file-upload input {
+        display: none;
+    }
+
+    .header-section {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        align-items: center;
+    }
+
+    .main-inputs {
+        flex: 1;
+    }
+
+    .input-group input {
+        width: 100%;
+        border: none;
+        padding: 8px 0;
+        font-family: inherit;
+        font-size: 1rem;
+        background: transparent;
+    }
+
+    .input-group input:focus {
+        outline: none;
+    }
+
+    .line {
+        height: 1px;
+        background: #eef2f8;
+        margin-top: 4px;
+    }
+
+    .bio-section {
+        margin: 2rem 0;
+    }
+
+    .section-title {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #e03a3a;
+        margin-bottom: 1rem;
+    }
+
+    .textarea-wrapper textarea {
+        width: 100%;
+        background: #f8fafc;
+        border: 1px solid #dce5ec;
+        padding: 1rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+        resize: vertical;
+    }
+
+    .textarea-wrapper textarea:focus {
+        outline: none;
+        border-color: #e03a3a;
+    }
+
+    .submit-btn {
+        background: transparent;
+        border: 1px solid #e03a3a;
+        color: #e03a3a;
+        padding: 0.8rem 2rem;
+        font-family: inherit;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .submit-btn:hover {
+        background: rgba(224, 58, 58, 0.05);
+    }
+</style>
+
+<script>
+    function previewAvatar(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            const preview = document.getElementById('currentAvatar');
+            if (preview) {
+                preview.src = reader.result;
+            }
+        };
+        if (event.target.files[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
+
+    function previewBanner(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            const preview = document.getElementById('currentBanner');
+            if (preview) {
+                if (preview.tagName === 'IMG') {
+                    preview.src = reader.result;
+                } else {
+                    const container = preview.parentElement;
+                    const newImg = document.createElement('img');
+                    newImg.id = 'currentBanner';
+                    newImg.className = 'current-banner';
+                    newImg.src = reader.result;
+                    container.replaceChild(newImg, preview);
+                }
+            }
+        };
+        if (event.target.files[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
+</script>
+{% endblock %}

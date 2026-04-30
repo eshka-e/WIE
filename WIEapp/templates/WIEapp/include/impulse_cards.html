@@ -1,0 +1,234 @@
+{% load static %}
+
+{% for impulse in impulses %}
+<div class="impulse-card" data-space="{{ impulse.space.name }}">
+    <div class="impulse-meta">
+        <span class="impulse-space">{{ impulse.space.get_name_display }}</span>
+        <span class="impulse-author">@<a href="{% url 'WIEapp:user_profile' impulse.author.user.username %}">{{ impulse.author.user.username }}</a></span>
+        <span class="impulse-date">{{ impulse.created_at|date:"d.m.Y" }}</span>
+    </div>
+
+    <div class="impulse-title">
+        <a href="{% url 'WIEapp:impulse_detail' impulse.id %}">{{ impulse.title|upper }}</a>
+    </div>
+
+    <!-- КОНТЕНТ В ЗАВИСИМОСТИ ОТ ПРОСТРАНСТВА -->
+    {% if impulse.space.name == 'vision' and impulse.image %}
+        <div class="impulse-media">
+            <img src="{{ impulse.image.url }}" alt="{{ impulse.title }}">
+        </div>
+    {% elif impulse.space.name == 'craft' and impulse.video_url %}
+        <div class="impulse-media video-preview" onclick="window.location.href='{% url 'WIEapp:impulse_detail' impulse.id %}'">
+            <img src="https://img.youtube.com/vi/{{ impulse.video_url|slice:'-11:' }}/hqdefault.jpg" alt="video preview">
+            <div class="play-icon">▶</div>
+        </div>
+    {% elif impulse.space.name == 'nerve' %}
+        <div class="impulse-excerpt">
+            {{ impulse.content|truncatechars:200|linebreaks }}
+        </div>
+    {% endif %}
+
+    <!-- ТЕГИ -->
+    {% if impulse.tags.all %}
+    <div class="impulse-tags">
+        {% for tag in impulse.tags.all|slice:":3" %}
+        <span class="tag">#{{ tag.name }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- СТАТИСТИКА -->
+    <div class="impulse-stats">
+        <div class="stat">💬 {{ impulse.comments.count }} откликов</div>
+        <div class="stat">🫀 {{ impulse.resonances.filter.resonance_type.heart.count }}</div>
+        <div class="stat">💥 {{ impulse.resonances.filter.resonance_type.blast.count }}</div>
+    </div>
+
+    <!-- КНОПКИ ДЕЙСТВИЙ -->
+    <div class="impulse-actions">
+        <button class="action-btn resonate-btn heart-btn" data-impulse-id="{{ impulse.id }}" data-type="heart">
+            🫀 {{ impulse.resonances.filter.resonance_type.heart.count }}
+        </button>
+        <button class="action-btn resonate-btn blast-btn" data-impulse-id="{{ impulse.id }}" data-type="blast">
+            💥 {{ impulse.resonances.filter.resonance_type.blast.count }}
+        </button>
+        <a href="{% url 'WIEapp:impulse_detail' impulse.id %}" class="action-link">ПЕРЕЙТИ</a>
+    </div>
+</div>
+{% empty %}
+<div class="empty-feed">
+    <p>→ НЕТ ИМПУЛЬСОВ</p>
+    <p style="margin-top: 1rem;">БУДЬ ПЕРВЫМ, КТО СОЗДАСТ ИМПУЛЬС</p>
+</div>
+{% endfor %}
+
+<style>
+    .impulse-card {
+        border: 1px solid #eef2f8;
+        background: #ffffff;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s;
+    }
+
+    .impulse-card:hover {
+        border-color: #e03a3a;
+    }
+
+    .impulse-meta {
+        font-size: 0.7rem;
+        color: #8a9cb0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .impulse-space {
+        color: #e03a3a;
+        font-weight: bold;
+    }
+
+    .impulse-author a {
+        color: #1a2c3e;
+        text-decoration: none;
+    }
+
+    .impulse-author a:hover {
+        color: #e03a3a;
+    }
+
+    .impulse-title {
+        font-size: 1.2rem;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.8rem;
+    }
+
+    .impulse-title a {
+        color: #1a2c3e;
+        text-decoration: none;
+    }
+
+    .impulse-title a:hover {
+        color: #e03a3a;
+    }
+
+    .impulse-media {
+        margin: 1rem 0;
+        background: #f8fafc;
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .impulse-media img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .video-preview {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .play-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 48px;
+        height: 48px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #e03a3a;
+        font-size: 1.5rem;
+        pointer-events: none;
+    }
+
+    .impulse-excerpt {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: #334454;
+        margin: 1rem 0;
+    }
+
+    .impulse-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin: 1rem 0;
+    }
+
+    .tag {
+        font-size: 0.65rem;
+        color: #8a9cb0;
+        background: #f0f4fa;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+
+    .impulse-stats {
+        display: flex;
+        gap: 1rem;
+        margin: 1rem 0;
+        font-size: 0.7rem;
+        color: #8a9cb0;
+    }
+
+    .impulse-actions {
+        display: flex;
+        gap: 1rem;
+        border-top: 1px solid #eef2f8;
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .action-btn {
+        background: transparent;
+        border: none;
+        color: #8a9cb0;
+        font-family: inherit;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        padding: 0.3rem 0;
+    }
+
+    .action-btn:hover {
+        color: #e03a3a;
+    }
+
+    .action-link {
+        background: transparent;
+        border: none;
+        color: #8a9cb0;
+        font-family: inherit;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        text-decoration: none;
+        padding: 0.3rem 0;
+    }
+
+    .action-link:hover {
+        color: #e03a3a;
+    }
+
+    .empty-feed {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #b4c4d4;
+        border: 1px dashed #eef2f8;
+    }
+</style>

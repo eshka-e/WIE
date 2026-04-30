@@ -1,10 +1,163 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block content %}
+<div class="follow-container">
+    <div class="follow-header">
+        <h1>ОРИЕНТИРЫ</h1>
+        <a href="{% url 'WIEapp:profile' %}" class="back-link">← НАЗАД</a>
+    </div>
+
+    {% if landmarks %}
+        <div class="follow-list">
+            {% for landmark in landmarks %}
+            <div class="follow-card">
+                <div class="follow-avatar">
+                    {% if landmark.target.avatar %}
+                        <img src="{{ landmark.target.avatar.url }}" alt="avatar">
+                    {% else %}
+                        <img src="{% static 'img/logo-main.png' %}" alt="avatar">
+                    {% endif %}
+                </div>
+                <div class="follow-info">
+                    <a href="{% url 'WIEapp:user_profile' landmark.target.user.username %}" class="follow-name">
+                        {{ landmark.target.display_name|default:landmark.target.user.username|upper }}
+                    </a>
+                    <span class="follow-username">@{{ landmark.target.user.username }}</span>
+                </div>
+                <div class="follow-actions">
+                    <button class="unfollow-btn" data-user-id="{{ landmark.target.id }}">УБРАТЬ ОРИЕНТИР</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-follow">
+            <p>→ НЕТ ОРИЕНТИРОВ</p>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .follow-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .follow-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 2rem;
+        border-left: 4px solid #e03a3a;
+        padding-left: 1.5rem;
+    }
+
+    .follow-header h1 {
+        font-size: 1.8rem;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .back-link {
+        color: #8a9cb0;
+        text-decoration: none;
+    }
+
+    .follow-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .follow-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border: 1px solid #eef2f8;
+    }
+
+    .follow-avatar img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .follow-info {
+        flex: 1;
+    }
+
+    .follow-name {
+        font-weight: bold;
+        text-decoration: none;
+        color: #1a2c3e;
+    }
+
+    .follow-username {
+        font-size: 0.8rem;
+        color: #8a9cb0;
+        margin-left: 0.5rem;
+    }
+
+    .unfollow-btn {
+        background: transparent;
+        border: 1px solid #e03a3a;
+        color: #e03a3a;
+        padding: 0.3rem 1rem;
+        font-size: 0.7rem;
+        cursor: pointer;
+    }
+
+    .empty-follow {
+        text-align: center;
+        padding: 3rem;
+        color: #b4c4d4;
+    }
+</style>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    document.querySelectorAll('.unfollow-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            fetch('/api/follow/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrftoken
+                },
+                body: `user_id=${userId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'unfollowed') {
+                    this.closest('.follow-card').remove();
+                    if (document.querySelectorAll('.follow-card').length === 0) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

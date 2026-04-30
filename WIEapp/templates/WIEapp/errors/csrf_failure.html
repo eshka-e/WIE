@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-code">CSRF</div>
+    <div class="error-title">НЕВЕРНЫЙ ЗАПРОС</div>
+    <div class="error-message">
+        Сессия устарела или запрос был отправлен с неверными данными.<br>
+        Попробуйте обновить страницу.
+    </div>
+    <div class="error-actions">
+        <a href="{% url 'WIEapp:stream' %}" class="btn">В ПОТОК</a>
+        <button onclick="location.reload()" class="btn btn-secondary">ОБНОВИТЬ</button>
+    </div>
+</div>
+{% endblock %}
