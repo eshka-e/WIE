@@ -4,43 +4,53 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a820307f-927b-4bc0-8aa3-0ad8fe519a3c" name="Changes" comment="registration settings">
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_email.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/errors/403.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/errors/404.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/errors/500.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/errors/csrf_failure.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/space_detail.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/impulse_cards.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/spaces_list.html" afterDir="false" />
+    <list default="true" id="a820307f-927b-4bc0-8aa3-0ad8fe519a3c" name="Changes" comment="registration edits,&#10;error pages, spaces, I don't remember yet">
+      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/muted_profile.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/css/er.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Black.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Black.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-BlackItalic.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-BlackItalic.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Bold.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Bold.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-BoldItalic.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-BoldItalic.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Light.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Light.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-LightItalic.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-LightItalic.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Medium.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Medium.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-MediumItalic.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-MediumItalic.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Regular.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Regular.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-RegularItalic.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-RegularItalic.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-SemiBold.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-SemiBold.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-SemiBoldItalic.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-SemiBoldItalic.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Thin.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-Thin.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-ThinItalic.otf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/NonBureau-ThinItalic.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/fonts/Waterway Display Font.ttf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WHOisE/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/WHOisE/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WHOisE/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/WHOisE/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/signals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_verify_failed.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_verify_failed.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_complete.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_complete.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_confirm.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_confirm.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_done.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_done.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/register_details.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/verify_email_sent.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/verify_email_sent.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_confirm_delete.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_confirm_delete.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/errors/403.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/errors/403.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/errors/404.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/errors/404.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/errors/500.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/errors/500.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/space.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/stream.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/stream.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/edit_profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/edit_profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/followers.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/followers.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/landmarks.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/landmarks.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/notifications.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/notifications.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/base.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/auth.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/auth.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/style.css" afterDir="false" />
@@ -56,9 +66,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="CSS File" />
         <option value="Python Script" />
         <option value="HTML File" />
+        <option value="CSS File" />
       </list>
     </option>
   </component>
@@ -82,30 +92,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
-    "last_opened_file_path": "C:/Users/User/Desktop/WHOisE/WIEapp/migrations",
-    "list.type.of.created.stylesheet": "CSS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/User/Desktop/WHOisE/static/fonts&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\User\Desktop\WHOisE\static\fonts" />
+      <recent name="C:\Users\User\Desktop\WHOisE\static\font" />
       <recent name="C:\Users\User\Desktop\WHOisE\WIEapp\migrations" />
       <recent name="C:\Users\User\Desktop\WHOisE\static" />
       <recent name="C:\Users\User\Desktop\WHOisE\WIEapp" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\User\Desktop\WHOisE\static\font" />
       <recent name="C:\Users\User\Desktop\WHOisE\WIEapp\templates\WIEapp" />
       <recent name="C:\Users\User\Desktop\WHOisE\WIEapp\templates" />
       <recent name="C:\Users\User\Desktop\WHOisE\static\img" />
@@ -159,7 +172,8 @@
       <workItem from="1775633634298" duration="46738000" />
       <workItem from="1776229567413" duration="9961000" />
       <workItem from="1776576342320" duration="7144000" />
-      <workItem from="1777121156856" duration="38440000" />
+      <workItem from="1777121156856" duration="68956000" />
+      <workItem from="1777899887363" duration="17353000" />
     </task>
     <task id="LOCAL-00001" summary="start and setting">
       <option name="closed" value="true" />
@@ -177,7 +191,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775970954568</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="registration edits,&#10;error pages, spaces, I don't remember yet">
+      <option name="closed" value="true" />
+      <created>1777554823107</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1777554823107</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -208,6 +230,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="start and setting" />
     <MESSAGE value="registration settings" />
-    <option name="LAST_COMMIT_MESSAGE" value="registration settings" />
+    <MESSAGE value="registration edits,&#10;error pages, spaces, I don't remember yet" />
+    <option name="LAST_COMMIT_MESSAGE" value="registration edits,&#10;error pages, spaces, I don't remember yet" />
   </component>
 </project>

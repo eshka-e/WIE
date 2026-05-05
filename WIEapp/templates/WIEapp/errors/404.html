@@ -1,66 +1,158 @@
-{% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
-<div class="error-container">
-    <div class="error-code">404</div>
-    <div class="error-title">СЛЕД ПОТЕРЯН</div>
-    <div class="error-message">
-        Страница, которую вы ищете, не существует.<br>
-        Возможно, она ушла в архив или её никогда не было.
+<div class="error-page">
+    <!-- Left content section -->
+    <div class="content-section">
+        <div class="error-container">
+            <img class="muted-icon" src="{% static 'img/c404.png' %}" alt="Логотип WHOisE">
+            <div class="error-title">СЛЕД ПОТЕРЯН</div>
+            <div class="error-message">
+                Страница, которую вы ищете, не существует.<br>
+                Возможно, она ушла в архив или её никогда не было.
+            </div>
+        </div>
     </div>
-    <div class="error-actions">
-        <a href="{% url 'WIEapp:stream' %}" class="btn">В ПОТОК</a>
-        <a href="{% url 'WIEapp:spaces_list' %}" class="btn btn-secondary">В ПРОСТРАНСТВА</a>
+
+    <!-- Button at bottom -->
+    <div class="button-wrapper">
+        <a href="{% url 'WIEapp:stream' %}" class="submit-btn"> ВЕРНУТЬСЯ В ПОТОК</a>
     </div>
 </div>
 
 <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-image: url('/static/img/e404.png');
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: auto 100%;
+    font-family: 'Non Bureau', sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.error-page {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Left content section with 70px left padding */
+.content-section {
+    padding-left: 70px;
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 120px); /* Adjust based on button height */
+}
+
+.error-container {
+    max-width: 600px;
+    text-align: left;
+}
+
+.muted-icon {
+    display: block;
+    height: 500px;
+}
+
+.error-title {
+    font-size: 40px;
+    font-weight: bold;
+    color: #000000;
+
+}
+
+.error-message {
+    color: #000000;
+    margin: 10px 0;
+    line-height: 1.5;
+    font-weight: 300;
+    font-size: 28px;
+    text-transform: uppercase;
+}
+
+/* Button wrapper with 70px side padding - full width */
+.button-wrapper {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 70px 20px 70px;
+    width: 100%;
+}
+
+.submit-btn {
+    background: #171A2A;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 3px 110px;
+    font-size: 48px;
+    font-weight: 800;
+    font-style: italic;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 5px;
+    font-family: inherit;
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+}
+
+.submit-btn:hover {
+    background: #251111;
+    transform: scale(0.98);
+}
+
+.submit-btn:active {
+    background: #140000;
+    transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .content-section {
+        padding-left: 70px;
+    }
+
+    .button-wrapper {
+        padding: 0 70px 40px 70px;
+    }
+
+    .submit-btn {
+        font-size: 32px;
+        padding: 3px 60px;
+    }
+
     .error-container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 4rem 2rem;
-        text-align: center;
-        border-left: 4px solid #e03a3a;
+        max-width: 90%;
     }
-    .error-code {
-        font-size: 5rem;
-        color: #e03a3a;
-        font-weight: bold;
+}
+
+@media (max-width: 480px) {
+    .content-section {
+        padding-left: 70px;
     }
-    .error-title {
-        font-size: 1.5rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin: 1rem 0;
+
+    .button-wrapper {
+        padding: 0 70px 20px 70px;
     }
-    .error-message {
-        color: #8a9cb0;
-        margin: 1.5rem 0;
-        line-height: 1.5;
+
+    .submit-btn {
+        font-size: 24px;
+        padding: 3px 30px;
     }
-    .error-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin-top: 2rem;
-    }
-    .btn {
-        background: transparent;
-        border: 1px solid #e03a3a;
-        color: #e03a3a;
-        padding: 0.5rem 1.5rem;
-        text-decoration: none;
-        text-transform: uppercase;
-        font-size: 0.8rem;
-    }
-    .btn-secondary {
-        border-color: #dce5ec;
-        color: #8a9cb0;
-    }
-    .btn-secondary:hover {
-        border-color: #e03a3a;
-        color: #e03a3a;
-    }
+}
 </style>
 {% endblock %}

@@ -98,6 +98,60 @@ def verify_email_view(request, token):
     except Profile.DoesNotExist:
         return render(request, 'WIEapp/auth/email_verify_failed.html')
 
+@login_required
+def notifications_view(request):
+    notifications = Notification.objects.filter(
+        recipient=request.user.profile
+    ).select_related('sender__user', 'impulse', 'comment').order_by('-created_at')
+    unread_count = notifications.filter(is_read=False).count()
+    return render(request, 'WIEapp/profile/notifications.html', {
+        'notifications': notifications,
+        'unread_notifications': unread_count,  # ВАЖНО!
+        'has_unread': unread_count > 0,
+        'unread_count': unread_count,
+    })
+
+
+@login_required
+@require_http_methods(['POST'])
+def mark_notification_as_read(request, notification_id):
+    """Отметить одно уведомление как прочитанное"""
+    try:
+        notification = Notification.objects.get(
+            id=notification_id,
+            recipient=request.user.profile  # ВАЖНО: .profile
+        )
+        notification.is_read = True
+        notification.save()
+        return JsonResponse({'status': 'success'})
+    except Notification.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Notification not found'}, status=404)
+
+
+@login_required
+@require_http_methods(['POST'])
+def delete_notification(request, notification_id):
+    """Удалить уведомление"""
+    try:
+        notification = Notification.objects.get(
+            id=notification_id,
+            recipient=request.user.profile  # ВАЖНО: .profile
+        )
+        notification.delete()
+        return JsonResponse({'status': 'success'})
+    except Notification.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Notification not found'}, status=404)
+
+
+@login_required
+@require_http_methods(['POST'])
+def mark_all_notifications_read(request):
+    """Отметить все уведомления пользователя как прочитанные"""
+    count = Notification.objects.filter(
+        recipient=request.user.profile,
+        is_read=False
+    ).update(is_read=True)
+    return JsonResponse({'status': 'success', 'updated_count': count})
 
 @login_required
 def unread_notifications_count(request):
@@ -105,9 +159,20 @@ def unread_notifications_count(request):
     return JsonResponse({'count': count})
 
 
+
 @login_required
 def stream_view(request):
-    impulses = Impulse.objects.all().select_related(
+    # Получаем ID пользователей, которых заглушил текущий пользователь
+    muted_users = Landmark.objects.filter(
+        follower=request.user.profile,
+        target_type='profile',
+        is_muted=True
+    ).values_list('target_id', flat=True)
+
+    # Исключаем импульсы заглушённых авторов
+    impulses = Impulse.objects.exclude(
+        author_id__in=muted_users
+    ).select_related(
         'author__user', 'space'
     ).prefetch_related('tags', 'resonances').order_by('-created_at')
 
@@ -128,6 +193,7 @@ def stream_view(request):
     })
 
 
+
 @login_required
 def spaces_list_view(request):
     spaces = Space.objects.all().order_by('order')
@@ -136,9 +202,19 @@ def spaces_list_view(request):
 
 def space_detail_view(request, space_name):
     space = get_object_or_404(Space, name=space_name)
-    impulses = Impulse.objects.filter(space=space).select_related(
+
+    muted_users = Landmark.objects.filter(
+        follower=request.user.profile,
+        target_type='profile',
+        is_muted=True
+    ).values_list('target_id', flat=True)
+
+    impulses = Impulse.objects.filter(space=space).exclude(
+        author_id__in=muted_users
+    ).select_related(
         'author__user'
     ).prefetch_related('tags', 'resonances').order_by('-created_at')
+
     paginator = Paginator(impulses, 10)
     page = request.GET.get('page', 1)
     impulses_page = paginator.get_page(page)
@@ -148,7 +224,6 @@ def space_detail_view(request, space_name):
         'current_space': space,
         'current_space_name': space.get_name_display(),
     })
-
 
 @login_required
 def impulse_detail_view(request, impulse_id):
@@ -257,6 +332,19 @@ def profile_view(request, username=None):
         is_own_profile = True
 
     profile = get_object_or_404(Profile, user=user)
+
+    # Если профиль заглушён текущим пользователем — показываем заглушку
+    if request.user.is_authenticated and not is_own_profile:
+        is_muted_by_me = Landmark.objects.filter(
+            follower=request.user.profile,
+            target_type='profile',
+            target_id=profile.id,
+            is_muted=True
+        ).exists()
+        if is_muted_by_me:
+            return render(request, 'WIEapp/profile/muted_profile.html', {'profile': profile})
+
+    # Импульсы пользователя (без фильтрации по заглушке — это его собственный контент)
     impulses = Impulse.objects.filter(author=profile).select_related('space').order_by('-created_at')
     impulses_count = impulses.count()
 
@@ -307,6 +395,7 @@ def profile_view(request, username=None):
         'is_following': is_following,
         'is_muted': is_muted,
     })
+
 
 
 @login_required
@@ -383,33 +472,6 @@ def followers_view(request):
     followers = [lm.follower for lm in landmarks]
     return render(request, 'WIEapp/profile/followers.html', {'followers': followers})
 
-
-@login_required
-def notifications_view(request):
-    notifications = Notification.objects.filter(
-        recipient=request.user.profile
-    ).select_related('sender__user', 'impulse', 'comment').order_by('-created_at')
-    unread_count = notifications.filter(is_read=False).count()
-    return render(request, 'WIEapp/profile/notifications.html', {
-        'notifications': notifications,
-        'has_unread': unread_count > 0,
-        'unread_count': unread_count,
-    })
-
-
-@login_required
-@require_http_methods(['POST'])
-def delete_notification(request, notification_id):
-    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user.profile)
-    notification.delete()
-    return JsonResponse({'status': 'success'})
-
-
-@login_required
-@require_http_methods(['POST'])
-def mark_all_notifications_read(request):
-    Notification.objects.filter(recipient=request.user.profile, is_read=False).update(is_read=True)
-    return JsonResponse({'status': 'success'})
 
 
 @login_required
@@ -584,6 +646,16 @@ def report_user(request):
         target_id = request.POST.get('user_id')
         reason = request.POST.get('reason')
         target_profile = get_object_or_404(Profile, id=target_id)
+
+        if target_profile == request.user.profile:
+            return JsonResponse({'error': 'Нельзя жаловаться на себя'}, status=400)
+
+        Report.objects.create(
+            reporter=request.user.profile,
+            reported_user=target_profile,
+            reason=reason,
+            description=''
+        )
         return JsonResponse({'status': 'reported'})
     return JsonResponse({'error': 'invalid method'}, status=400)
 

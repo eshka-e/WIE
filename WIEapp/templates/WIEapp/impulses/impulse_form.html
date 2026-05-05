@@ -44,11 +44,6 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="id_tags">ТЕГИ (через запятую)</label>
-            {{ form.tags }}
-        </div>
-
         <div class="form-actions">
             <button type="submit" class="submit-btn">
                 {% if editing %}СОХРАНИТЬ{% else %}ОПУБЛИКОВАТЬ{% endif %}
@@ -59,6 +54,13 @@
 </div>
 
 <style>
+    @font-face {
+        font-family: 'Waterway';
+        src: url('{% static "fonts/Waterway Display Font.ttf" %}') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
     .form-container {
         max-width: 700px;
         margin: 0 auto;
@@ -66,12 +68,15 @@
     }
 
     h1 {
-        font-size: 1.8rem;
+        font-family: 'Waterway', sans-serif;
+        font-size: 34px;
+        font-weight: normal;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         margin-bottom: 2rem;
-        border-left: 4px solid #e03a3a;
-        padding-left: 1rem;
+        text-align: left;
+        border-left: none;
+        padding-left: 0;
     }
 
     .form-group {
@@ -80,25 +85,33 @@
 
     .form-group label {
         display: block;
-        font-size: 0.75rem;
+        font-family: 'Waterway', sans-serif;
+        font-size: 34px;
+        font-weight: normal;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #e03a3a;
+        letter-spacing: 0.05em;
         margin-bottom: 0.5rem;
+        text-align: left;
     }
 
-    .form-group input, .form-group select, .form-group textarea {
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
         width: 100%;
-        background: #f8fafc;
-        border: 1px solid #dce5ec;
+        background: white;
+        border: none;
+        border-bottom: 2px solid #171a2a;
         padding: 0.8rem;
         font-family: inherit;
         font-size: 0.9rem;
+        outline: none;
     }
 
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
         outline: none;
-        border-color: #e03a3a;
+        border-bottom-color: #4f81b4;
     }
 
     .form-group textarea {
@@ -110,12 +123,14 @@
         font-size: 0.7rem;
         color: #8a9cb0;
         margin-top: 0.3rem;
+        text-align: left;
     }
 
     .form-error {
         font-size: 0.7rem;
         color: #e03a3a;
         margin-top: 0.3rem;
+        text-align: left;
     }
 
     .media-preview {
@@ -133,37 +148,70 @@
     .form-actions {
         display: flex;
         gap: 1rem;
-        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+        align-items: center;
     }
 
     .submit-btn {
-        background: transparent;
-        border: 1px solid #e03a3a;
-        color: #e03a3a;
-        padding: 0.8rem 2rem;
+        background: #171A2A;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 0 110px;
+        height: 60px;
+        line-height: 1;
+        font-size: 48px;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: 1.5px;
         cursor: pointer;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-sizing: border-box;
     }
 
     .submit-btn:hover {
-        background: #e03a3a;
-        color: white;
+        background: #251111;
+        transform: scale(0.98);
+    }
+
+    .submit-btn:active {
+        background: #140000;
+        transform: scale(0.98);
     }
 
     .cancel-btn {
         background: transparent;
         border: 1px solid #dce5ec;
+        border-radius: 3px;
         color: #8a9cb0;
-        padding: 0.8rem 2rem;
+        height: 60px;
+        line-height: 1;
+        padding: 0 24px;
         text-decoration: none;
         text-transform: uppercase;
         letter-spacing: 0.1em;
+        font-family: inherit;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
     }
 
     .cancel-btn:hover {
-        border-color: #e03a3a;
-        color: #e03a3a;
+        border-color: #05026c;
+        color: #05026c;
+        transform: scale(0.98);
+    }
+
+    .cancel-btn:active {
+        transform: scale(0.98);
     }
 </style>
 
@@ -178,8 +226,8 @@
         const videoGroup = document.getElementById('video-group');
         const mediaLabel = document.getElementById('media-label');
         const mediaHint = document.getElementById('media-hint');
-        const imageInput = document.getElementById('media-image');
-        const videoInput = document.getElementById('media-video');
+        const imageInput = document.getElementById('id_image');
+        const videoInput = document.getElementById('id_video_url');
         const previewDiv = document.getElementById('media-preview');
         const previewImage = document.getElementById('preview-image');
         const spaceHint = document.getElementById('space-hint');

@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/notifications/count/', views.unread_notifications_count, name='unread_count'),
     path('api/notifications/<int:notification_id>/delete/', views.delete_notification, name='delete_notification'),
     path('api/notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_read'),
+    path('api/notifications/<int:notification_id>/mark-read/', views.mark_notification_as_read, name='mark_notification_read'),
 
     path('landmarks/', views.landmarks_view, name='landmarks'),
     path('followers/', views.followers_view, name='followers'),

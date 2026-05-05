@@ -1,100 +1,108 @@
 @font-face {
+    font-family: 'Waterway';
+    src: url('../fonts/Waterway Display Font.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Thin'), local('NonBureau-Thin');
+    src: url('../fonts/NonBureau-Thin.woff2') format('woff2');
     font-weight: 100;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Light'), local('NonBureau-Light');
+    src: url('../fonts/NonBureau-Light.woff2') format('woff2');
     font-weight: 300;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Regular'), local('NonBureau-Regular');
+    src: url('../fonts/NonBureau-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Medium'), local('NonBureau-Medium');
+    src: url('../fonts/NonBureau-Medium.woff2') format('woff2');
     font-weight: 500;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau SemiBold'), local('NonBureau-SemiBold');
+    src: url('../fonts/NonBureau-SemiBold.woff2') format('woff2');
     font-weight: 600;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Bold'), local('NonBureau-Bold');
+    src: url('../fonts/NonBureau-Bold.woff2') format('woff2');
     font-weight: 700;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Black'), local('NonBureau-Black');
+    src: url('../fonts/NonBureau-Black.woff2') format('woff2');
     font-weight: 900;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Thin Italic'), local('NonBureau-ThinItalic');
+    src: url('../fonts/NonBureau-ThinItalic.woff2') format('woff2');
     font-weight: 100;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Light Italic'), local('NonBureau-LightItalic');
+    src: url('../fonts/NonBureau-LightItalic.woff2') format('woff2');
     font-weight: 300;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Regular Italic'), local('NonBureau-RegularItalic');
+    src: url('../fonts/NonBureau-RegularItalic.woff2') format('woff2');
     font-weight: 400;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Medium Italic'), local('NonBureau-MediumItalic');
+    src: url('../fonts/NonBureau-MediumItalic.woff2') format('woff2');
     font-weight: 500;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau SemiBold Italic'), local('NonBureau-SemiBoldItalic');
+    src: url('../fonts/NonBureau-SemiBoldItalic.woff2') format('woff2');
     font-weight: 600;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Bold Italic'), local('NonBureau-BoldItalic');
+    src: url('../fonts/NonBureau-BoldItalic.woff2') format('woff2');
     font-weight: 700;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Non Bureau';
-    src: local('Non Bureau Black Italic'), local('NonBureau-BlackItalic');
+    src: url('../fonts/NonBureau-BlackItalic.woff2') format('woff2');
     font-weight: 900;
     font-style: italic;
 }
+
 
 html {
     font-size: 16px;
@@ -176,6 +184,18 @@ body {
     color: #03009f;
     font-size: 32px;
 }
+
+    .space-title {
+        font-family: 'Non Bureau', 'Times New Roman', serif;
+        font-weight: 500;
+        font-style: italic;
+        font-size: 55px;
+        text-align: left;
+        margin: 10px 10px;
+        padding: 0;
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+    }
 
 @media (max-width: 768px) {
     .status-panel {
@@ -442,41 +462,76 @@ body {
 }
 
 
-    .profile-stats {
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        margin: 1rem 0;
-    }
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1rem 0;
+}
 
-    .stat-item {
-        text-align: center;
-        text-decoration: none;
-    }
+.stat-item {
+    text-align: center;
+    text-decoration: none;
+}
 
-    .stat-value {
-        display: block;
-        font-size: 38px;
-        font-weight: 900;
-        color: #171A2A;
-    }
+.stat-value {
+    display: block;
+    font-size: 38px;
+    font-weight: 900;
+    color: #171A2A;
+}
 
-    .stat-label {
-        font-size: 24px;
-        color: #171A2A;
-        text-transform: lowercase;
-        letter-spacing: 0.05em;
-    }
+.stat-label {
+    font-size: 24px;
+    color: #171A2A;
+    text-transform: lowercase;
+    letter-spacing: 0.05em;
+}
 
-        .btn-edit {
-        background: none;
-        border: 1px solid #171A2A;
-        color: #171A2A;
-        border-radius: 3px;
-        padding: 4px 25px;
-        font-family: inherit;
-        font-size: 15px;
-        text-decoration: none;
-        display: inline-block;
-        font-style: italic;
-    }
+.btn-edit {
+    background: none;
+    border: 1px solid #171A2A;
+    color: #171A2A;
+    border-radius: 3px;
+    padding: 4px 25px;
+    font-family: inherit;
+    font-size: 15px;
+    text-decoration: none;
+    display: inline-block;
+    font-style: italic;
+}
+
+.notification-item {
+    cursor: pointer;
+}
+
+.profile-section {
+    margin-left: 55px;
+    margin-right: 55px;
+}
+
+.submit-btn {
+    background: #171A2A;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 3px 110px;
+    font-size: 48px;
+    font-weight: 800;
+    font-style: italic;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 16px;
+    font-family: inherit;
+}
+
+.submit-btn:hover {
+    background: #251111;
+    transform: scale(0.98);
+}
+
+.submit-btn:active {
+     background: #140000;
+    transform: scale(0.98);
+}

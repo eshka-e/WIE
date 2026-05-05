@@ -133,3 +133,21 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.recipient.user.username} — {self.get_notification_type_display()}"
+
+class Report(models.Model):
+    REASON_CHOICES = [
+        ('spam', 'Спам'),
+        ('harassment', 'Оскорбления'),
+        ('illegal', 'Незаконный контент'),
+        ('other', 'Другое'),
+    ]
+
+    reporter = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='reports_made')
+    reported_user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='reports_received')
+    reason = models.CharField(max_length=50, choices=REASON_CHOICES)
+    description = models.TextField(blank=True)
+    status = models.CharField(max_length=20, default='pending')  # pending, reviewed, rejected
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.reporter.user.username} -> {self.reported_user.user.username} ({self.reason})"

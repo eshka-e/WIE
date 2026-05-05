@@ -1,17 +1,159 @@
-{% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
-<div class="error-container">
-    <div class="error-code">403</div>
-    <div class="error-title">ДОСТУП ЗАКРЫТ</div>
-    <div class="error-message">
-        У вас нет прав для просмотра этой страницы.<br>
-        Возможно, вы не тот След.
+<div class="error-page">
+    <!-- Left content section -->
+    <div class="content-section">
+        <div class="error-container">
+            <img class="muted-icon" src="{% static 'img/c403.png' %}" alt="Логотип WHOisE">
+            <div class="error-title">ДОСТУП ЗАКРЫТ</div>
+            <div class="error-message">
+                У вас нет прав для просмотра этой страницы.<br>
+                Возможно, вы не тот След,или входная точка требует авторизации.
+            </div>
+        </div>
     </div>
-    <div class="error-actions">
-        <a href="{% url 'WIEapp:stream' %}" class="btn">В ПОТОК</a>
-        <a href="{% url 'WIEapp:login' %}" class="btn btn-secondary">ВОЙТИ</a>
+
+    <!-- Button at bottom -->
+    <div class="button-wrapper">
+        <a href="{% url 'WIEapp:stream' %}" class="submit-btn">ВЕРНУТЬСЯ В ПОТОК</a>
     </div>
 </div>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-image: url('/static/img/e404.png');
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: auto 100%;
+    font-family: 'Non Bureau', sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.error-page {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Left content section with 70px left padding */
+.content-section {
+    padding-left: 70px;
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 120px); /* Adjust based on button height */
+}
+
+.error-container {
+    max-width: 600px;
+
+    text-align: left;
+}
+
+.muted-icon {
+    display: block;
+    height: 500px;
+}
+
+.error-title {
+    font-size: 40px;
+    font-weight: bold;
+    color: #000000;
+
+}
+
+.error-message {
+    color: #000000;
+    margin: 10px 0;
+    line-height: 1.5;
+    font-weight: 300;
+    font-size: 28px;
+    text-transform: uppercase;
+}
+
+/* Button wrapper with 70px side padding - full width */
+.button-wrapper {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 70px 20px 70px;
+    width: 100%;
+}
+
+.submit-btn {
+    background: #171A2A;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 3px 110px;
+    font-size: 48px;
+    font-weight: 800;
+    font-style: italic;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 5px;
+    font-family: inherit;
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+}
+
+.submit-btn:hover {
+    background: #251111;
+    transform: scale(0.98);
+}
+
+.submit-btn:active {
+    background: #140000;
+    transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .content-section {
+        padding-left: 70px;
+    }
+
+    .button-wrapper {
+        padding: 0 70px 40px 70px;
+    }
+
+    .submit-btn {
+        font-size: 32px;
+        padding: 3px 60px;
+    }
+
+    .error-container {
+        max-width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-section {
+        padding-left: 70px;
+    }
+
+    .button-wrapper {
+        padding: 0 70px 20px 70px;
+    }
+
+    .submit-btn {
+        font-size: 24px;
+        padding: 3px 30px;
+    }
+}
+</style>
 {% endblock %}

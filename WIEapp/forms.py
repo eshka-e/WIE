@@ -43,7 +43,7 @@ class ImpulseForm(forms.ModelForm):
 
     class Meta:
         model = Impulse
-        fields = ['space', 'title', 'content', 'image', 'video_url', 'tags']
+        fields = ['space', 'title', 'content', 'image', 'video_url']
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'ЗАГОЛОВОК ИМПУЛЬСА', 'class': 'form-input'}),
             'content': forms.Textarea(attrs={'rows': 8, 'placeholder': 'ТЕКСТ ИМПУЛЬСА...', 'class': 'form-textarea'}),
@@ -68,6 +68,7 @@ class ImpulseForm(forms.ModelForm):
         self.fields['content'].required = False
         self.fields['image'].required = False
         self.fields['video_url'].required = False
+        self.fields['space'].required = True
 
         if self.instance and self.instance.pk:
             existing_tags = ', '.join([tag.name for tag in self.instance.tags.all()])
@@ -88,41 +89,30 @@ class ImpulseForm(forms.ModelForm):
 
         # ВАЛИДАЦИЯ ДЛЯ ВИДЕНИЕ (vision)
         if space_name == 'vision':
-            # Изображение обязательно
             if not image and not self.instance.image:
                 self.add_error('image', 'Для пространства ВИДЕНИЕ обязательно изображение')
-            # Видео запрещено
             if video_url:
                 self.add_error('video_url', 'В пространстве ВИДЕНИЕ нельзя загружать видео')
-            # Заголовок и описание опциональны - не проверяем
 
         # ВАЛИДАЦИЯ ДЛЯ РЕМЕСЛО (craft)
         elif space_name == 'craft':
-            # Видео обязательно
             if not video_url and not self.instance.video_url:
                 self.add_error('video_url', 'Для пространства РЕМЕСЛО обязательно видео')
-            # Изображение запрещено
             if image:
                 self.add_error('image', 'В пространстве РЕМЕСЛО нельзя загружать изображения')
-            # Заголовок обязателен
             if not title:
                 self.add_error('title', 'Для пространства РЕМЕСЛО обязателен заголовок')
-            # Описание обязательно
             if not content:
                 self.add_error('content', 'Для пространства РЕМЕСЛО обязательно описание')
 
-        # ВАЛИДАЦИЯ ДЛЯ ЧУВСТВО (nerve)
+        # ВАЛИДАЦИЯ ДЛЯ ЧУТКОСТЬ (nerve)
         elif space_name == 'nerve':
-            # Изображение запрещено
             if image:
                 self.add_error('image', 'В пространстве ЧУТКОСТЬ нельзя загружать изображения')
-            # Видео запрещено
             if video_url:
                 self.add_error('video_url', 'В пространстве ЧУТКОСТЬ нельзя загружать видео')
-            # Заголовок обязателен
             if not title:
                 self.add_error('title', 'Для пространства ЧУТКОСТЬ обязателен заголовок')
-            # Описание обязательно
             if not content:
                 self.add_error('content', 'Для пространства ЧУТКОСТЬ обязательно описание')
 
@@ -132,17 +122,8 @@ class ImpulseForm(forms.ModelForm):
         instance = super().save(commit=False)
         if commit:
             instance.save()
-            tag_string = self.cleaned_data.get('tags', '')
-            if tag_string:
-                instance.tags.clear()
-                tags = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
-                for tag_name in tags:
-                    if tag_name.startswith('#'):
-                        tag_name = tag_name[1:]
-                    tag, _ = Tag.objects.get_or_create(name=tag_name)
-                    instance.tags.add(tag)
-        return instance
 
+        return instance
 
 class CommentForm(forms.ModelForm):
     class Meta:

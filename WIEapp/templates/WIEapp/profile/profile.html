@@ -58,7 +58,7 @@
 {% if not is_own_profile %}
 <div class="profile-buttons">
     <button id="follow-btn" class="profile-action-btn" data-user-id="{{ profile.id }}">
-        {% if is_following %}УБРАТЬ ОРИЕНТИР{% else %}В ОРИЕНТИРЫ{% endif %}
+        {% if is_following %}УБРАТЬ ОРИЕНТИР{% else %}+ В ОРИЕНТИРЫ{% endif %}
     </button>
 
     <div class="more-menu">
@@ -84,14 +84,17 @@
     </section>
 
     <section class="profile-section">
+  <h2 class="section-label">ИМПУЛЬСЫ</h2>
         {% if user == profile.user %}
-            <a href="{% url 'WIEapp:create_impulse' %}" class="form-impuls-btn">
-                <span class="plus">+</span>
-                <span class="bar-text">СФОРМИРОВАТЬ ИМПУЛЬС</span>
-            </a>
+            <div class="impulse-btn-wrapper">
+                <a href="{% url 'WIEapp:create_impulse' %}" class="form-impuls-btn">
+                    <span class="plus">+</span>
+                    <span class="bar-text">СФОРМИРОВАТЬ ИМПУЛЬС</span>
+                </a>
+            </div>
         {% else %}
             <div class="follow-bar">
-                СЛЕД {{ profile.display_name|default:profile.user.username|upper }}
+
             </div>
         {% endif %}
 {% if ordered_spaces %}
@@ -114,40 +117,54 @@
 
 <style>
     /* ГЛОБАЛЬНЫЙ СБРОС ОТСТУПОВ */
-    body {
+  body, html {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .profile-container {
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    /* БАННЕР - ГАРАНТИРОВАННО НА ВСЮ ШИРИНУ */
+    .profile-cover {
+        width: 100%;
+        min-width: 100vw;
+        height: 300px;
+        background: #1a2c3e;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        left: 0;
+        right: 0;
+    }
+
+    .cover-image {
+        width: 100%;
+        min-width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+        display: block;
         margin: 0;
         padding: 0;
     }
 
- /* ВАШИ ОБНОВЛЕННЫЕ СТИЛИ */
-.profile-container {
-    padding: 0;
-    margin: 0;
-    overflow-x: hidden;
-}
-
-/* ЗАСТАВЛЯЕМ БАННЕР РАСТЯНУТЬСЯ */
-.profile-cover {
-    width: 100vw;
-    height: 200px;
-    background: #1a2c3e;
-    overflow: hidden;
-    margin: 0;
-    position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
-    margin-top: calc(-1 * (какой-то отступ сверху если есть));
-}
-
+    /* Принудительное растягивание, если cover не сработал */
     .cover-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block !important;
+        width: 100% !important;
+        min-width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
     }
 
+    /* Для плейсхолдера без картинки */
     .cover-placeholder {
         width: 100%;
         height: 100%;
@@ -165,38 +182,233 @@
     .avatar-wrapper {
         display: flex;
         justify-content: center;
-        margin-top: -75px;
+        margin-top: -155px;
         margin-bottom: 15px;
         position: relative;
         z-index: 2;
     }
 
+
+
     .avatar {
-        width: 150px;
-        height: 150px;
+        width: 250px;
+        height: 250px;
         border-radius: 50%;
         object-fit: cover;
         border: 1px solid white;
         background: white;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
     }
 
-    /* ОСТАЛЬНЫЕ ВАШИ СТИЛИ ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ */
     .main-username {
         text-align: center;
-        font-size: 1.8rem;
+        font-size: 68px;
         letter-spacing: 0.1em;
         margin: 0.5rem 0 0.2rem 0;
     }
 
     .username-tag {
         text-align: center;
-        color: #8a9cb0;
-        font-size: 0.9rem;
+        color: #171a2a;
+        font-size: 32px;
         margin: -0.5rem 0 1rem 0;
     }
 
-    /* ... и так далее, все остальные ваши стили ... */
+
+
+  .btn-logout {
+        padding: 4px 25px;
+        border: 1px solid #990002;
+        background: none;
+        color: #990002;
+        border-radius: 3px;
+        font-size: 15px;
+        letter-spacing: 0.1em;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-logout:hover {
+       border: 1px solid #FF0000;
+         color: #FF0000;
+        background: none;
+    }
+
+    .btn-logout:active {
+        border: 1px solid #380000;
+         color: #380000;
+        background: none;
+    }
+
+    /* СЕКЦИЯ ЛЕЙБЛ - Waterway шрифт, 60px, прижат влево */
+    .section-label {
+        font-family: 'Waterway', sans-serif;
+        font-size: 57px;
+        text-align: left;
+        margin: 30px 0 0 0;
+        padding: 0;
+        letter-spacing: 0.02em;
+        font-weight: normal;
+        line-height: 1.2;
+    }
+
+    /* ЗАГОЛОВОК ПРОСТРАНСТВА - Non Bureau, курсив, 55px, прижат влево */
+    .space-title {
+        font-family: 'Non Bureau', 'Times New Roman', serif;
+        font-weight: 500;
+        font-style: italic;
+        font-size: 55px;
+        text-align: left;
+        margin: 60px 80px;
+        padding: 0;
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+    }
+
+
+
+    /* ОСТАЛЬНЫЕ СТИЛИ ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ */
+    .profile-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 1rem 0;
+        position: relative;
+    }
+
+
+    .more-menu {
+        position: relative;
+    }
+
+
+    .more-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background: #2a2a2a;
+        border-radius: 4px;
+        min-width: 150px;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 10px 16px;
+        background: none;
+        border: none;
+        color: white;
+        text-align: left;
+        cursor: pointer;
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+        transition: background 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+        background: rgba(255,255,255,0.1);
+    }
+
+    .dropdown-item.report {
+        color: #ff6b6b;
+    }
+
+    .bio-content {
+    margin: 1rem 0 2rem 0;
+    line-height: 1.6;
+    padding: 0;
+    width: 100%;
+}
+
+/* Стиль, когда есть контент */
+.bio-content:has(p:not(.placeholder-text)) p {
+    font-size: 36px;
+    font-weight: 400;
+    text-transform: uppercase;
+    text-align: left;
+    width: 100%;
+    padding-left: 90px;
+    padding-right: 90px;
+    padding-bottom: 30px;
+    margin: 0;
+    box-sizing: border-box;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+
+}
+
+/* Стиль для плейсхолдера (когда нет контента) */
+.bio-content .placeholder-text {
+    text-align: center;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 1rem;
+    color: #171A2A;
+    letter-spacing: 0.05em;
+    width: 100%;
+    padding: 20px 0;
+    margin: 0;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+    .bio-content:has(p:not(.placeholder-text)) p {
+        font-size: 32px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+    .follow-bar {
+        text-align: center;
+        padding: 20px;
+        color: #8a9cb0;
+        letter-spacing: 0.1em;
+        font-size: 0.9rem;
+    }
+
+    .space-impulses {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .no-impulses {
+        text-align: center;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 1rem;
+    color: #171A2A;
+    letter-spacing: 0.05em;
+    width: 100%;
+    padding: 40px 0;
+    margin: 0;
+    }
+
+
+    .form-impuls-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+
+    .form-impuls-btn .plus {
+        margin-right: 100px;
+        flex-shrink: 0;
+    }
+
+    .form-impuls-btn .bar-text {
+        flex: 1;
+        text-align: center;
+    }
+    /* =============================================== */
+
 </style>
 
 <script>
