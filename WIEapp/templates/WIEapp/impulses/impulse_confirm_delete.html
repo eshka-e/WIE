@@ -2,95 +2,163 @@
 {% load static %}
 
 {% block content %}
-<div class="delete-container">
-    <div class="delete-card">
-        <h1>УДАЛИТЬ ИМПУЛЬС?</h1>
+<div class="form-container">
+    <h1>УДАЛИТЬ ИМПУЛЬС?</h1>
 
-        <div class="impulse-preview">
-            <div class="impulse-title">{{ impulse.title|upper }}</div>
-            <div class="impulse-meta">
-                {{ impulse.space.get_name_display }} • @{{ impulse.author.user.username }}
-            </div>
+    <div class="impulse-preview">
+        <div class="impulse-title">{{ impulse.title|upper }}</div>
+        <div class="impulse-meta">
+            {{ impulse.space.get_name_display }} • @{{ impulse.author.user.username }}
         </div>
-
-        <p class="warning-text">Это действие нельзя отменить. Импульс и все отклики будут удалены навсегда.</p>
-
-        <form method="post" class="delete-form">
-            {% csrf_token %}
-            <div class="delete-actions">
-                <button type="submit" class="btn-delete">ДА, УДАЛИТЬ</button>
-                <a href="{% url 'WIEapp:impulse_detail' impulse.id %}" class="btn-cancel">ОТМЕНА</a>
-            </div>
-        </form>
     </div>
+
+    <p class="warning-text">Импульс и все отклики будут стёрты навсегда.</p>
+
+    <form method="post" class="delete-form">
+        {% csrf_token %}
+
+        <div class="form-actions">
+            <button type="submit" class="submit-btn delete-btn">ДА, СТЕРЕТЬ</button>
+            <a href="{% url 'WIEapp:impulse_detail' impulse.id %}" class="cancel-btn">ОТМЕНА</a>
+        </div>
+    </form>
 </div>
 
 <style>
-    .delete-container {
-        max-width: 500px;
-        margin: 0 auto;
-        padding: 4rem 2rem;
+    @font-face {
+        font-family: 'Waterway';
+        src: url('{% static "fonts/Waterway Display Font.ttf" %}') format('truetype');
+        font-weight: normal;
+        font-style: normal;
     }
 
-    .delete-card {
-        border: 1px solid #eef2f8;
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
         padding: 2rem;
-        text-align: center;
     }
 
     h1 {
-        font-size: 1.5rem;
+        font-family: 'Waterway', sans-serif;
+        font-size: 34px;
+        font-weight: normal;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.05em;
+        margin-bottom: 2rem;
+        text-align: left;
+        border-left: none;
+        padding-left: 0;
         color: #e03a3a;
-        margin-bottom: 1.5rem;
     }
 
     .impulse-preview {
         background: #f8fafc;
-        padding: 1rem;
+        padding: 1.5rem;
         margin-bottom: 1.5rem;
+     
     }
 
     .impulse-title {
-        font-weight: bold;
-        font-size: 1.1rem;
+        font-family: 'Waterway', sans-serif;
+        font-size: 20px;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         margin-bottom: 0.5rem;
+        color: #171a2a;
     }
 
     .impulse-meta {
         font-size: 0.7rem;
         color: #8a9cb0;
+        letter-spacing: 0.03em;
     }
 
     .warning-text {
-        color: #cc0000;
-        font-size: 0.8rem;
+        color: #171a2a;
+        font-size: 1rem;
         margin-bottom: 2rem;
+        padding: 0.8rem;
+        background: #fff5f5;
+text-transform: uppercase;
+        font-style: italic;
     }
 
-    .delete-actions {
+    .form-actions {
         display: flex;
         gap: 1rem;
-        justify-content: center;
+        margin-bottom: 1.5rem;
+        align-items: center;
     }
 
-    .btn-delete {
-        background: transparent;
-        border: 1px solid #cc0000;
-        color: #cc0000;
-        padding: 0.6rem 1.5rem;
+    .submit-btn {
+        background: #171A2A;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 0 110px;
+        height: 60px;
+        line-height: 1;
+        font-size: 48px;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: 1.5px;
         cursor: pointer;
-        text-transform: uppercase;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-sizing: border-box;
     }
 
-    .btn-cancel {
+    .submit-btn:hover {
+        background: #251111;
+        transform: scale(0.98);
+    }
+
+    .submit-btn:active {
+        background: #140000;
+        transform: scale(0.98);
+    }
+
+    .delete-btn {
+        background: #171a2a;
+    }
+
+    .delete-btn:hover {
+        background: #000000;
+    }
+
+    .cancel-btn {
         background: transparent;
         border: 1px solid #dce5ec;
+        border-radius: 3px;
         color: #8a9cb0;
-        padding: 0.6rem 1.5rem;
+        height: 60px;
+        line-height: 1;
+        padding: 0 24px;
         text-decoration: none;
         text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-family: inherit;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    .cancel-btn:hover {
+        border-color: #05026c;
+        color: #05026c;
+        transform: scale(0.98);
+    }
+
+    .cancel-btn:active {
+        transform: scale(0.98);
     }
 </style>
 {% endblock %}

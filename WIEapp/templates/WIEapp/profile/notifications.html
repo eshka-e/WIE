@@ -6,116 +6,126 @@
     <title>whoise</title>
 </head>
 {% block content %}
- <h2 class="space-title">СИГНАЛЫ</h2>
-    <div class="notifications-container">
-    <div class="notifications-header">
-
+<div class="signals-page">
+    <div class="signals-header">
+        <h2 class="space-title">СИГНАЛЫ</h2>
         {% if unread_notifications %}
         <button id="markAllRead" class="mark-all-btn">ПОМЕТИТЬ ВСЁ ПРОЧИТАННЫМ</button>
         {% endif %}
     </div>
 
-    <div class="notifications-list">
-        {% for notification in notifications %}
-        <div class="notification-item {% if not notification.is_read %}unread{% endif %}" data-id="{{ notification.id }}"
-            {% if notification.notification_type == 'landmark' %}
-                {% url 'WIEapp:profile' notification.sender.user.username as profile_url %}
-                data-url="{% if profile_url %}{{ profile_url }}{% endif %}"
-            {% else %}
-                data-url="{% url 'WIEapp:impulse_detail' notification.impulse.id %}"
-            {% endif %}
-        >
-            <div class="notification-icon">
-                {% if notification.notification_type == 'comment' %}💬
-                {% elif notification.notification_type == 'reply' %}↩️
-                {% elif notification.notification_type == 'resonance' %}
-                    {% if notification.metadata.resonance_type == 'heart' %}🫀
-                    {% else %}💥
-                    {% endif %}
-                {% elif notification.notification_type == 'landmark' %}👁️
-                {% else %}📢
+    <div class="notifications-container">
+        <div class="notifications-list">
+            {% for notification in notifications %}
+            <div class="notification-item {% if not notification.is_read %}unread{% endif %}" data-id="{{ notification.id }}"
+                {% if notification.notification_type == 'landmark' %}
+                    {% url 'WIEapp:profile' notification.sender.user.username as profile_url %}
+                    data-url="{% if profile_url %}{{ profile_url }}{% endif %}"
+                {% else %}
+                    data-url="{% url 'WIEapp:impulse_detail' notification.impulse.id %}"
                 {% endif %}
-            </div>
-            <div class="notification-content">
-                <div class="notification-text">
-                    <strong>@{{ notification.sender.user.username }}</strong>
-                    {% if notification.notification_type == 'comment' %}
-                        оставил(а) отклик на ваш импульс
-                        <span class="impulse-title">«{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»</span>
-                    {% elif notification.notification_type == 'reply' %}
-                        ответил(а) на ваш отклик в теме
-                        <span class="impulse-title">«{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»</span>
+            >
+                <div class="notification-icon">
+                    {% if notification.notification_type == 'comment' %}💬
+                    {% elif notification.notification_type == 'reply' %}↩️
                     {% elif notification.notification_type == 'resonance' %}
-                        {% if notification.metadata.resonance_type == 'heart' %}
-                            в сердечном резонансе с вашим импульсом
-                        {% else %}
-                            во взрывном резонансе с вашим импульсом
+                        {% if notification.metadata.resonance_type == 'heart' %}            <img style="height: 25px; width: 25px" src="{% static 'img/🫀.png' %}" alt="Логотип WHOisE">
+                        {% else %} <img style="height: 30px; width: 30px" src="{% static 'img/boom.png' %}" alt="Логотип WHOisE">
                         {% endif %}
-                        <span class="impulse-title">«{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»</span>
-                    {% elif notification.notification_type == 'landmark' %}
-                        теперь ваш последователь
+                    {% elif notification.notification_type == 'landmark' %}👁️
+                    {% else %}📢
                     {% endif %}
                 </div>
-                <div class="notification-meta">
-                    <span class="time">{{ notification.created_at|timesince }} назад</span>
+                <div class="notification-content">
+                    <div class="notification-text">
+                        <strong>@{{ notification.sender.user.username }}</strong>
+                        {% if notification.notification_type == 'comment' %}
+                            оставил(а) отклик на ваш импульс
+                            <span class="impulse-title">«{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»</span>
+                        {% elif notification.notification_type == 'reply' %}
+                            ответил(а) на ваш отклик в теме
+                            <span class="impulse-title">«{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»</span>
+                        {% elif notification.notification_type == 'resonance' %}
+                            {% if notification.metadata.resonance_type == 'heart' %}
+                                в сердечном резонансе с вашим импульсом
+                            {% else %}
+                                во взрывном резонансе с вашим импульсом
+                            {% endif %}
+                            <span class="impulse-title">«{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»</span>
+                        {% elif notification.notification_type == 'landmark' %}
+                            теперь ваш последователь
+                        {% endif %}
+                    </div>
+                    <div class="notification-meta">
+                        <span class="time">{{ notification.created_at|timesince }} назад</span>
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    <button class="delete-notification" data-id="{{ notification.id }}">СТЕРЕТЬ</button>
                 </div>
             </div>
-            <div class="notification-actions">
-                <button class="delete-notification" data-id="{{ notification.id }}">СТЕРЕТЬ</button>
+            {% empty %}
+            <div class="empty-notifications">
+                <p>[ НЕТ СИГНАЛА ]</p>
+                <p class="empty-hint">КОГДА ПОЯВЯТСЯ ОТКЛИКИ ИЛИ РЕЗОНАНСЫ, ОНИ БУДУТ ЗДЕСЬ</p>
             </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="empty-notifications">
-            <p>[ НЕТ СИГНАЛА ]</p>
-            <p class="empty-hint">КОГДА ПОЯВЯТСЯ ОТКЛИКИ ИЛИ РЕЗОНАНСЫ, ОНИ БУДУТ ЗДЕСЬ</p>
-        </div>
-        {% endfor %}
     </div>
 </div>
 
 <style>
-
-
-  body, html {
+    body, html {
         margin: 0;
         padding: 0;
         overflow-x: hidden;
     }
 
-    .notifications-container {
+    /* Новый контейнер для всей страницы сигналов */
+    .signals-page {
         max-width: 100%;
         margin: 0 auto;
         padding: 0 70px;
-        margin-top: 0; /* Убираем отступ сверху */
-        padding-top: 0; /* Убираем паддинг сверху */
     }
 
-    /* Убираем отступы у base.html контента */
-    .notifications-container:first-child {
-        margin-top: 0;
+    /* Шапка с заголовком и кнопкой */
+    .signals-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
-
-
 
     .space-title {
-        margin: 0; /* Убираем отступы у заголовка */
+        margin: 0;
         padding: 0;
+        font-size: 3rem;
+    }
+
+    /* Контейнер уведомлений без верхнего заголовка */
+    .notifications-container {
+        width: 100%;
+        margin-top: 0;
+        padding-top: 0;
     }
 
     .mark-all-btn {
-        background: transparent;
-        border: 1px solid #e03a3a;
-        color: #e03a3a;
-        padding: 0.3rem 1rem;
-        font-family: inherit;
-        font-size: 0.7rem;
+        background: #FFCDCD;
+        border-radius: 3px;
+        border: none;
+        color: #990002;
+        padding: 0.4rem 1rem;
+        font-size: 1rem;
         cursor: pointer;
         transition: all 0.2s;
+        white-space: nowrap;
     }
 
     .mark-all-btn:hover {
-        background: #e03a3a;
-        color: white;
+        background: #ffeded;
+         color: #990002;
     }
 
     .notifications-list {
@@ -127,24 +137,23 @@
     .notification-item {
         display: flex;
         align-items: flex-start;
-        gap: 1.5rem; /* Увеличиваем отступ между элементами */
-        padding: 1rem 4rem; /* Увеличиваем внутренний отступ (было 1.2rem) */
+        gap: 1.5rem;
+        padding: 1rem 4rem;
         background: #ffffff;
         transition: all 0.2s;
         cursor: pointer;
         position: relative;
         border: none;
         text-decoration: none;
-        width: 100%; /* Занимает всю ширину контейнера */
+        width: 100%;
+        box-sizing: border-box;
     }
 
-    /* Убираем все рамки */
     .notification-item {
         border: none;
         border-radius: 0;
     }
 
-    /* Состояния для обычного уведомления */
     .notification-item:hover {
         background: #E6E8FF;
     }
@@ -153,7 +162,6 @@
         background: #CDD1FF;
     }
 
-    /* Состояния для непрочитанного уведомления */
     .notification-item.unread {
         background: #FFF0F0;
         border-left: 4px solid #FF0003;
@@ -168,14 +176,14 @@
     }
 
     .notification-icon {
-        width: 40px; /* Увеличиваем иконку (было 32px) */
+        width: 40px;
         height: 40px;
         background: transparent;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.3rem; /* Увеличиваем размер иконки */
+        font-size: 1.3rem;
         flex-shrink: 0;
     }
 
@@ -184,10 +192,10 @@
     }
 
     .notification-text {
-        font-size: 1rem; /* Увеличиваем размер текста (было 0.9rem) */
-        line-height: 1.5; /* Увеличиваем межстрочный интервал */
+        font-size: 1rem;
+        line-height: 1.5;
         color: #334454;
-         text-align: left;
+        text-align: left;
     }
 
     .notification-text strong {
@@ -196,13 +204,13 @@
     }
 
     .impulse-title {
-        color: #e03a3a;
-        border-bottom: 1px dotted #e03a3a;
+        color: #05026c;
+        border-bottom: 1px dotted #05026c;
     }
 
     .notification-meta {
-        margin-top: 0.6rem; /* Немного увеличиваем отступ */
-        font-size: 0.75rem; /* Немного увеличиваем шрифт (было 0.7rem) */
+        margin-top: 0.6rem;
+        font-size: 0.75rem;
         color: #8a9cb0;
         text-align: left;
     }
@@ -222,7 +230,7 @@
         border: none;
         color: #7684AC;
         font-family: inherit;
-        font-size: 1rem; /* Немного увеличиваем */
+        font-size: 1rem;
         cursor: pointer;
         transition: color 0.2s;
     }
@@ -259,22 +267,35 @@
     }
 
     @media (max-width: 768px) {
-        .notifications-container {
+        .signals-page {
             padding: 0 20px;
         }
+
+        .signals-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .mark-all-btn {
+            align-self: flex-end;
+        }
+
         .notification-item {
-            padding: 1rem 1rem; /* На мобильных устройствах уменьшаем отступы */
+            padding: 1rem 1rem;
             gap: 1rem;
         }
+
         .notification-actions {
             opacity: 1;
             margin-left: 0;
         }
+
         .notification-icon {
             width: 32px;
             height: 32px;
             font-size: 1.1rem;
         }
+
         .notification-text {
             font-size: 0.9rem;
         }
@@ -282,7 +303,6 @@
 </style>
 
 <script>
-    // CSRF токен
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -300,7 +320,6 @@
 
     const csrftoken = getCookie('csrftoken');
 
-    // При загрузке страницы
     document.addEventListener('DOMContentLoaded', function() {
         const markAllBtn = document.getElementById('markAllRead');
         const hasUnread = document.querySelectorAll('.notification-item.unread').length > 0;
@@ -309,7 +328,6 @@
             markAllBtn.style.display = 'none';
         }
 
-        // Добавляем класс no-link для уведомлений без URL
         document.querySelectorAll('.notification-item').forEach(item => {
             if (!item.dataset.url || item.dataset.url === '') {
                 item.classList.add('no-link');
@@ -319,10 +337,8 @@
         console.log('Страница загружена, непрочитанных:', document.querySelectorAll('.notification-item.unread').length);
     });
 
-    // Клик по карточке - переход по ссылке
     document.querySelectorAll('.notification-item').forEach(item => {
         item.addEventListener('click', function(e) {
-            // Не срабатывать при клике на кнопку удаления
             if (e.target.classList.contains('delete-notification')) {
                 e.stopPropagation();
                 return;
@@ -332,13 +348,11 @@
             const id = this.dataset.id;
             const isUnread = this.classList.contains('unread');
 
-            // Если нет URL или он пустой - ничего не делаем
             if (!url || url === '') {
                 console.log('Нет URL для перехода');
                 return;
             }
 
-            // Если непрочитанное - сначала отмечаем, потом переходим
             if (isUnread) {
                 fetch(`/api/notifications/${id}/mark-read/`, {
                     method: 'POST',
@@ -360,17 +374,14 @@
                     }
                 })
                 .finally(() => {
-                    // Переходим по ссылке в любом случае
                     window.location.href = url;
                 });
             } else {
-                // Если уже прочитано - сразу переходим
                 window.location.href = url;
             }
         });
     });
 
-    // Удаление уведомления
     document.querySelectorAll('.delete-notification').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -407,7 +418,6 @@
         });
     });
 
-    // Пометить всё прочитанным
     const markAllBtn = document.getElementById('markAllRead');
     if (markAllBtn) {
         markAllBtn.addEventListener('click', function() {

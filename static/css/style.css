@@ -438,35 +438,14 @@ body {
     }
 }
 
-.form-impuls-btn {
-    background: white;
-    color: #05026C;
-    border: 3px solid #05026C;
-    border-radius: 4px;
-    padding: 3px 120px;
-    font-size: 44px;
-    font-weight: 500;
-    font-style: italic;
-    letter-spacing: 1.5px;
-    transition: all 0.2s ease;
-    margin-top: 16px;
-    font-family: inherit;
-    text-decoration: none;
-}
-
-
-.form-impuls-btn:hover {
-    border: solid #304361;
-    color: #304361;
-    transform: scale(0.98);
-}
-
 
 .profile-stats {
     display: flex;
     justify-content: center;
     gap: 2rem;
     margin: 1rem 0;
+    margin-bottom: 30px;
+    margin-bottom: 16px;
 }
 
 .stat-item {

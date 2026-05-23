@@ -3,24 +3,14 @@
 
 {% block content %}
 <div class="stream-container">
-    <div class="stream-header">
-        <h1>ПОТОК</h1>
-        <a href="{% url 'WIEapp:create_impulse' %}" class="create-btn">+ НОВЫЙ ИМПУЛЬС</a>
+    <div class="stream-mode-bar">
+        <button class="mode-btn {% if mode == 'all' %}active{% endif %}" data-mode="all">ОБЩЕЕ</button>
+        <button class="mode-btn {% if mode == 'followed' %}active{% endif %}" data-mode="followed">МОИ ОРИЕНТИРЫ</button>
     </div>
 
-
-
-    <!-- ЛЕНТА ИМПУЛЬСОВ -->
     <div class="impulses-list" id="impulses-list">
-        {% include 'WIEapp/include/impulse_cards.html' with impulses=impulses %}
+        {% include 'WIEapp/include/impulse_cards.html' with impulses=impulses has_next=has_next %}
     </div>
-
-    <!-- ПАГИНАЦИЯ ДЛЯ БЕСКОНЕЧНОГО СКРОЛЛА -->
-    {% if impulses.has_next %}
-    <div class="loading-trigger" data-next-page="{{ impulses.next_page_number }}" style="text-align: center; padding: 2rem;">
-        <span class="loader">ЗАГРУЗКА...</span>
-    </div>
-    {% endif %}
 </div>
 
 <style>
@@ -29,231 +19,192 @@
         margin: 0 auto;
         padding: 2rem;
     }
-
-    .stream-header {
+    .stream-mode-bar {
+        position: sticky;
+        top: 10px; /* ← ОТСТУП 15 ПИКСЕЛЕЙ ОТ ВЕРХА */
+        background: rgba(255, 255, 255, 0.62);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(15px);
+        margin-left: auto;
+        margin-right: auto;
         display: flex;
-        justify-content: space-between;
-        align-items: baseline;
+        gap: 2rem;
+        justify-content: center;
+        padding: 0.3rem 1rem;
         margin-bottom: 2rem;
-        border-left: 4px solid #e03a3a;
-        padding-left: 1.5rem;
+        border-radius: 4px;
+        z-index: 10;
     }
-
-    .stream-header h1 {
-        font-size: 2rem;
-        font-weight: normal;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #1a2c3e;
-    }
-
-    .create-btn {
-        background: transparent;
-        border: 1px solid #e03a3a;
-        color: #e03a3a;
-        padding: 0.5rem 1rem;
-        font-family: inherit;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-
-    .create-btn:hover {
-        background: rgba(224, 58, 58, 0.05);
-    }
-
-    .filters {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-        border-bottom: 1px solid #eef2f8;
-        padding-bottom: 1rem;
-    }
-
-    .filter-btn {
+    .mode-btn {
         background: transparent;
         border: none;
-        color: #8a9cb0;
-        font-family: inherit;
-        font-size: 0.75rem;
-        text-transform: uppercase;
+        font-family: 'Non Bureau', monospace;
+        font-size: 28px;
+        font-weight: 400;
         letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #171a2a;
         cursor: pointer;
-        padding: 0.3rem 0;
-        transition: color 0.2s;
+        padding: 0.2rem 0;
+        transition: all 0.2s;
     }
+    .mode-btn.active {
+        color: #05026c;
 
-    .filter-btn.active {
-        color: #e03a3a;
-        border-bottom: 2px solid #e03a3a;
     }
-
-    .filter-btn:hover {
-        color: #e03a3a;
-    }
-
-    .loader {
-        font-size: 0.7rem;
-        color: #8a9cb0;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
+    .mode-btn:hover {
+        color: #03009f;
     }
 </style>
 
 <script>
-  // ==================== CSRF-ТОКЕН ====================
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
+    // CSRF-токен уже объявлен в base.html, не объявляем заново!
+    let currentMode = '{{ mode|default:"all" }}';
+    let hasMore = {{ has_next|lower }};
+    let loading = false;
+    let nextPage = null;
+    let loaderElement = null;
+
+    // Резонансы
+    function attachResonanceListeners() {
+        document.querySelectorAll('.reaction-btn').forEach(btn => {
+            btn.removeEventListener('click', resonanceHandler);
+            btn.addEventListener('click', resonanceHandler);
+        });
     }
-    return cookieValue;
-}
 
-const csrftoken = getCookie('csrftoken');
+    function resonanceHandler(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const btn = e.currentTarget;
+        const impulseId = btn.dataset.impulseId;
+        const type = btn.dataset.type;
 
-// ==================== РЕЗОНАНСЫ ====================
-function attachResonanceListeners() {
-    document.querySelectorAll('.resonate-btn').forEach(btn => {
-        btn.removeEventListener('click', resonanceHandler);
-        btn.addEventListener('click', resonanceHandler);
-    });
-}
+        fetch('/api/resonate/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken
+            },
+            credentials: 'same-origin',
+            body: `impulse_id=${impulseId}&resonance_type=${type}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            const card = btn.closest('.impulse-card');
+            if (type === 'heart') {
+                const heartCount = card.querySelector('.heart-reaction .reaction-count');
+                if (heartCount) heartCount.innerText = data.heart_count;
+                if (data.user_heart !== undefined) {
+                    if (data.user_heart) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                }
+            } else {
+                const blastCount = card.querySelector('.blast-reaction .reaction-count');
+                if (blastCount) blastCount.innerText = data.blast_count;
+                if (data.user_blast !== undefined) {
+                    if (data.user_blast) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                }
+            }
+        })
+        .catch(error => console.error('Ошибка резонанса:', error));
+    }
 
-function resonanceHandler(e) {
-    e.preventDefault();
-    const btn = e.currentTarget;
-    const impulseId = btn.dataset.impulseId;
-    const type = btn.dataset.type;
+    // Переключение режимов
+    function initModeSwitcher() {
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        const impulsesList = document.getElementById('impulses-list');
 
-    fetch('/api/resonate/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrftoken
-        },
-        credentials: 'same-origin',
-        body: `impulse_id=${impulseId}&resonance_type=${type}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        const card = btn.closest('.impulse-card');
-        const heartBtn = card.querySelector('.heart-btn');
-        const blastBtn = card.querySelector('.blast-btn');
-        if (heartBtn) heartBtn.innerHTML = `❤️ ${data.heart_count}`;
-        if (blastBtn) blastBtn.innerHTML = `💥 ${data.blast_count}`;
-
-        // Обновляем активное состояние кнопок
-        if (data.user_heart !== undefined) {
-            if (data.user_heart) heartBtn.classList.add('active');
-            else heartBtn.classList.remove('active');
+        if (modeBtns.length === 0) {
+            console.log('Кнопки .mode-btn не найдены');
+            return;
         }
-        if (data.user_blast !== undefined) {
-            if (data.user_blast) blastBtn.classList.add('active');
-            else blastBtn.classList.remove('active');
-        }
-    })
-    .catch(error => console.error('Ошибка резонанса:', error));
-}
 
-// ==================== ФИЛЬТРАЦИЯ ====================
-function initFilters() {
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const impulsesList = document.getElementById('impulses-list');
+        modeBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const mode = this.dataset.mode;
+                currentMode = mode;
+                hasMore = true;
+                nextPage = null;
 
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            filterBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+                modeBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
 
-            const space = this.dataset.space;
-
-            fetch(`?space=${space}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => response.text())
-            .then(html => {
-                impulsesList.innerHTML = html;
-                attachResonanceListeners();
-                initInfiniteScroll();
+                fetch(`/stream/?mode=${mode}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    impulsesList.innerHTML = html;
+                    attachResonanceListeners();
+                    initInfiniteScroll();
+                })
+                .catch(error => console.error('Ошибка переключения:', error));
             });
         });
-    });
-}
-
-// ==================== БЕСКОНЕЧНЫЙ СКРОЛЛ ====================
-let loading = false;
-let nextPage = null;
-let loaderElement = null;
-
-function initInfiniteScroll() {
-    const trigger = document.querySelector('.loading-trigger');
-    if (trigger) {
-        nextPage = trigger.dataset.nextPage || null;
-        loaderElement = trigger;
-    } else {
-        nextPage = null;
-        loaderElement = null;
     }
-    loading = false;
-}
 
-function loadMore() {
-    if (loading || !nextPage) return;
-
-    loading = true;
-    if (loaderElement) loaderElement.style.display = 'block';
-
-    fetch(`?page=${nextPage}`, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(response => response.text())
-    .then(html => {
-        const impulsesList = document.getElementById('impulses-list');
-        impulsesList.insertAdjacentHTML('beforeend', html);
-
-        // Обновляем nextPage из нового триггера
-        const newTrigger = document.querySelector('.loading-trigger');
-        if (newTrigger && newTrigger.dataset.nextPage) {
-            nextPage = newTrigger.dataset.nextPage;
-            if (loaderElement) loaderElement.dataset.nextPage = nextPage;
+    // Бесконечный скролл
+    function initInfiniteScroll() {
+        const trigger = document.querySelector('.loading-trigger');
+        if (trigger && hasMore) {
+            nextPage = trigger.dataset.nextPage || null;
+            loaderElement = trigger;
         } else {
             nextPage = null;
-            if (loaderElement) loaderElement.remove();
+            loaderElement = null;
+            hasMore = false;
         }
-
-        attachResonanceListeners();
         loading = false;
-        if (loaderElement) loaderElement.style.display = 'none';
-    })
-    .catch(error => {
-        console.error('Ошибка загрузки:', error);
-        loading = false;
-    });
-}
-
-// Обработчик скролла
-function handleScroll() {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
-        loadMore();
     }
-}
 
-// ==================== ИНИЦИАЛИЗАЦИЯ ====================
-document.addEventListener('DOMContentLoaded', function() {
-    attachResonanceListeners();
-    initFilters();
-    initInfiniteScroll();
-    window.addEventListener('scroll', handleScroll);
-});
+    function loadMore() {
+        if (loading || !hasMore || !nextPage) return;
+
+        loading = true;
+        if (loaderElement) loaderElement.style.display = 'block';
+
+        fetch(`/stream/?mode=${currentMode}&page=${nextPage}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const impulsesList = document.getElementById('impulses-list');
+            impulsesList.insertAdjacentHTML('beforeend', html);
+
+            const newTrigger = document.querySelector('.loading-trigger');
+            if (newTrigger && newTrigger.dataset.nextPage) {
+                nextPage = newTrigger.dataset.nextPage;
+                if (loaderElement) loaderElement.dataset.nextPage = nextPage;
+                hasMore = true;
+            } else {
+                hasMore = false;
+                if (loaderElement) loaderElement.remove();
+            }
+
+            attachResonanceListeners();
+            loading = false;
+            if (loaderElement) loaderElement.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки:', error);
+            loading = false;
+        });
+    }
+
+    function handleScroll() {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+            loadMore();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        attachResonanceListeners();
+        initModeSwitcher();
+        initInfiniteScroll();
+        window.addEventListener('scroll', handleScroll);
+    });
 </script>
 {% endblock %}

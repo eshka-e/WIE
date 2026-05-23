@@ -1,11 +1,10 @@
-{% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
 <div class="follow-container">
     <div class="follow-header">
+         <a href="{% url 'WIEapp:profile' %}" > <img class="back-link" src="{% static 'img/back.png' %}" alt="avatar"></a>
         <h1>ОРИЕНТИРЫ</h1>
-        <a href="{% url 'WIEapp:profile' %}" class="back-link">← НАЗАД</a>
     </div>
 
     {% if landmarks %}
@@ -43,79 +42,128 @@
         max-width: 700px;
         margin: 0 auto;
         padding: 2rem;
+        font-family: 'Non Bureau', sans-serif;
     }
 
     .follow-header {
         display: flex;
-        justify-content: space-between;
-        align-items: baseline;
+        align-items: center;
+        gap: 40px;
         margin-bottom: 2rem;
-        border-left: 4px solid #e03a3a;
-        padding-left: 1.5rem;
-    }
-
-    .follow-header h1 {
-        font-size: 1.8rem;
-        font-weight: normal;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
+        justify-content: flex-start;
     }
 
     .back-link {
-        color: #8a9cb0;
+        height: 36px;
+        width: auto;
         text-decoration: none;
+        display: block;
+    }
+
+    .follow-header h1 {
+        font-size: 2.2rem;
+        font-style: italic;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #171A2A;
+        margin: 0;
+        line-height: 1.2;
     }
 
     .follow-list {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.25rem;
     }
 
     .follow-card {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 1.2rem;
         padding: 1rem;
-        border: 1px solid #eef2f8;
+        background: #FFFFFF;
+        border-bottom: 1px solid #eef2f8;
     }
 
     .follow-avatar img {
-        width: 50px;
-        height: 50px;
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
         object-fit: cover;
     }
 
     .follow-info {
         flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 
     .follow-name {
-        font-weight: bold;
+        font-weight: 700;
+        font-size: 30px;
+        color: #171A2A;
         text-decoration: none;
-        color: #1a2c3e;
+        line-height: 1.2;
     }
 
     .follow-username {
-        font-size: 0.8rem;
-        color: #8a9cb0;
-        margin-left: 0.5rem;
+        font-size: 15px;
+        font-weight: 400;
+        color: #171A2A;
+        opacity: 0.75;
     }
 
     .unfollow-btn {
-        background: transparent;
-        border: 1px solid #e03a3a;
-        color: #e03a3a;
-        padding: 0.3rem 1rem;
-        font-size: 0.7rem;
+        background: #eeeeef;
+        border: 1px solid #808080;
+        font-style: italic;
+        color: #808080;
+        padding: 0.3rem 1.2rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
         cursor: pointer;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .unfollow-btn:hover {
+        background: #99000210;
     }
 
     .empty-follow {
         text-align: center;
         padding: 3rem;
         color: #b4c4d4;
+    }
+
+    @media (max-width: 550px) {
+        .follow-container {
+            padding: 1.25rem;
+        }
+        .follow-header {
+            gap: 20px;
+        }
+        .follow-header h1 {
+            font-size: 1.4rem;
+        }
+        .follow-name {
+            font-size: 24px;
+        }
+        .follow-username {
+            font-size: 13px;
+        }
+        .follow-avatar img {
+            width: 55px;
+            height: 55px;
+        }
+        .unfollow-btn {
+            padding: 0.3rem 0.9rem;
+        }
     }
 </style>
 

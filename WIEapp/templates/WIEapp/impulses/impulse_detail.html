@@ -1,112 +1,115 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load micawber_tags %}
 
 {% block content %}
 <div class="impulse-detail-container">
-    <div class="impulse-detail-header">
-        <div class="impulse-meta">
-            <span class="impulse-space">{{ impulse.space.get_name_display }}</span>
-            <span class="impulse-author">@{{ impulse.author.user.username }}</span>
-            <span class="impulse-date">{{ impulse.created_at|date:"d.m.Y" }}</span>
-        </div>
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+    <div class="detail-navbar">
+        <a href="javascript:history.back()" class="nav-back">
+            <img class="back-link" src="{% static 'img/back.png' %}" alt="avatar">
+        </a>
 
-        <h1 class="impulse-title">{{ impulse.title|upper }}</h1>
+        <div class="nav-actions">
+            <button class="menu-dots-btn" id="menuDotsBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="6" r="1.5" fill="currentColor"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                    <circle cx="12" cy="18" r="1.5" fill="currentColor"/>
+                </svg>
+            </button>
 
-        {% if impulse.author == user.profile %}
-        <div class="impulse-actions">
-            <a href="{% url 'WIEapp:edit_impulse' impulse.id %}" class="btn-edit">РЕДАКТИРОВАТЬ</a>
-            <a href="{% url 'WIEapp:delete_impulse' impulse.id %}" class="btn-delete">УДАЛИТЬ</a>
+            <div class="dropdown-menu" id="actionDropdown">
+                <button class="dropdown-item" id="reportBtn">ПОЖАЛОВАТЬСЯ</button>
+                {% if impulse.author == user.profile %}
+                    <a href="{% url 'WIEapp:edit_impulse' impulse.id %}" class="dropdown-item">РЕДАКТИРОВАТЬ</a>
+                    <a href="{% url 'WIEapp:delete_impulse' impulse.id %}" class="dropdown-item delete-item">УДАЛИТЬ</a>
+                {% endif %}
+            </div>
         </div>
+    </div>
+
+    <!-- МЕДИА С УВЕЛИЧЕННОЙ ВЫСОТОЙ -->
+    {% if impulse.image or impulse.video_url or impulse.video_file %}
+    <div class="detail-media-container">
+        {% if impulse.image %}
+            <img src="{{ impulse.image.url }}" alt="{{ impulse.title }}" class="detail-media">
+        {% elif impulse.video_url %}
+            <div class="detail-video-wrapper">
+                {{ impulse.video_url|oembed }}
+            </div>
+        {% elif impulse.video_file %}
+            <video controls class="detail-media">
+                <source src="{{ impulse.video_file.url }}" type="video/mp4">
+            </video>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- ЗАГОЛОВОК + РЕАКЦИИ -->
+    <div class="title-reactions-row">
+        {% if impulse.title %}
+            <h1 class="detail-title">{{ impulse.title|upper }}</h1>
+        {% else %}
+            <div class="title-placeholder"></div>
+        {% endif %}
+
+        <div class="reactions-group">
+            <button class="reaction-btn heart-reaction {% if user_heart %}active{% endif %}"
+                    data-type="heart" data-impulse-id="{{ impulse.id }}">
+                <img class="reaction-icon heart-icon" src="{% static 'img/🫀.png' %}" alt="heart">
+                <span class="reaction-count">[{{ heart_count }}]</span>
+            </button>
+
+            <button class="reaction-btn blast-reaction {% if user_blast %}active{% endif %}"
+                    data-type="blast" data-impulse-id="{{ impulse.id }}">
+                <img class="reaction-icon blast-icon" src="{% static 'img/boom.png' %}" alt="blast">
+                <span class="reaction-count">[{{ blast_count }}]</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- КОНТЕНТ -->
+    {% if impulse.content %}
+    <div class="detail-content">
+        {{ impulse.content|linebreaks }}
+    </div>
+    {% endif %}
+
+    <!-- АВТОР — ТУТ ДОБАВЛЕНА ССЫЛКА -->
+    <div class="author-info-card">
+        <a href="{% url 'WIEapp:user_profile' impulse.author.user.username %}" class="author-link">
+            <div class="author-avatar">
+                {% if impulse.author.avatar %}
+                    <img src="{{ impulse.author.avatar.url }}" alt="{{ impulse.author.user.username }}">
+                {% else %}
+                    <div class="avatar-placeholder">{{ impulse.author.user.username|make_list|first|upper }}</div>
+                {% endif %}
+            </div>
+        </a>
+        <div class="author-details">
+            <a href="{% url 'WIEapp:user_profile' impulse.author.user.username %}" class="author-name-link">
+                <div class="author-name">{{ impulse.author.user.username|upper }}</div>
+            </a>
+            <div class="post-time">{{ impulse.created_at|date:"d.m.Y" }} в {{ impulse.created_at|date:"H:i" }}</div>
+        </div>
+    </div>
+
+    <!-- КОММЕНТАРИИ -->
+    <div class="comments-section">
+        <h2 class="section-title">ОТКЛИКИ [{{ impulse.comments.count }}]</h2>
+
+        {% if comments %}
+            {% for comment in comments %}
+                {% include 'WIEapp/include/comment_tree.html' with comment=comment %}
+            {% endfor %}
+        {% else %}
+            <p class="placeholder-text">[ ПОКА НЕТ ОТКЛИКОВ. БУДЬ ПЕРВЫМ ]</p>
         {% endif %}
     </div>
 
-    <!-- МЕДИА (если есть) -->
-    {% if impulse.image %}
-    <div class="impulse-media">
-        <img src="{{ impulse.image.url }}" alt="{{ impulse.title }}">
-    </div>
-    {% elif impulse.video_url %}
-    <div class="impulse-media video-wrapper">
-        <video controls src="{{ impulse.video_url }}"></video>
-    </div>
-    {% endif %}
-
-    <!-- ТЕКСТ ИМПУЛЬСА -->
-    <div class="impulse-content">
-        {{ impulse.content|linebreaks }}
-    </div>
-
-    <!-- ТЕГИ -->
-    {% if impulse.tags.all %}
-    <div class="impulse-tags">
-        {% for tag in impulse.tags.all %}
-        <span class="tag">#{{ tag.name }}</span>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- РЕЗОНАНСЫ -->
-    <div class="resonance-section">
-        <div class="resonance-buttons">
-            <button class="resonate-btn heart-btn {% if user_heart %}active{% endif %}"
-                    data-type="heart" data-impulse-id="{{ impulse.id }}">
-                🫀 {{ heart_count }}
-            </button>
-            <button class="resonate-btn blast-btn {% if user_blast %}active{% endif %}"
-                    data-type="blast" data-impulse-id="{{ impulse.id }}">
-                💥 {{ blast_count }}
-            </button>
-        </div>
-    </div>
-
-    <!-- ОТКЛИКИ -->
-    <div class="comments-section">
-        <h2 class="section-title">ОТКЛИКИ ({{ impulse.comments.count }})</h2>
-
-        {% for comment in comments %}
-        <div class="comment" id="comment-{{ comment.id }}">
-            <div class="comment-meta">
-                <a href="{% url 'WIEapp:user_profile' comment.author.user.username %}">
-                    @{{ comment.author.user.username }}
-                </a>
-                <span class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
-            </div>
-            <div class="comment-content">{{ comment.content|linebreaks }}</div>
-            <div class="comment-actions">
-                <button class="reply-toggle" data-comment-id="{{ comment.id }}">↩️ ОТВЕТИТЬ</button>
-            </div>
-
-            <!-- ВЛОЖЕННЫЕ ОТВЕТЫ -->
-            {% if comment.replies.all %}
-            <div class="replies">
-                {% for reply in comment.replies.all %}
-                <div class="reply" id="comment-{{ reply.id }}">
-                    <div class="comment-meta">
-                        <a href="{% url 'WIEapp:user_profile' reply.author.user.username %}">
-                            @{{ reply.author.user.username }}
-                        </a>
-                        <span class="comment-date">{{ reply.created_at|date:"d.m.Y H:i" }}</span>
-                    </div>
-                    <div class="comment-content">{{ reply.content|linebreaks }}</div>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <!-- ФОРМА ОТВЕТА -->
-            <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
-                <textarea rows="3" placeholder="ВАШ ОТВЕТ..."></textarea>
-                <button class="submit-reply" data-parent-id="{{ comment.id }}">ОТВЕТИТЬ</button>
-            </div>
-        </div>
-        {% empty %}
-        <p class="placeholder-text">[ ПОКА НЕТ ОТКЛИКОВ. БУДЬ ПЕРВЫМ ]</p>
-        {% endfor %}
-    </div>
-
-    <!-- ФОРМА НОВОГО ОТКЛИКА -->
+    <!-- ФОРМА КОММЕНТАРИЯ -->
     <div class="new-comment">
-        <h2 class="section-title">ОСТАВИТЬ ОТКЛИК</h2>
         <form method="post" class="comment-form">
             {% csrf_token %}
             {{ form.content }}
@@ -117,195 +120,355 @@
 
 <style>
     .impulse-detail-container {
-        max-width: 800px;
+        max-width: 100%;
         margin: 0 auto;
-        padding: 2rem;
     }
 
-    .impulse-meta {
-        display: flex;
-        gap: 1rem;
-        font-size: 0.8rem;
-        color: #8a9cb0;
-        margin-bottom: 1rem;
-    }
-
-    .impulse-space {
-        color: #e03a3a;
-        font-weight: bold;
-    }
-
-    .impulse-title {
-        font-size: 2rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 1.5rem;
-    }
-
-    .impulse-actions {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .btn-edit, .btn-delete {
-        background: transparent;
-        border: 1px solid #e03a3a;
-        color: #e03a3a;
-        padding: 0.3rem 1rem;
+    .back-link {
+        height: 36px;
+        width: auto;
         text-decoration: none;
-        font-size: 0.7rem;
     }
 
-    .btn-delete {
-        border-color: #cc0000;
+    /* Панель навигации */
+    .detail-navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 0 70px 1rem 70px;
+        position: relative;
+    }
+
+    .nav-back {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #334454;
+        transition: color 0.2s;
+    }
+
+    .nav-back:hover {
+        color: #e03a3a;
+    }
+
+    .nav-actions {
+        position: relative;
+    }
+
+    .menu-dots-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        display: flex;
+        border-radius: 50%;
+        transition: background 0.2s;
+        color: #334454;
+    }
+
+    .menu-dots-btn:hover {
+        background: rgba(207, 223, 255, 0.18);
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        min-width: 180px;
+        display: none;
+        z-index: 100;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 12px 16px;
+        text-align: left;
+        background: none;
+        border: none;
+        font-family: inherit;
+        font-size: 0.85rem;
+        color: #334454;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .dropdown-item:hover {
+        background: #f8fafc;
+    }
+
+    .delete-item {
         color: #cc0000;
     }
 
-    .impulse-media {
-        margin: 1.5rem 0;
-    }
-
-    .impulse-media img {
+    /* Медиа контейнер */
+    .detail-media-container {
         width: 100%;
-        height: auto;
-    }
-
-    .impulse-content {
-        font-size: 1rem;
-        line-height: 1.6;
-        color: #334454;
         margin: 1.5rem 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
-    .impulse-tags {
+    .detail-video-wrapper {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .detail-video-wrapper iframe {
+        width: 100%;
+        height: 70vh;
+        min-height: 500px;
+        max-height: 800px;
+        display: block;
+        border: none;
+    }
+
+    .detail-media {
+        max-width: 100%;
+        max-height: 70vh;
+        min-height: 500px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+    }
+
+    /* Заголовок и реакции */
+    .title-reactions-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin: 1.5rem 0 1rem;
+        padding: 0 70px;
+        flex-wrap: wrap;
+    }
+
+    .detail-title {
+        font-size: 40px;
+        font-weight: 500;
+        color: #1a2a3a;
+        margin: 0;
+        flex: 1;
+        text-align: left;
+    }
+
+    .title-placeholder {
+        flex: 1;
+    }
+
+    .reactions-group {
         display: flex;
         gap: 0.5rem;
-        flex-wrap: wrap;
-        margin: 1rem 0;
     }
 
-    .tag {
-        font-size: 0.7rem;
-        color: #8a9cb0;
-        background: #f0f4fa;
-        padding: 0.2rem 0.6rem;
-        border-radius: 20px;
-    }
-
-    .resonance-section {
-        margin: 1.5rem 0;
-        padding: 1rem 0;
-        border-top: 1px solid #eef2f8;
-        border-bottom: 1px solid #eef2f8;
-    }
-
-    .resonance-buttons {
+    .reaction-btn {
         display: flex;
-        gap: 1rem;
-    }
-
-    .resonate-btn {
-        background: transparent;
-        border: 1px solid #dce5ec;
-        padding: 0.5rem 1rem;
-        font-family: inherit;
-        font-size: 0.9rem;
+        align-items: center;
+        gap: 6px;
+        background: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 3px;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: background 0.2s ease;
+        font-family: inherit;
     }
 
-    .resonate-btn.active {
-        border-color: #e03a3a;
-        background: rgba(224, 58, 58, 0.1);
+    .reaction-btn:hover {
+        background: #CFDFFF;
     }
 
-    .comments-section {
+    .reaction-btn.active {
+        background: #7B90CA;
+    }
+
+    .reaction-btn.active .reaction-count {
+        color: #1a2a3a;
+    }
+
+    .reaction-icon {
+        height: 25px;
+        width: 25px;
+        display: block;
+    }
+
+    .blast-icon {
+        height: 30px;
+        width: 30px;
+    }
+
+    .reaction-count {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #334454;
+    }
+
+    /* Контент */
+    .detail-content {
+        font-size: 25px;
+        font-weight: 400;
+        line-height: 1.4;
+        color: #2c3e4e;
+        margin: 1.5rem 0;
+        padding: 0 70px;
+        text-align: left;
+    }
+
+    /* Автор — ОБНОВЛЕННЫЕ СТИЛИ С ССЫЛКАМИ */
+    .author-info-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
         margin: 2rem 0;
+        padding: 0.5rem 70px;
     }
 
-    .section-title {
-        font-size: 1rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #e03a3a;
-        margin-bottom: 1.5rem;
+    .author-link {
+        text-decoration: none;
+        flex-shrink: 0;
     }
 
-    .comment {
-        border-bottom: 1px solid #eef2f8;
-        padding: 1rem 0;
+    .author-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #eef2f8;
+        transition: opacity 0.2s;
     }
 
-    .comment-meta {
-        font-size: 0.75rem;
-        color: #8a9cb0;
-        margin-bottom: 0.5rem;
+    .author-link:hover .author-avatar {
+        opacity: 0.8;
     }
 
-    .comment-meta a {
-        color: #e03a3a;
+    .author-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 500;
+        color: #7B90CA;
+        background: #CFDFFF;
+    }
+
+    .author-details {
+        flex: 1;
+    }
+
+    .author-name-link {
         text-decoration: none;
     }
 
-    .comment-content {
-        font-size: 0.9rem;
-        line-height: 1.4;
-        margin-bottom: 0.5rem;
+    .author-name {
+        font-size: 32px;
+        font-weight: 500;
+        color: #1a2a3a;
+        line-height: 1.2;
+        text-align: left;
+        transition: color 0.2s;
     }
 
-    .comment-actions {
-        font-size: 0.7rem;
+    .author-name-link:hover .author-name {
+        color: #05026C;
+
     }
 
-    .comment-actions button {
-        background: none;
-        border: none;
+    .post-time {
+        font-size: 12px;
+        font-weight: 200;
         color: #8a9cb0;
-        cursor: pointer;
+        margin-top: 4px;
+        text-align: left;
     }
 
-    .replies {
-        margin-left: 1.5rem;
-        margin-top: 1rem;
-        border-left: 2px solid #eef2f8;
-        padding-left: 1rem;
+    /* Комментарии */
+    .comments-section {
+        margin: 2rem 0;
+        padding: 0 70px;
     }
 
-    .reply-form {
-        margin-top: 0.5rem;
-        margin-left: 1.5rem;
+    .section-title {
+        font-size: 25px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #05026C;
+        margin-bottom: 1.5rem;
+        text-align: left;
     }
 
-    .reply-form textarea {
-        width: 100%;
-        background: #f8fafc;
-        border: 1px solid #dce5ec;
-        padding: 0.5rem;
-        font-family: inherit;
-    }
-
+    /* НОВЫЕ СТИЛИ ДЛЯ ФОРМЫ РОДИТЕЛЬСКОГО КОММЕНТАРИЯ */
     .new-comment {
         margin-top: 2rem;
-        padding-top: 1rem;
+        padding: 1rem 70px 0 70px;
         border-top: 1px solid #eef2f8;
     }
 
-    .new-comment textarea {
+    .comment-form textarea {
         width: 100%;
-        background: #f8fafc;
-        border: 1px solid #dce5ec;
-        padding: 1rem;
+        font-size: 32px;
+        font-style: italic;
+        font-weight: 300;
+        color: #1a2c3e;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #d0d8e0;
+        padding: 12px 0 8px 0;
+        outline: none;
+        transition: all 0.2s ease;
         font-family: inherit;
-        margin-bottom: 1rem;
+    }
+
+    .comment-form textarea:focus {
+        border-bottom-color: #05026C;
     }
 
     .submit-btn {
-        background: transparent;
-        border: 1px solid #e03a3a;
-        color: #e03a3a;
-        padding: 0.5rem 1.5rem;
+        background: #171A2A;
+        color: white;
+        border: none;
+        padding: 3px 120px;
+        font-size: 48px;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: 1.5px;
         cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 16px;
+        font-family: inherit;
+    }
+
+    .submit-btn:hover {
+        background: #251111;
+        transform: scale(0.98);
+    }
+
+    .submit-btn:active {
+        background: #140000;
     }
 
     .placeholder-text {
@@ -313,11 +476,89 @@
         text-align: center;
         padding: 2rem;
     }
+
+    /* Адаптив для мобильных */
+    @media (max-width: 768px) {
+        .detail-navbar,
+        .title-reactions-row,
+        .detail-content,
+        .author-info-card,
+        .comments-section,
+        .new-comment {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .detail-title {
+            font-size: 28px;
+        }
+
+        .detail-content {
+            font-size: 18px;
+        }
+
+        .author-name {
+            font-size: 24px;
+        }
+
+        .comment-form textarea {
+            font-size: 24px;
+        }
+
+        .detail-video-wrapper iframe {
+            height: 40vh;
+            min-height: 300px;
+        }
+
+        .detail-media {
+            max-height: 40vh;
+            min-height: 300px;
+        }
+    }
+
+    /* Для планшетов */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .detail-video-wrapper iframe {
+            height: 50vh;
+            min-height: 400px;
+        }
+
+        .detail-media {
+            max-height: 50vh;
+            min-height: 400px;
+        }
+    }
 </style>
 
 <script>
-    // Резонансы
-    document.querySelectorAll('.resonate-btn').forEach(btn => {
+    // Меню
+    const menuBtn = document.getElementById('menuDotsBtn');
+    const dropdown = document.getElementById('actionDropdown');
+
+    if (menuBtn) {
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    }
+
+    // Жалоба
+    const reportBtn = document.getElementById('reportBtn');
+    if (reportBtn) {
+        reportBtn.addEventListener('click', () => {
+            alert('Функция жалобы будет доступна в ближайшее время');
+            dropdown.classList.remove('show');
+        });
+    }
+
+    // Реакции
+    document.querySelectorAll('.reaction-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const impulseId = this.dataset.impulseId;
             const type = this.dataset.type;
@@ -332,41 +573,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.querySelector('.heart-btn').innerHTML = `❤️ ${data.heart_count}`;
-                document.querySelector('.blast-btn').innerHTML = `💥 ${data.blast_count}`;
-            });
-        });
-    });
-
-    // Показать/скрыть форму ответа
-    document.querySelectorAll('.reply-toggle').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const commentId = this.dataset.commentId;
-            const form = document.getElementById(`reply-form-${commentId}`);
-            form.style.display = form.style.display === 'block' ? 'none' : 'block';
-        });
-    });
-
-    // Отправка ответа AJAX
-    document.querySelectorAll('.submit-reply').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const parentId = this.dataset.parentId;
-            const content = this.previousElementSibling.value;
-
-            fetch('{% url "WIEapp:add_reply_ajax" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: `parent_id=${parentId}&content=${encodeURIComponent(content)}`
+                document.querySelector('.heart-reaction .reaction-count').innerText = data.heart_count;
+                document.querySelector('.blast-reaction .reaction-count').innerText = data.blast_count;
+                this.classList.toggle('active');
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    location.reload();
-                }
-            });
+            .catch(error => console.error('Error:', error));
         });
     });
 </script>

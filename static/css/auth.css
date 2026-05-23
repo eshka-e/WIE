@@ -221,6 +221,9 @@ body {
     transform: scale(0.98);
 }
 
+.submit-btn:active {
+    background: #140000;
+}
 
 
 /* Footer links */

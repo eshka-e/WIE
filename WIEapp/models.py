@@ -151,3 +151,14 @@ class Report(models.Model):
 
     def __str__(self):
         return f"{self.reporter.user.username} -> {self.reported_user.user.username} ({self.reason})"
+
+
+class Warning(models.Model):
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='warnings')
+    moderator = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='given_warnings')
+    reason = models.TextField(default='Нарушение правил платформы')
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Warning for {self.user.user.username} by {self.moderator.user.username}"

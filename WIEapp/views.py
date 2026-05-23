@@ -159,22 +159,87 @@ def unread_notifications_count(request):
     return JsonResponse({'count': count})
 
 
-
 @login_required
 def stream_view(request):
-    # Получаем ID пользователей, которых заглушил текущий пользователь
+    mode = request.GET.get('mode', 'all')
+    user_profile = request.user.profile
+
+    # Заглушённые пользователи
     muted_users = Landmark.objects.filter(
-        follower=request.user.profile,
+        follower=user_profile,
         target_type='profile',
         is_muted=True
     ).values_list('target_id', flat=True)
 
-    # Исключаем импульсы заглушённых авторов
-    impulses = Impulse.objects.exclude(
-        author_id__in=muted_users
-    ).select_related(
+    impulses = Impulse.objects.exclude(author_id__in=muted_users).select_related(
         'author__user', 'space'
-    ).prefetch_related('tags', 'resonances').order_by('-created_at')
+    ).prefetch_related('tags', 'resonances')
+
+    if mode == 'followed':
+        followed_users = Landmark.objects.filter(
+            follower=user_profile,
+            target_type='profile'
+        ).values_list('target_id', flat=True)
+        followed_users = [uid for uid in followed_users if uid != user_profile.id]
+        impulses = impulses.filter(author_id__in=followed_users)
+
+    impulses = impulses.order_by('-created_at')
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(impulses, 10)
+
+    try:
+        impulses_page = paginator.page(page)
+    except (PageNotAnInteger, EmptyPage):
+        impulses_page = paginator.page(1)
+
+    # AJAX-запрос
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'WIEapp/include/impulse_cards.html', {
+            'impulses': impulses_page,
+            'has_next': impulses_page.has_next()  # ← передаём флаг
+        })
+
+    return render(request, 'WIEapp/impulses/stream.html', {
+        'impulses': impulses_page,
+        'mode': mode,
+        'has_next': impulses_page.has_next(),  # ← передаём флаг
+        'spaces': Space.objects.all()
+    })
+
+@login_required
+def spaces_list_view(request):
+    spaces = Space.objects.all().order_by('order')
+    return render(request, 'WIEapp/spaces_list.html', {'spaces': spaces})
+
+
+@login_required
+def space_detail_view(request, space_name):
+    space = get_object_or_404(Space, name=space_name)
+    mode = request.GET.get('mode', 'all')
+    user_profile = request.user.profile
+
+    # Заглушённые пользователи
+    muted_users = Landmark.objects.filter(
+        follower=user_profile,
+        target_type='profile',
+        is_muted=True
+    ).values_list('target_id', flat=True)
+
+    # Базовый запрос
+    impulses = Impulse.objects.filter(space=space).exclude(author_id__in=muted_users).select_related(
+        'author__user'
+    ).prefetch_related('tags', 'resonances')
+
+    if mode == 'followed':
+        followed_users = Landmark.objects.filter(
+            follower=user_profile,
+            target_type='profile'
+        ).values_list('target_id', flat=True)
+        followed_users = [uid for uid in followed_users if uid != user_profile.id]
+        impulses = impulses.filter(author_id__in=followed_users)
+
+    impulses = impulses.order_by('-created_at')
 
     page = request.GET.get('page', 1)
     paginator = Paginator(impulses, 10)
@@ -185,46 +250,17 @@ def stream_view(request):
         impulses_page = paginator.page(1)
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render(request, 'WIEapp/partials/impulse_cards.html', {'impulses': impulses_page})
-
-    return render(request, 'WIEapp/impulses/stream.html', {
-        'impulses': impulses_page,
-        'spaces': Space.objects.all()
-    })
-
-
-
-@login_required
-def spaces_list_view(request):
-    spaces = Space.objects.all().order_by('order')
-    return render(request, 'WIEapp/spaces_list.html', {'spaces': spaces})
-
-
-def space_detail_view(request, space_name):
-    space = get_object_or_404(Space, name=space_name)
-
-    muted_users = Landmark.objects.filter(
-        follower=request.user.profile,
-        target_type='profile',
-        is_muted=True
-    ).values_list('target_id', flat=True)
-
-    impulses = Impulse.objects.filter(space=space).exclude(
-        author_id__in=muted_users
-    ).select_related(
-        'author__user'
-    ).prefetch_related('tags', 'resonances').order_by('-created_at')
-
-    paginator = Paginator(impulses, 10)
-    page = request.GET.get('page', 1)
-    impulses_page = paginator.get_page(page)
+        return render(request, 'WIEapp/include/impulse_cards.html', {
+            'impulses': impulses_page,
+            'has_next': impulses_page.has_next()
+        })
 
     return render(request, 'WIEapp/impulses/space_detail.html', {
         'impulses': impulses_page,
         'current_space': space,
-        'current_space_name': space.get_name_display(),
+        'mode': mode,
+        'has_next': impulses_page.has_next(),
     })
-
 @login_required
 def impulse_detail_view(request, impulse_id):
     impulse = get_object_or_404(
@@ -264,6 +300,7 @@ def impulse_detail_view(request, impulse_id):
         'impulse': impulse,
         'comments': comments,
         'form': form,
+        'user': request.user,  # 👈 ЭТО ВАЖНО ДОБАВИТЬ!
         'heart_count': impulse.resonances.filter(resonance_type='heart').count(),
         'blast_count': impulse.resonances.filter(resonance_type='blast').count(),
         'user_heart': user_heart,
@@ -446,32 +483,58 @@ def edit_profile_view(request):
 
 
 @login_required
-def landmarks_view(request):
+def followers_view(request):
+    username = request.GET.get('user')
+    if username:
+        target_user = get_object_or_404(User, username=username)
+        target_profile = target_user.profile
+    else:
+        target_profile = request.user.profile
+
+    print(f"Target profile: {target_profile.user.username}")  # ← отладка
+
     landmarks = Landmark.objects.filter(
-        follower=request.user.profile,
+        target_type='profile',
+        target_id=target_profile.id
+    )
+    print(f"Landmarks count: {landmarks.count()}")  # ← отладка
+
+    followers = [lm.follower for lm in landmarks]
+    print(f"Followers count: {len(followers)}")  # ← отладка
+
+    return render(request, 'WIEapp/profile/followers.html', {
+        'profiles': followers,
+        'target_profile': target_profile,
+    })
+
+
+@login_required
+def landmarks_view(request):
+    username = request.GET.get('user')
+    if username:
+        target_user = get_object_or_404(User, username=username)
+        target_profile = target_user.profile
+    else:
+        target_profile = request.user.profile
+
+    # Получаем ориентиры target_profile
+    landmarks = Landmark.objects.filter(
+        follower=target_profile,
         target_type='profile'
     ).select_related('follower__user')
 
     landmarks_with_target = []
     for lm in landmarks:
-        target_profile = Profile.objects.get(id=lm.target_id)
+        target = Profile.objects.get(id=lm.target_id)
         landmarks_with_target.append({
-            'target': target_profile,
+            'target': target,
             'is_muted': lm.is_muted
         })
 
-    return render(request, 'WIEapp/profile/landmarks.html', {'landmarks': landmarks_with_target})
-
-
-@login_required
-def followers_view(request):
-    landmarks = Landmark.objects.filter(
-        target_type='profile',
-        target_id=request.user.profile.id
-    ).select_related('follower__user')
-    followers = [lm.follower for lm in landmarks]
-    return render(request, 'WIEapp/profile/followers.html', {'followers': followers})
-
+    return render(request, 'WIEapp/profile/landmarks.html', {
+        'landmarks': landmarks_with_target,
+        'target_profile': target_profile,
+    })
 
 
 @login_required
@@ -518,6 +581,10 @@ def toggle_resonance(request):
 def add_reply_ajax(request):
     parent_id = request.POST.get('parent_id')
     content = request.POST.get('content')
+
+    if not parent_id or not content:
+        return JsonResponse({'status': 'error', 'error': 'Missing data'}, status=400)
+
     parent_comment = get_object_or_404(Comment, id=parent_id)
 
     reply = Comment.objects.create(
@@ -538,11 +605,12 @@ def add_reply_ajax(request):
 
     return JsonResponse({
         'status': 'success',
-        'author': reply.author.user.username,
+        'comment_id': reply.id,
+        'author_username': reply.author.user.username,
+        'author_name': reply.author.display_name or reply.author.user.username,
         'content': reply.content,
-        'created_at': reply.created_at.strftime('%d.%m.%Y %H:%M')
+        'created_at': reply.created_at.strftime('%d.%m.%Y')
     })
-
 
 @login_required
 @require_http_methods(['POST'])
@@ -688,3 +756,115 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'WIEapp/auth/password_reset_complete.html'
+
+
+@login_required
+@require_http_methods(['POST'])
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    user_profile = request.user.profile
+
+    # Права: автор комментария, автор импульса или админ
+    if user_profile == comment.author or user_profile == comment.impulse.author or user_profile.user.is_superuser:
+        comment.delete()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'error': 'permission denied'}, status=403)
+
+
+
+@login_required
+@require_http_methods(['POST'])
+def unban_user(request):
+    """Разбан пользователя (только для админов)"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'permission denied'}, status=403)
+
+    user_id = request.POST.get('user_id')
+    if not user_id:
+        return JsonResponse({'error': 'no user_id'}, status=400)
+
+    target_profile = get_object_or_404(Profile, id=user_id)
+
+    # Активируем пользователя
+    target_profile.user.is_active = True
+    target_profile.user.save()
+
+    # Опционально: сбросить активные предупреждения
+    # Warning.objects.filter(user=target_profile, is_active=True).update(is_active=False)
+
+    return JsonResponse({'status': 'unbanned'})
+
+
+# ЕСЛИ У ТЕБЯ НЕТ ЭТОЙ ФУНКЦИИ, ДОБАВЬ (ОНА УЖЕ ДОЛЖНА БЫТЬ, НО НА ВСЯКИЙ СЛУЧАЙ)
+@login_required
+@require_http_methods(['POST'])
+def warn_user(request):
+    """Выдача предупреждения (только для админов)"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'permission denied'}, status=403)
+
+    user_id = request.POST.get('user_id')
+    if not user_id:
+        return JsonResponse({'error': 'no user_id'}, status=400)
+
+    target_profile = get_object_or_404(Profile, id=user_id)
+
+    # Нельзя выдавать предупреждение админу
+    if target_profile.user.is_superuser:
+        return JsonResponse({'error': 'cannot warn an admin'}, status=400)
+
+    # Создаём предупреждение
+    Warning.objects.create(
+        user=target_profile,
+        moderator=request.user.profile,
+        reason='Нарушение правил платформы'
+    )
+
+    warnings_count = Warning.objects.filter(user=target_profile, is_active=True).count()
+    is_banned = False
+
+    # Три предупреждения → бан
+    if warnings_count >= 3:
+        target_profile.user.is_active = False
+        target_profile.user.save()
+        is_banned = True
+
+    return JsonResponse({
+        'status': 'warned',
+        'warnings_count': warnings_count,
+        'is_banned': is_banned
+    })
+
+@login_required
+@require_http_methods(['POST'])
+def ban_user(request):
+    """Мгновенный бан пользователя (только для админов)"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'permission denied'}, status=403)
+
+    user_id = request.POST.get('user_id')
+    if not user_id:
+        return JsonResponse({'error': 'no user_id'}, status=400)
+
+    target_profile = get_object_or_404(Profile, id=user_id)
+
+    # Нельзя банить админа
+    if target_profile.user.is_superuser:
+        return JsonResponse({'error': 'cannot ban an admin'}, status=400)
+
+    # Баним пользователя
+    target_profile.user.is_active = False
+    target_profile.user.save()
+
+    # Опционально: добавить запись в Warning с особым типом
+    Warning.objects.create(
+        user=target_profile,
+        moderator=request.user.profile,
+        reason='Мгновенный бан за грубое нарушение'
+    )
+
+    return JsonResponse({'status': 'banned'})
+
+def faq_view(request):
+    form = SearchForm(request.GET or None)
+    return render(request, 'WIEapp/search/faq.html', {'form': form})

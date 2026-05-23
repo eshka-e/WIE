@@ -55,4 +55,14 @@ urlpatterns = [
     path('api/follow/', views.toggle_follow, name='toggle_follow'),
     path('api/mute/', views.toggle_mute, name='toggle_mute'),
     path('api/report-user/', views.report_user, name='report_user'),
+
+# В urls.py, в urlpatterns ДОБАВЬ ЭТУ СТРОЧКУ:
+path('api/unban-user/', views.unban_user, name='unban_user'),
+path('api/ban-user/', views.ban_user, name='ban_user'),
+
+    path('add-reply-ajax/', views.add_reply_ajax, name='add_reply_ajax'),
+    path('delete-comment/<int:comment_id>/', views.delete_comment, name='delete_comment'),
+    path('warn-user/', views.warn_user, name='warn_user'),
+
+path('faq/', views.faq_view, name='faq'),
 ]

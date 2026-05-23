@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="profile-container">
-    <!-- ВЕРХНЯЯ ЧАСТЬ С КАРТИНКОЙ (было profile-banner) -->
+    <!-- ВЕРХНЯЯ ЧАСТЬ С КАРТИНКОЙ -->
     <div class="profile-cover">
         {% if profile.banner %}
             <img src="{{ profile.banner.url }}" alt="cover" class="cover-image">
@@ -23,101 +23,134 @@
         {% endif %}
     </div>
 
-    <h1 class="main-username">
-        {{ profile.display_name|default:profile.user.username|upper }}
-    </h1>
+    <div class="profile-content">
+        <h1 class="main-username">
+            {{ profile.display_name|default:profile.user.username|upper }}
+        </h1>
 
-    {% if profile.display_name %}
-        <p class="username-tag">@{{ profile.user.username }}</p>
-    {% endif %}
+        {% if profile.display_name %}
+            <p class="username-tag">@{{ profile.user.username }}</p>
+        {% endif %}
 
-  <div class="profile-stats">
-    <div class="stat-item">
-        <span class="stat-value">{{ impulses_count }}</span>
-        <span class="stat-label">ИМПУЛЬСЫ</span>
-    </div>
-    <a href="{% url 'WIEapp:followers' %}" class="stat-item stat-link">
-        <span class="stat-value">{{ followers_count }}</span>
-        <span class="stat-label">ПОСЛЕДОВАТЕЛИ</span>
-    </a>
-    <a href="{% url 'WIEapp:landmarks' %}" class="stat-item stat-link">
-        <span class="stat-value">{{ following_count }}</span>
-        <span class="stat-label">ОРИЕНТИРЫ</span>
-    </a>
-</div>
+        <div class="profile-stats">
+            <div class="stat-item">
+                <span class="stat-value">{{ impulses_count }}</span>
+                <span class="stat-label">ИМПУЛЬСЫ</span>
+            </div>
+            <a href="{% url 'WIEapp:followers' %}?user={{ profile.user.username }}" class="stat-item stat-link">
+                <span class="stat-value">{{ followers_count }}</span>
+                <span class="stat-label">ПОСЛЕДОВАТЕЛИ</span>
+            </a>
+            <a href="{% url 'WIEapp:landmarks' %}?user={{ profile.user.username }}" class="stat-item stat-link">
+                <span class="stat-value">{{ following_count }}</span>
+                <span class="stat-label">ОРИЕНТИРЫ</span>
+            </a>
+        </div>
 
-    {% if user == profile.user %}
+        <!-- СВОЙ ПРОФИЛЬ -->
+        {% if user == profile.user %}
         <div class="profile-actions">
             <a href="{% url 'WIEapp:edit_profile' %}" class="btn-edit">ИЗМЕНИТЬ</a>
             <form method="POST" action="{% url 'logout' %}" style="display: inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn-logout">ВЫХОД</button>
             </form>
+            <div class="nav-actions">
+                <button class="menu-dots-btn" id="more-menu-btn-self">⋮</button>
+                <div class="dropdown-menu" id="more-dropdown-self">
+                    <a href="{% url 'WIEapp:faq' %}" class="dropdown-item">❓ FAQ / ПОМОЩЬ</a>
+                </div>
+            </div>
         </div>
-    {% endif %}
-{% if not is_own_profile %}
-<div class="profile-buttons">
-    <button id="follow-btn" class="profile-action-btn" data-user-id="{{ profile.id }}">
-        {% if is_following %}УБРАТЬ ОРИЕНТИР{% else %}+ В ОРИЕНТИРЫ{% endif %}
-    </button>
+        {% endif %}
 
-    <div class="more-menu">
-        <button class="more-btn" id="more-menu-btn">⋮</button>
-        <div class="more-dropdown" id="more-dropdown" style="display: none;">
-            <button id="mute-btn" class="dropdown-item">
-                {% if is_muted %}РАЗГЛУШИТЬ{% else %}ЗАГЛУШИТЬ{% endif %}
+        <!-- ЧУЖОЙ ПРОФИЛЬ -->
+        {% if user.is_authenticated and user != profile.user %}
+        <div class="profile-buttons">
+            <button id="follow-btn" class="follow-btn-custom {% if is_following %}follow-already-custom{% else %}follow-back-custom{% endif %}" data-user-id="{{ profile.id }}">
+                {% if is_following %}УБРАТЬ ОРИЕНТИР{% else %}+ В ОРИЕНТИРЫ{% endif %}
             </button>
-            <button id="report-btn" class="dropdown-item report">ПОЖАЛОВАТЬСЯ</button>
+
+            <div class="nav-actions">
+                <button class="menu-dots-btn" id="more-menu-btn">⋮</button>
+                <div class="dropdown-menu" id="more-dropdown">
+                    <button id="mute-btn" class="dropdown-item">
+                        {% if is_muted %}РАЗГЛУШИТЬ{% else %}ЗАГЛУШИТЬ{% endif %}
+                    </button>
+                    <button id="report-btn" class="dropdown-item report">ПОЖАЛОВАТЬСЯ</button>
+
+                    {% if user.is_superuser %}
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-header">АДМИН-ПАНЕЛЬ</div>
+                    <button id="warn-btn" class="dropdown-item warn-admin">⚠ ВЫДАТЬ ПРЕДУПРЕЖДЕНИЕ</button>
+                    <button id="ban-btn" class="dropdown-item ban-admin">🔨 БАН</button>
+                    {% if profile.user.is_active == False %}
+                    <button id="unban-btn" class="dropdown-item unban-admin">🔄 РАЗБАНИТЬ</button>
+                    {% endif %}
+                    {% endif %}
+
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'WIEapp:faq' %}" class="dropdown-item">❓ FAQ / ПОМОЩЬ</a>
+                </div>
+            </div>
         </div>
+        {% endif %}
+
+        <!-- О СЕБЕ -->
+        <section class="profile-section">
+            <h2 class="section-label">О СЕБЕ</h2>
+            <div class="bio-content">
+                {% if profile.bio %}
+                    <p>{{ profile.bio|linebreaks }}</p>
+                {% else %}
+                    <p class="placeholder-text">[ ЗДЕСЬ ПУСТО ]</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- ИМПУЛЬСЫ -->
+        <section class="profile-section">
+            <h2 class="section-label">ИМПУЛЬСЫ</h2>
+            {% if user == profile.user %}
+                <div class="impulse-btn-wrapper">
+                    <a href="{% url 'WIEapp:create_impulse' %}" class="form-impuls-btn">
+                        <span class="plus">+</span>
+                        <span class="bar-text">СФОРМИРОВАТЬ ИМПУЛЬС</span>
+                    </a>
+                </div>
+            {% else %}
+                <div class="follow-bar"></div>
+            {% endif %}
+
+            {% if ordered_spaces %}
+                {% for space in ordered_spaces %}
+                    <div class="space-section">
+                        <h2 class="space-title">{{ space.name }}</h2>
+                        <div class="space-impulses">
+                            {% include 'WIEapp/include/impulse_cards.html' with impulses=space.impulses %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-impulses">
+                    <p class="placeholder-text">[ ИМПУЛЬСОВ НЕТ ]</p>
+                </div>
+            {% endif %}
+        </section>
     </div>
 </div>
-{% endif %}
-    <section class="profile-section">
-        <h2 class="section-label">О СЕБЕ</h2>
-        <div class="bio-content">
-            {% if profile.bio %}
-                <p>{{ profile.bio|linebreaks }}</p>
-            {% else %}
-                <p class="placeholder-text">[ ЗДЕСЬ ПУСТО ]</p>
-            {% endif %}
-        </div>
-    </section>
 
-    <section class="profile-section">
-  <h2 class="section-label">ИМПУЛЬСЫ</h2>
-        {% if user == profile.user %}
-            <div class="impulse-btn-wrapper">
-                <a href="{% url 'WIEapp:create_impulse' %}" class="form-impuls-btn">
-                    <span class="plus">+</span>
-                    <span class="bar-text">СФОРМИРОВАТЬ ИМПУЛЬС</span>
-                </a>
-            </div>
-        {% else %}
-            <div class="follow-bar">
-
-            </div>
-        {% endif %}
-{% if ordered_spaces %}
-    {% for space in ordered_spaces %}
-        <div class="space-section">
-            <h2 class="space-title">{{ space.name }}</h2>
-            <div class="space-impulses">
-                {% include 'WIEapp/include/impulse_cards.html' with impulses=space.impulses %}
-            </div>
-        </div>
-    {% endfor %}
-{% else %}
-    <div class="no-impulses">
-        <p class="placeholder-text">[ ИМПУЛЬСОВ НЕТ ]</p>
+<div id="notification-toast" class="notification-toast" style="display: none;">
+    <div class="toast-icon" id="toast-icon"></div>
+    <div class="toast-content">
+        <div class="toast-title" id="toast-title"></div>
+        <div class="toast-message" id="toast-message"></div>
     </div>
-{% endif %}
-
-    </section>
+    <button class="toast-close" onclick="closeToast()">×</button>
 </div>
 
 <style>
-    /* ГЛОБАЛЬНЫЙ СБРОС ОТСТУПОВ */
-  body, html {
+    body, html {
         margin: 0;
         padding: 0;
         overflow-x: hidden;
@@ -131,7 +164,11 @@
         position: relative;
     }
 
-    /* БАННЕР - ГАРАНТИРОВАННО НА ВСЮ ШИРИНУ */
+    .profile-content {
+        padding-right: 50px;
+        box-sizing: border-box;
+    }
+
     .profile-cover {
         width: 100%;
         min-width: 100vw;
@@ -156,15 +193,6 @@
         padding: 0;
     }
 
-    /* Принудительное растягивание, если cover не сработал */
-    .cover-image {
-        width: 100% !important;
-        min-width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-    }
-
-    /* Для плейсхолдера без картинки */
     .cover-placeholder {
         width: 100%;
         height: 100%;
@@ -178,7 +206,6 @@
         letter-spacing: 0.1em;
     }
 
-    /* АВАТАР С ТОНКОЙ ОБВОДКОЙ (1px) */
     .avatar-wrapper {
         display: flex;
         justify-content: center;
@@ -188,8 +215,6 @@
         z-index: 2;
     }
 
-
-
     .avatar {
         width: 250px;
         height: 250px;
@@ -197,7 +222,6 @@
         object-fit: cover;
         border: 1px solid white;
         background: white;
-
     }
 
     .main-username {
@@ -214,9 +238,62 @@
         margin: -0.5rem 0 1rem 0;
     }
 
+    .profile-stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1rem 0;
+    }
 
+    .stat-item {
+        text-align: center;
+        text-decoration: none;
+    }
 
-  .btn-logout {
+    .stat-link {
+        text-decoration: none;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 38px;
+        font-weight: 900;
+        color: #171A2A;
+    }
+
+    .stat-label {
+        font-size: 24px;
+        color: #171A2A;
+        text-transform: lowercase;
+        letter-spacing: 0.05em;
+    }
+
+    .profile-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 1rem 0 2rem 0;
+        align-items: center;
+    }
+
+    .btn-edit {
+        background: none;
+        border: 1px solid #171A2A;
+        color: #171A2A;
+        border-radius: 3px;
+        padding: 4px 25px;
+        font-family: inherit;
+        font-size: 15px;
+        text-decoration: none;
+        display: inline-block;
+        font-style: italic;
+    }
+
+    .btn-logout {
         padding: 4px 25px;
         border: 1px solid #990002;
         background: none;
@@ -228,19 +305,147 @@
         cursor: pointer;
     }
 
-    .btn-logout:hover {
-       border: 1px solid #FF0000;
-         color: #FF0000;
-        background: none;
+    .profile-buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 1rem 0;
+        position: relative;
     }
 
-    .btn-logout:active {
-        border: 1px solid #380000;
-         color: #380000;
-        background: none;
+    .follow-btn-custom {
+        all: unset;
+        display: inline-block;
+        font-style: italic;
+        font-weight: 500;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        border-radius: 3px;
+        text-align: center;
+        font-family: inherit;
     }
 
-    /* СЕКЦИЯ ЛЕЙБЛ - Waterway шрифт, 60px, прижат влево */
+    .follow-back-custom {
+        background: transparent;
+        border: 1px solid #990002;
+        color: #990002;
+        padding: 4px 20px;
+        font-size: 15px;
+        letter-spacing: 0.5px;
+        line-height: 1.2;
+    }
+
+    .follow-back-custom:hover {
+        background: rgba(153, 0, 2, 0.05);
+    }
+
+    .follow-already-custom {
+        background: #e0e0e0;
+        border: 1px solid #b0b0b0;
+        color: #555555;
+        padding: 4px 20px;
+        font-size: 15px;
+        letter-spacing: 0.5px;
+        line-height: 1.2;
+        cursor: default;
+        opacity: 0.8;
+    }
+
+    .nav-actions {
+        position: relative;
+    }
+
+    .menu-dots-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        display: flex;
+        border-radius: 50%;
+        transition: background 0.2s;
+        color: #334454;
+        font-size: 1.5rem;
+        line-height: 1;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .menu-dots-btn:hover {
+        background: rgba(207, 223, 255, 0.18);
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        min-width: 180px;
+        display: none;
+        z-index: 100;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 12px 16px;
+        text-align: left;
+        background: none;
+        border: none;
+        font-family: inherit;
+        font-size: 0.85rem;
+        color: #334454;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-decoration: none;
+    }
+
+    .dropdown-item:hover {
+        background: #f8fafc;
+    }
+
+    .dropdown-item.report {
+        color: #dc2626;
+    }
+
+    .dropdown-item.warn-admin {
+        color: #f59e0b;
+    }
+
+    .dropdown-item.ban-admin {
+        color: #ef4444;
+    }
+
+    .dropdown-item.unban-admin {
+        color: #10b981;
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background: #e5e7eb;
+        margin: 6px 0;
+    }
+
+    .dropdown-header {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6b7280;
+        padding: 8px 16px;
+        background: #f9fafb;
+        font-weight: 600;
+    }
+
     .section-label {
         font-family: 'Waterway', sans-serif;
         font-size: 57px;
@@ -252,7 +457,6 @@
         line-height: 1.2;
     }
 
-    /* ЗАГОЛОВОК ПРОСТРАНСТВА - Non Bureau, курсив, 55px, прижат влево */
     .space-title {
         font-family: 'Non Bureau', 'Times New Roman', serif;
         font-weight: 500;
@@ -265,102 +469,70 @@
         line-height: 1.1;
     }
 
-
-
-    /* ОСТАЛЬНЫЕ СТИЛИ ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ */
-    .profile-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        margin: 1rem 0;
-        position: relative;
-    }
-
-
-    .more-menu {
-        position: relative;
-    }
-
-
-    .more-dropdown {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        margin-top: 0.5rem;
-        background: #2a2a2a;
+    .form-impuls-btn {
+        background: white;
+        color: #05026C;
+        border: 3px solid #05026C;
         border-radius: 4px;
-        min-width: 150px;
-        z-index: 100;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    .dropdown-item {
-        display: block;
+        padding: 3px 120px;
+        font-size: 44px;
+        font-weight: 500;
+        font-style: italic;
+        letter-spacing: 1.5px;
+        transition: all 0.2s ease;
+        margin-top: 16px;
+        font-family: inherit;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         width: 100%;
-        padding: 10px 16px;
-        background: none;
-        border: none;
-        color: white;
-        text-align: left;
-        cursor: pointer;
-        font-size: 0.85rem;
-        letter-spacing: 0.05em;
-        transition: background 0.2s ease;
+        box-sizing: border-box;
     }
 
-    .dropdown-item:hover {
-        background: rgba(255,255,255,0.1);
+    .form-impuls-btn .plus {
+        margin-right: 100px;
+        flex-shrink: 0;
     }
 
-    .dropdown-item.report {
-        color: #ff6b6b;
+    .form-impuls-btn .bar-text {
+        flex: 1;
+        text-align: center;
     }
 
     .bio-content {
-    margin: 1rem 0 2rem 0;
-    line-height: 1.6;
-    padding: 0;
-    width: 100%;
-}
-
-/* Стиль, когда есть контент */
-.bio-content:has(p:not(.placeholder-text)) p {
-    font-size: 36px;
-    font-weight: 400;
-    text-transform: uppercase;
-    text-align: left;
-    width: 100%;
-    padding-left: 90px;
-    padding-right: 90px;
-    padding-bottom: 30px;
-    margin: 0;
-    box-sizing: border-box;
-    letter-spacing: 0.02em;
-    line-height: 1.2;
-
-}
-
-/* Стиль для плейсхолдера (когда нет контента) */
-.bio-content .placeholder-text {
-    text-align: center;
-    font-style: italic;
-    font-weight: 300;
-    font-size: 1rem;
-    color: #171A2A;
-    letter-spacing: 0.05em;
-    width: 100%;
-    padding: 20px 0;
-    margin: 0;
-}
-
-/* Адаптив для мобильных */
-@media (max-width: 768px) {
-    .bio-content:has(p:not(.placeholder-text)) p {
-        font-size: 32px;
-        padding-left: 20px;
-        padding-right: 20px;
+        margin: 1rem 0 2rem 0;
+        line-height: 1.6;
+        padding: 0;
+        width: 100%;
     }
-}
+
+    .bio-content:has(p:not(.placeholder-text)) p {
+        font-size: 36px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: left;
+        width: 100%;
+        padding-left: 90px;
+        padding-right: 90px;
+        padding-bottom: 30px;
+        margin: 0;
+        box-sizing: border-box;
+        letter-spacing: 0.02em;
+        line-height: 1.2;
+    }
+
+    .bio-content .placeholder-text {
+        text-align: center;
+        font-style: italic;
+        font-weight: 300;
+        font-size: 1rem;
+        color: #171A2A;
+        letter-spacing: 0.05em;
+        width: 100%;
+        padding: 20px 0;
+        margin: 0;
+    }
 
     .follow-bar {
         text-align: center;
@@ -378,41 +550,61 @@
 
     .no-impulses {
         text-align: center;
-    font-style: italic;
-    font-weight: 300;
-    font-size: 1rem;
-    color: #171A2A;
-    letter-spacing: 0.05em;
-    width: 100%;
-    padding: 40px 0;
-    margin: 0;
+        font-style: italic;
+        font-weight: 300;
+        font-size: 1rem;
+        color: #171A2A;
+        letter-spacing: 0.05em;
+        width: 100%;
+        padding: 40px 0;
+        margin: 0;
     }
 
-
-    .form-impuls-btn {
+    .notification-toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        min-width: 300px;
+        max-width: 400px;
+        background: #ffeded;
+        border-radius: 8px;
+        padding: 16px 20px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        text-decoration: none;
-        box-sizing: border-box;
+        gap: 12px;
+        z-index: 9999;
+        border-left: 4px solid;
+        animation: slideIn 0.3s ease-out;
     }
 
-    .form-impuls-btn .plus {
-        margin-right: 100px;
-        flex-shrink: 0;
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
 
-    .form-impuls-btn .bar-text {
-        flex: 1;
-        text-align: center;
-    }
-    /* =============================================== */
+    .notification-toast.warning { border-left-color: #ffaa66; }
+    .notification-toast.ban { border-left-color: #ff4444; }
 
+    .toast-icon { font-size: 24px; width: 32px; text-align: center; }
+    .toast-content { flex: 1; }
+    .toast-title { font-weight: bold; margin-bottom: 4px; font-size: 14px; }
+    .toast-message { font-size: 12px; opacity: 0.9; }
+    .toast-close { background: none; border: none; font-size: 20px; cursor: pointer; opacity: 0.6; }
+
+    @media (max-width: 768px) {
+        .profile-content { padding-right: 20px; }
+        .space-title { margin: 40px 20px; font-size: 40px; }
+        .bio-content:has(p:not(.placeholder-text)) p { padding-left: 20px; padding-right: 20px; font-size: 24px; }
+        .main-username { font-size: 40px; }
+        .username-tag { font-size: 24px; }
+        .section-label { font-size: 40px; }
+        .form-impuls-btn { padding: 3px 40px; font-size: 28px; }
+        .form-impuls-btn .plus { margin-right: 30px; }
+        .notification-toast { bottom: 20px; right: 20px; left: 20px; max-width: none; }
+    }
 </style>
 
 <script>
-    // Функция получения CSRF-токена из куки
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -428,33 +620,45 @@
         return cookieValue;
     }
 
-    // Объявляем csrftoken ГЛОБАЛЬНО
     const csrftoken = getCookie('csrftoken');
-    console.log('CSRF Token:', csrftoken);  // для отладки — посмотри в консоли
+    let toastTimeout = null;
+
+    function showToast(title, message, type = 'info') {
+        const toast = document.getElementById('notification-toast');
+        const toastTitle = document.getElementById('toast-title');
+        const toastMessage = document.getElementById('toast-message');
+        const toastIcon = document.getElementById('toast-icon');
+
+        toast.classList.remove('warning', 'ban');
+        toast.classList.add(type);
+        toastIcon.textContent = type === 'warning' ? '⚠️' : '🔨';
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+        toast.style.display = 'flex';
+
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            toast.style.display = 'none';
+        }, 5000);
+    }
+
+    function closeToast() {
+        const toast = document.getElementById('notification-toast');
+        toast.style.display = 'none';
+        if (toastTimeout) clearTimeout(toastTimeout);
+    }
 
     // Подписка/отписка
     const followBtn = document.getElementById('follow-btn');
     if (followBtn) {
         followBtn.addEventListener('click', function() {
-            const userId = this.dataset.userId;
             fetch('/api/follow/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': csrftoken
-                },
-                body: `user_id=${userId}`
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
+                body: `user_id=${this.dataset.userId}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'followed') {
-                    followBtn.textContent = 'УБРАТЬ ОРИЕНТИР';
-                } else if (data.status === 'unfollowed') {
-                    followBtn.textContent = 'В ОРИЕНТИРЫ';
-                }
-                location.reload();
-            })
-            .catch(error => console.error('Ошибка подписки:', error));
+            .then(() => location.reload())
+            .catch(error => console.error('Ошибка:', error));
         });
     }
 
@@ -462,24 +666,13 @@
     const muteBtn = document.getElementById('mute-btn');
     if (muteBtn) {
         muteBtn.addEventListener('click', function() {
-            const userId = '{{ profile.id }}';
             fetch('/api/mute/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': csrftoken
-                },
-                body: `user_id=${userId}`
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
+                body: `user_id={{ profile.id }}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'muted') {
-                    muteBtn.textContent = 'РАЗГЛУШИТЬ';
-                } else if (data.status === 'unmuted') {
-                    muteBtn.textContent = 'ЗАГЛУШИТЬ';
-                }
-            })
-            .catch(error => console.error('Ошибка мута:', error));
+            .then(() => location.reload())
+            .catch(error => console.error('Ошибка:', error));
         });
     }
 
@@ -491,33 +684,108 @@
             if (reason) {
                 fetch('/api/report-user/', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRFToken': csrftoken
-                    },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
                     body: `user_id={{ profile.id }}&reason=${encodeURIComponent(reason)}`
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert('Жалоба отправлена');
+                    if (data.status === 'reported') alert('Жалоба отправлена');
+                    else alert('Ошибка: ' + data.error);
                 })
-                .catch(error => console.error('Ошибка жалобы:', error));
+                .catch(error => console.error('Ошибка:', error));
             }
         });
     }
 
-    // Выпадающее меню с тремя точками
+    // Выдать предупреждение (админ)
+    const warnBtn = document.getElementById('warn-btn');
+    if (warnBtn) {
+        warnBtn.addEventListener('click', function() {
+            if (confirm(`Выдать предупреждение @{{ profile.user.username }}?`)) {
+                fetch('/api/warn-user/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
+                    body: `user_id={{ profile.id }}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'warned') {
+                        showToast('ПРЕДУПРЕЖДЕНИЕ', `${data.warnings_count}/3`, 'warning');
+                        if (data.is_banned) showToast('БАН', '3 предупреждения', 'ban');
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                })
+                .catch(error => console.error('Ошибка:', error));
+            }
+        });
+    }
+
+    // Бан (админ)
+    const banBtn = document.getElementById('ban-btn');
+    if (banBtn) {
+        banBtn.addEventListener('click', function() {
+            if (confirm(`Забанить @{{ profile.user.username }}?`)) {
+                fetch('/api/ban-user/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
+                    body: `user_id={{ profile.id }}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'banned') {
+                        showToast('ПОЛЬЗОВАТЕЛЬ ЗАБАНЕН', `@{{ profile.user.username }}`, 'ban');
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                })
+                .catch(error => console.error('Ошибка:', error));
+            }
+        });
+    }
+
+    // Разбан (админ)
+    const unbanBtn = document.getElementById('unban-btn');
+    if (unbanBtn) {
+        unbanBtn.addEventListener('click', function() {
+            if (confirm(`Разбанить @{{ profile.user.username }}?`)) {
+                fetch('/api/unban-user/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
+                    body: `user_id={{ profile.id }}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'unbanned') {
+                        showToast('РАЗБАНЕН', `@{{ profile.user.username }}`, 'warning');
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                })
+                .catch(error => console.error('Ошибка:', error));
+            }
+        });
+    }
+
+    // Меню для чужого профиля
     const moreBtn = document.getElementById('more-menu-btn');
     const moreDropdown = document.getElementById('more-dropdown');
     if (moreBtn) {
-        moreBtn.addEventListener('click', function(e) {
+        moreBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isVisible = moreDropdown.style.display === 'block';
-            moreDropdown.style.display = isVisible ? 'none' : 'block';
+            moreDropdown.classList.toggle('show');
         });
-        document.addEventListener('click', function() {
-            moreDropdown.style.display = 'none';
+        document.addEventListener('click', () => moreDropdown.classList.remove('show'));
+        moreDropdown?.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // Меню для своего профиля
+    const moreBtnSelf = document.getElementById('more-menu-btn-self');
+    const moreDropdownSelf = document.getElementById('more-dropdown-self');
+    if (moreBtnSelf) {
+        moreBtnSelf.addEventListener('click', (e) => {
+            e.stopPropagation();
+            moreDropdownSelf.classList.toggle('show');
         });
+        document.addEventListener('click', () => moreDropdownSelf?.classList.remove('show'));
+        moreDropdownSelf?.addEventListener('click', (e) => e.stopPropagation());
     }
 </script>
 {% endblock %}

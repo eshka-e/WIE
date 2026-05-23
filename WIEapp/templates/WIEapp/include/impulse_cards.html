@@ -1,228 +1,499 @@
 {% load static %}
+{% load micawber_tags %}
 
-{% for impulse in impulses %}
-<div class="impulse-card" data-space="{{ impulse.space.name }}">
-    <div class="impulse-meta">
-        <span class="impulse-space">{{ impulse.space.get_name_display }}</span>
-        <span class="impulse-author">@<a href="{% url 'WIEapp:user_profile' impulse.author.user.username %}">{{ impulse.author.user.username }}</a></span>
-        <span class="impulse-date">{{ impulse.created_at|date:"d.m.Y" }}</span>
-    </div>
+{# Группируем импульсы по типу #}
+{% regroup impulses by space.name as grouped_impulses %}
 
-    <div class="impulse-title">
-        <a href="{% url 'WIEapp:impulse_detail' impulse.id %}">{{ impulse.title|upper }}</a>
-    </div>
+<div class="all-impulses">
+    {% for group in grouped_impulses %}
+        {% if group.grouper == 'vision' %}
+            <!-- СЕКЦИЯ ВИДЕНИЙ - СЕТКА 4 КОЛОНКИ -->
+            <div class="vision-grid-section">
+                {% for impulse in group.list %}
+                    <a href="{% url 'WIEapp:impulse_detail' impulse.id %}" class="impulse-card vision-card {% if not impulse.title %}no-title{% endif %}">
+                        <div class="vision-media">
+                            {% if impulse.image %}
+                                <img src="{{ impulse.image.url }}" alt="{{ impulse.title }}">
+                            {% else %}
+                                <div class="vision-placeholder">[ ИЗОБРАЖЕНИЕ ]</div>
+                            {% endif %}
+                        </div>
+                        {% if impulse.title %}
+                            <div class="vision-title">{{ impulse.title|upper|truncatechars:20|linebreaks }}</div>
+                        {% endif %}
+                    </a>
+                {% endfor %}
+            </div>
 
-    <!-- КОНТЕНТ В ЗАВИСИМОСТИ ОТ ПРОСТРАНСТВА -->
-    {% if impulse.space.name == 'vision' and impulse.image %}
-        <div class="impulse-media">
-            <img src="{{ impulse.image.url }}" alt="{{ impulse.title }}">
+        {% elif group.grouper == 'craft' %}
+            <!-- СЕКЦИЯ РЕМЕСЛА -->
+            <div class="craft-section">
+                {% for impulse in group.list %}
+                    <a href="{% url 'WIEapp:impulse_detail' impulse.id %}" class="impulse-card craft-card-like-nerve">
+                        <!-- ШАПКА -->
+                        <div class="craft-header-like-nerve">
+                            <div class="craft-avatar-like-nerve">
+                                {% if impulse.author.avatar %}
+                                    <img src="{{ impulse.author.avatar.url }}" alt="avatar">
+                                {% else %}
+                                    <img src="{% static 'img/logo-main.png' %}" alt="avatar">
+                                {% endif %}
+                            </div>
+                            <div class="craft-author-info-like-nerve">
+                                <div class="craft-author-name-like-nerve">{{ impulse.author.display_name|default:impulse.author.user.username|upper }}</div>
+                                <div class="craft-date-like-nerve">{{ impulse.created_at|date:"d.m.Y" }}</div>
+                            </div>
+                        </div>
+
+                        <!-- ЗАГОЛОВОК -->
+                        <div class="craft-title-like-nerve">{{ impulse.title|upper }}</div>
+
+                        <!-- ВИДЕО -->
+                        {% if impulse.video_url %}
+                            <div class="video-wrapper">
+                                {{ impulse.video_url|oembed }}
+                            </div>
+                        {% elif impulse.video_file %}
+                            <div class="video-wrapper">
+                                <video controls preload="metadata">
+                                    <source src="{{ impulse.video_file.url }}" type="video/mp4">
+                                </video>
+                            </div>
+                        {% endif %}
+
+                        <!-- ТЕКСТ -->
+                        {% if impulse.content %}
+                            <div class="craft-content-like-nerve">{{ impulse.content|truncatechars:300|linebreaks }}</div>
+                        {% endif %}
+
+                        <!-- РЕАКЦИИ -->
+                        <div class="reactions-group">
+                            <button class="reaction-btn heart-reaction" data-type="heart" data-impulse-id="{{ impulse.id }}">
+                                <img class="reaction-icon heart-icon" src="{% static 'img/🫀.png' %}" alt="heart">
+                                <span class="reaction-count">{{ impulse.heart_count|default:0 }}</span>
+                            </button>
+                            <button class="reaction-btn blast-reaction" data-type="blast" data-impulse-id="{{ impulse.id }}">
+                                <img class="reaction-icon blast-icon" src="{% static 'img/boom.png' %}" alt="blast">
+                                <span class="reaction-count">{{ impulse.blast_count|default:0 }}</span>
+                            </button>
+                        </div>
+
+                        <!-- КОММЕНТАРИИ -->
+                        <div class="craft-comments-like-nerve">
+                            откликов [ {{ impulse.comments.count }} ]
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+
+        {% elif group.grouper == 'nerve' %}
+            <!-- СЕКЦИЯ ЧУТКОСТИ -->
+            <div class="nerve-section">
+                {% for impulse in group.list %}
+                    <a href="{% url 'WIEapp:impulse_detail' impulse.id %}" class="impulse-card nerve-card">
+                        <div class="nerve-header">
+                            <div class="nerve-avatar">
+                                {% if impulse.author.avatar %}
+                                    <img src="{{ impulse.author.avatar.url }}" alt="avatar">
+                                {% else %}
+                                    <img src="{% static 'img/logo-main.png' %}" alt="avatar">
+                                {% endif %}
+                            </div>
+                            <div class="nerve-author-info">
+                                <div class="nerve-author-name">{{ impulse.author.display_name|default:impulse.author.user.username|upper }}</div>
+                                <div class="nerve-date">{{ impulse.created_at|date:"d.m.Y" }}</div>
+                            </div>
+                        </div>
+                        <div class="nerve-title">{{ impulse.title|upper }}</div>
+
+                        {% if impulse.video_url %}
+                            <div class="video-wrapper">
+                                {{ impulse.video_url|oembed }}
+                            </div>
+                        {% endif %}
+
+                        {% if impulse.content %}
+                            <div class="nerve-content">{{ impulse.content|truncatechars:120|linebreaks }}</div>
+                        {% endif %}
+
+                        <div class="reactions-group">
+                            <button class="reaction-btn heart-reaction" data-type="heart" data-impulse-id="{{ impulse.id }}">
+                                <img class="reaction-icon heart-icon" src="{% static 'img/🫀.png' %}" alt="heart">
+                                <span class="reaction-count">{{ impulse.heart_count|default:0 }}</span>
+                            </button>
+                            <button class="reaction-btn blast-reaction" data-type="blast" data-impulse-id="{{ impulse.id }}">
+                                <img class="reaction-icon blast-icon" src="{% static 'img/boom.png' %}" alt="blast">
+                                <span class="reaction-count">{{ impulse.blast_count|default:0 }}</span>
+                            </button>
+                        </div>
+                        <div class="nerve-comments">
+                            откликов [ {{ impulse.comments.count }} ]
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% empty %}
+        <div class="empty-feed">
+            <p>→ НЕТ ИМПУЛЬСОВ</p>
+            <p style="margin-top: 1rem;">БУДЬ ПЕРВЫМ, КТО СОЗДАСТ ИМПУЛЬС</p>
         </div>
-    {% elif impulse.space.name == 'craft' and impulse.video_url %}
-        <div class="impulse-media video-preview" onclick="window.location.href='{% url 'WIEapp:impulse_detail' impulse.id %}'">
-            <img src="https://img.youtube.com/vi/{{ impulse.video_url|slice:'-11:' }}/hqdefault.jpg" alt="video preview">
-            <div class="play-icon">▶</div>
-        </div>
-    {% elif impulse.space.name == 'nerve' %}
-        <div class="impulse-excerpt">
-            {{ impulse.content|truncatechars:200|linebreaks }}
-        </div>
-    {% endif %}
-
-    <!-- ТЕГИ -->
-    {% if impulse.tags.all %}
-    <div class="impulse-tags">
-        {% for tag in impulse.tags.all|slice:":3" %}
-        <span class="tag">#{{ tag.name }}</span>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- СТАТИСТИКА -->
-    <div class="impulse-stats">
-        <div class="stat">💬 {{ impulse.comments.count }} откликов</div>
-        <div class="stat">🫀 {{ impulse.resonances.filter.resonance_type.heart.count }}</div>
-        <div class="stat">💥 {{ impulse.resonances.filter.resonance_type.blast.count }}</div>
-    </div>
-
-    <!-- КНОПКИ ДЕЙСТВИЙ -->
-    <div class="impulse-actions">
-        <button class="action-btn resonate-btn heart-btn" data-impulse-id="{{ impulse.id }}" data-type="heart">
-            🫀 {{ impulse.resonances.filter.resonance_type.heart.count }}
-        </button>
-        <button class="action-btn resonate-btn blast-btn" data-impulse-id="{{ impulse.id }}" data-type="blast">
-            💥 {{ impulse.resonances.filter.resonance_type.blast.count }}
-        </button>
-        <a href="{% url 'WIEapp:impulse_detail' impulse.id %}" class="action-link">ПЕРЕЙТИ</a>
-    </div>
+    {% endfor %}
 </div>
-{% empty %}
-<div class="empty-feed">
-    <p>→ НЕТ ИМПУЛЬСОВ</p>
-    <p style="margin-top: 1rem;">БУДЬ ПЕРВЫМ, КТО СОЗДАСТ ИМПУЛЬС</p>
-</div>
-{% endfor %}
 
 <style>
-    .impulse-card {
-        border: 1px solid #eef2f8;
-        background: #ffffff;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        transition: all 0.2s;
-    }
-
-    .impulse-card:hover {
-        border-color: #e03a3a;
-    }
-
-    .impulse-meta {
-        font-size: 0.7rem;
-        color: #8a9cb0;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 1rem;
+    /* ===== REACTIONS ===== */
+    .reactions-group {
         display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 12px;
     }
 
-    .impulse-space {
-        color: #e03a3a;
-        font-weight: bold;
+    .reaction-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        font-family: inherit;
     }
 
-    .impulse-author a {
-        color: #1a2c3e;
-        text-decoration: none;
+    .reaction-btn:hover {
+        background: #CFDFFF;
     }
 
-    .impulse-author a:hover {
-        color: #e03a3a;
+    .reaction-btn.active {
+        background: #7B90CA;
     }
 
-    .impulse-title {
-        font-size: 1.2rem;
-        font-weight: normal;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.8rem;
+    .reaction-btn.active .reaction-count {
+        color: white;
     }
 
-    .impulse-title a {
-        color: #1a2c3e;
-        text-decoration: none;
-    }
-
-    .impulse-title a:hover {
-        color: #e03a3a;
-    }
-
-    .impulse-media {
-        margin: 1rem 0;
-        background: #f8fafc;
-        border-radius: 4px;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .impulse-media img {
-        width: 100%;
-        height: auto;
+    .reaction-icon {
+        height: 25px;
+        width: 25px;
         display: block;
     }
 
-    .video-preview {
-        position: relative;
-        cursor: pointer;
+    .blast-icon {
+        height: 30px;
+        width: 30px;
     }
 
-    .play-icon {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 48px;
-        height: 48px;
-        background: rgba(0, 0, 0, 0.7);
-        border-radius: 50%;
+    .reaction-count {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #334454;
+    }
+
+    /* ===== ОБЩИЕ СТИЛИ ===== */
+    .impulse-card {
+        text-decoration: none;
+        display: block;
+        background: #ffffff;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+    }
+
+    /* ===== ВИДЕО ОБЕРТКА ===== */
+    .video-wrapper {
+        width: 100%;
+        margin: 12px 0;
+        position: relative;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .video-wrapper iframe,
+    .video-wrapper video {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        display: block;
+        border: none;
+    }
+
+    /* ===== ВИДЕНИЯ ===== */
+    .vision-grid-section {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (min-width: 1400px) {
+        .vision-grid-section { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (min-width: 1024px) and (max-width: 1399px) {
+        .vision-grid-section { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .vision-grid-section { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 767px) {
+        .vision-grid-section { grid-template-columns: 1fr; }
+    }
+
+    .vision-card {
+        width: 100%;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .vision-card:hover {
+        background: #E6E8FF;
+    }
+
+    .vision-card.no-title {
+        padding: 5px;
+        height: 100%;
+    }
+
+    .vision-card.no-title .vision-media {
+        width: 100%;
+        height: 100%;
+        flex: 1;
+        display: flex;
+    }
+
+    .vision-card:not(.no-title) .vision-media {
+        aspect-ratio: 250 / 400;
+    }
+
+    .vision-media {
+        width: 100%;
+        background: #f0f4fa;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #e03a3a;
-        font-size: 1.5rem;
-        pointer-events: none;
+        overflow: hidden;
+        border-radius: 3px;
     }
 
-    .impulse-excerpt {
-        font-size: 0.9rem;
-        line-height: 1.4;
-        color: #334454;
-        margin: 1rem 0;
+    .vision-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
-    .impulse-tags {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        margin: 1rem 0;
-    }
-
-    .tag {
-        font-size: 0.65rem;
+    .vision-placeholder {
         color: #8a9cb0;
-        background: #f0f4fa;
-        padding: 0.2rem 0.6rem;
-        border-radius: 20px;
+        font-size: 0.8rem;
         text-transform: uppercase;
     }
 
-    .impulse-stats {
-        display: flex;
-        gap: 1rem;
-        margin: 1rem 0;
-        font-size: 0.7rem;
-        color: #8a9cb0;
-    }
-
-    .impulse-actions {
-        display: flex;
-        gap: 1rem;
-        border-top: 1px solid #eef2f8;
-        padding-top: 1rem;
-        margin-top: 0.5rem;
-    }
-
-    .action-btn {
-        background: transparent;
-        border: none;
-        color: #8a9cb0;
-        font-family: inherit;
-        font-size: 0.7rem;
+    .vision-title {
+        font-size: 27px;
+        font-weight: normal;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        cursor: pointer;
-        padding: 0.3rem 0;
+        color: #171A2A;
+        padding: 0 5px;
+        text-align: left;
+        width: 100%;
+        margin-top: 4px;
+        line-height: 1.2;
     }
 
-    .action-btn:hover {
-        color: #e03a3a;
+    @media (max-width: 767px) {
+        .vision-title {
+            font-size: 20px;
+        }
     }
 
-    .action-link {
-        background: transparent;
-        border: none;
-        color: #8a9cb0;
-        font-family: inherit;
-        font-size: 0.7rem;
+    /* ===== РЕМЕСЛО ===== */
+    .craft-card-like-nerve {
+        width: 100%;
+        padding: 25px;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    @media (max-width: 767px) {
+        .craft-card-like-nerve {
+            padding: 25px 12px;
+        }
+    }
+
+    .craft-card-like-nerve:hover {
+        background: #E6E8FF;
+    }
+
+    .craft-header-like-nerve {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .craft-avatar-like-nerve img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .craft-author-name-like-nerve {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #171A2A;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        cursor: pointer;
-        text-decoration: none;
-        padding: 0.3rem 0;
     }
 
-    .action-link:hover {
-        color: #e03a3a;
+    @media (max-width: 767px) {
+        .craft-author-name-like-nerve {
+            font-size: 0.85rem;
+        }
+    }
+
+    .craft-date-like-nerve {
+        font-size: 0.7rem;
+        color: #171A2A;
+    }
+
+    .craft-title-like-nerve {
+        font-size: 36px;
+        font-weight: 600;
+        color: #171A2A;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        text-align: left;
+    }
+
+    @media (max-width: 1023px) {
+        .craft-title-like-nerve {
+            font-size: 28px;
+        }
+    }
+
+    .craft-content-like-nerve {
+        font-size: 24px;
+        font-weight: 300;
+        color: #808080;
+        line-height: 1.3;
+        margin-left: 15px;
+        margin-bottom: 12px;
+        text-align: left;
+    }
+
+    @media (max-width: 1023px) {
+        .craft-content-like-nerve {
+            font-size: 20px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .craft-content-like-nerve {
+            font-size: 16px;
+            margin-left: 8px;
+        }
+    }
+
+    .craft-comments-like-nerve {
+        font-size: 25px;
+        font-weight: 500;
+        color: #05026C;
+        text-align: left;
+        width: 100%;
+    }
+
+    /* ===== ЧУТКОСТЬ ===== */
+    .nerve-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .nerve-card {
+        width: 100%;
+        padding: 25px;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    @media (max-width: 767px) {
+        .nerve-card {
+            padding: 25px 12px;
+        }
+    }
+
+    .nerve-card:hover {
+        background: #E6E8FF;
+    }
+
+    .nerve-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .nerve-avatar img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .nerve-author-name {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #171A2A;
+        text-transform: uppercase;
+    }
+
+    .nerve-date {
+        font-size: 0.7rem;
+        color: #171A2A;
+    }
+
+    .nerve-title {
+        font-size: 36px;
+        font-weight: 600;
+        color: #171A2A;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        text-align: left;
+    }
+
+    @media (max-width: 1023px) {
+        .nerve-title {
+            font-size: 28px;
+        }
+    }
+
+    .nerve-content {
+        font-size: 24px;
+        font-weight: 300;
+        color: #808080;
+        line-height: 1.3;
+        margin-left: 15px;
+        margin-bottom: 12px;
+        text-align: left;
+    }
+
+    @media (max-width: 1023px) {
+        .nerve-content {
+            font-size: 20px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .nerve-content {
+            font-size: 16px;
+            margin-left: 8px;
+        }
+    }
+
+    .nerve-comments {
+        font-size: 25px;
+        font-weight: 500;
+        color: #05026C;
+        text-align: left;
+        width: 100%;
     }
 
     .empty-feed {
@@ -232,3 +503,63 @@
         border: 1px dashed #eef2f8;
     }
 </style>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    document.querySelectorAll('.reaction-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const impulseId = this.dataset.impulseId;
+            const type = this.dataset.type;
+
+            fetch('/api/resonate/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrftoken
+                },
+                body: `impulse_id=${impulseId}&resonance_type=${type}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                const card = this.closest('.impulse-card');
+                if (type === 'heart') {
+                    const heartCount = card.querySelector('.heart-reaction .reaction-count');
+                    if (heartCount) heartCount.innerText = data.heart_count;
+                } else {
+                    const blastCount = card.querySelector('.blast-reaction .reaction-count');
+                    if (blastCount) blastCount.innerText = data.blast_count;
+                }
+
+                // Обновляем активное состояние кнопки
+                if (type === 'heart' && data.user_heart !== undefined) {
+                    if (data.user_heart) this.classList.add('active');
+                    else this.classList.remove('active');
+                }
+                if (type === 'blast' && data.user_blast !== undefined) {
+                    if (data.user_blast) this.classList.add('active');
+                    else this.classList.remove('active');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+</script>

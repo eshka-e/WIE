@@ -1,122 +1,203 @@
-{% extends 'base.html' %}
 {% load static %}
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>whoise</title>
+    <link rel="stylesheet" href="{% static 'css/er.css' %}">
+</head>
 {% block content %}
 <div class="follow-container">
     <div class="follow-header">
-        <h1>СЛЕДОВАТЕЛИ</h1>
-        <a href="{% url 'WIEapp:profile' %}" class="back-link">← НАЗАД</a>
+        <a href="{% if target_profile and target_profile != user.profile %}{% url 'WIEapp:user_profile' target_profile.user.username %}{% else %}{% url 'WIEapp:profile' %}{% endif %}">
+            <img class="back-link" src="{% static 'img/back.png' %}" alt="avatar">
+        </a>
+        <h1>
+            ПОСЛЕДОВАТЕЛИ
+            {% if target_profile and target_profile != user.profile %}
+                @{{ target_profile.user.username }}
+            {% endif %}
+        </h1>
     </div>
 
-    {% if followers %}
+    {% if profiles %}
         <div class="follow-list">
-            {% for follower in followers %}
+            {% for profile in profiles %}
             <div class="follow-card">
                 <div class="follow-avatar">
-                    {% if follower.avatar %}
-                        <img src="{{ follower.avatar.url }}" alt="avatar">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="avatar">
                     {% else %}
                         <img src="{% static 'img/logo-main.png' %}" alt="avatar">
                     {% endif %}
                 </div>
                 <div class="follow-info">
-                    <a href="{% url 'WIEapp:user_profile' follower.user.username %}" class="follow-name">
-                        {{ follower.display_name|default:follower.user.username|upper }}
+                    <a href="{% url 'WIEapp:user_profile' profile.user.username %}" class="follow-name">
+                        {{ profile.display_name|default:profile.user.username|upper }}
                     </a>
-                    <span class="follow-username">@{{ follower.user.username }}</span>
+                    <span class="follow-username">@{{ profile.user.username }}</span>
                 </div>
                 <div class="follow-actions">
-                    <button class="follow-back-btn" data-user-id="{{ follower.id }}">В ОРИЕНТИРЫ</button>
+                    {% if profile.user == user %}
+                        {# Это мы сами — не показываем кнопку #}
+                    {% elif profile.id in user_following_ids %}
+                        <button class="follow-already-btn" disabled>У ВАС В ОРИЕНТИРАХ</button>
+                    {% else %}
+                        <button class="follow-back-btn" data-user-id="{{ profile.id }}">+ В ОРИЕНТИРЫ</button>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
     {% else %}
         <div class="empty-follow">
-            <p>→ НЕТ СЛЕДОВАТЕЛЕЙ</p>
+            <p>→ НЕТ ПОСЛЕДОВАТЕЛЕЙ</p>
         </div>
     {% endif %}
 </div>
 
 <style>
-    /* те же стили, что в landmarks.html */
     .follow-container {
         max-width: 700px;
         margin: 0 auto;
         padding: 2rem;
+        font-family: 'Non Bureau', sans-serif;
     }
 
     .follow-header {
         display: flex;
-        justify-content: space-between;
-        align-items: baseline;
+        align-items: center;
+        gap: 40px;
         margin-bottom: 2rem;
-        border-left: 4px solid #e03a3a;
-        padding-left: 1.5rem;
-    }
-
-    .follow-header h1 {
-        font-size: 1.8rem;
-        font-weight: normal;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
+        justify-content: flex-start;
     }
 
     .back-link {
-        color: #8a9cb0;
+        height: 36px;
+        width: auto;
         text-decoration: none;
+        display: block;
+    }
+
+    .follow-header h1 {
+        font-size: 2.2rem;
+        font-style: italic;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #171A2A;
+        margin: 0;
+        line-height: 1.2;
     }
 
     .follow-list {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.25rem;
     }
 
     .follow-card {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 1.2rem;
         padding: 1rem;
-        border: 1px solid #eef2f8;
+        background: #FFFFFF;
+        border-bottom: 1px solid #eef2f8;
     }
 
     .follow-avatar img {
-        width: 50px;
-        height: 50px;
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
         object-fit: cover;
     }
 
     .follow-info {
         flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 
     .follow-name {
-        font-weight: bold;
+        font-weight: 700;
+        font-size: 30px;
+        color: #171A2A;
         text-decoration: none;
-        color: #1a2c3e;
+        line-height: 1.2;
     }
 
     .follow-username {
-        font-size: 0.8rem;
-        color: #8a9cb0;
-        margin-left: 0.5rem;
+        font-size: 15px;
+        font-weight: 400;
+        color: #171A2A;
+        opacity: 0.75;
     }
 
     .follow-back-btn {
         background: transparent;
-        border: 1px solid #e03a3a;
-        color: #e03a3a;
-        padding: 0.3rem 1rem;
-        font-size: 0.7rem;
+        border: 1px solid #990002;
+        font-style: italic;
+        color: #990002;
+        padding: 0.3rem 1.2rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
         cursor: pointer;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .follow-back-btn:hover {
+        background: #99000210;
+    }
+
+    .follow-already-btn {
+        background: #e0e0e0;
+        border: 1px solid #b0b0b0;
+        font-style: italic;
+        color: #555555;
+        padding: 0.3rem 1.2rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        border-radius: 3px;
+        white-space: nowrap;
+        cursor: default;
     }
 
     .empty-follow {
         text-align: center;
         padding: 3rem;
         color: #b4c4d4;
+    }
+
+    @media (max-width: 550px) {
+        .follow-container {
+            padding: 1.25rem;
+        }
+        .follow-header {
+            gap: 20px;
+        }
+        .follow-header h1 {
+            font-size: 1.4rem;
+        }
+        .follow-name {
+            font-size: 24px;
+        }
+        .follow-username {
+            font-size: 13px;
+        }
+        .follow-avatar img {
+            width: 55px;
+            height: 55px;
+        }
+        .follow-back-btn, .follow-already-btn {
+            padding: 0.3rem 0.9rem;
+        }
     }
 </style>
 
@@ -152,7 +233,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'followed') {
-                    this.textContent = 'УБРАТЬ ОРИЕНТИР';
                     location.reload();
                 }
             });

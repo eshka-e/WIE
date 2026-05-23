@@ -1,0 +1,511 @@
+{% load static %}
+
+<div class="comment" id="comment-{{ comment.id }}">
+    <div class="comment-header">
+        <div class="comment-author-info">
+            <a href="{% url 'WIEapp:user_profile' comment.author.user.username %}" class="comment-author-name">
+                {{ comment.author.display_name|default:comment.author.user.username|upper }}
+            </a>
+            <div class="comment-date">{{ comment.created_at|date:"d.m.Y" }} в {{ comment.created_at|date:"H:i" }}</div>
+        </div>
+
+        <!-- МЕНЮ С ТРЕМЯ ТОЧКАМИ -->
+        {% if user.is_authenticated %}
+            {% if user.profile == comment.author or user.profile == impulse.author or user.is_superuser %}
+            <div class="comment-menu">
+                <button class="comment-menu-btn">⋯</button>
+                <div class="comment-dropdown" style="display: none;">
+                    {% if user.profile == comment.author %}
+                        <button class="edit-comment-btn" data-comment-id="{{ comment.id }}">РЕДАКТИРОВАТЬ</button>
+                        <button class="delete-comment-btn" data-comment-id="{{ comment.id }}">УДАЛИТЬ</button>
+                    {% endif %}
+                    {% if user.profile == impulse.author or user.is_superuser %}
+                        <button class="delete-comment-btn" data-comment-id="{{ comment.id }}">УДАЛИТЬ (как автор импульса)</button>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <button class="warn-user-btn" data-user-id="{{ comment.author.id }}">ВЫДАТЬ ПРЕДУПРЕЖДЕНИЕ</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="comment-content">{{ comment.content|linebreaks }}</div>
+
+    <div class="comment-actions">
+        <button class="reply-toggle" data-comment-id="{{ comment.id }}">ОТКЛИКНУТЬСЯ</button>
+    </div>
+
+    <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
+        <textarea rows="3" placeholder="Ваш ответ..." class="reply-textarea"></textarea>
+        <button class="submit-reply" data-parent-id="{{ comment.id }}">ОТПРАВИТЬ</button>
+    </div>
+
+    <!-- РЕКУРСИВНЫЙ ВЫЗОВ -->
+    {% if comment.replies.all %}
+    <div class="replies">
+        {% for reply in comment.replies.all %}
+            {% include 'WIEapp/include/comment_tree.html' with comment=reply %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .comment {
+        margin-bottom: 25px; /* Увеличено с 20px до 25px */
+        padding-bottom: 0;
+    }
+
+    /* Отступ между родительскими комментариями */
+    .comment:not(.replies .comment) {
+        margin-bottom: 25px;
+    }
+
+    /* Для комментариев внутри дерева ответов */
+    .replies .comment {
+        margin-bottom: 15px; /* 15px между ответами внутри ветки */
+        margin-top: 15px;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    /* Убираем лишний margin у последнего комментария в ветке */
+    .replies .comment:last-child {
+        margin-bottom: 0;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        padding-left: 0;
+    }
+
+    .comment-author-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        align-items: flex-start;
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .comment-author-name {
+        font-size: 28px;
+        font-weight: bold;
+        color: #171A2A;
+        text-transform: uppercase;
+        text-decoration: none;
+        text-align: left;
+    }
+
+    .comment-author-name:hover {
+        color: #03009f;
+    }
+
+    .comment-date {
+        font-size: 15px;
+        color: #171A2A;
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    .comment-menu {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .comment-menu-btn {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #8a9cb0;
+        padding: 0 0.5rem;
+    }
+
+    .comment-menu-btn:hover {
+        color: #171A2A;
+    }
+
+    .comment-dropdown {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background: white;
+        border: 1px solid #eef2f8;
+        border-radius: 8px;
+        min-width: 200px;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .comment-dropdown button {
+        display: block;
+        width: 100%;
+        padding: 10px 16px;
+        background: none;
+        border: none;
+        text-align: left;
+        font-size: 0.75rem;
+        cursor: pointer;
+        color: #171A2A;
+        transition: background 0.2s;
+    }
+
+    .comment-dropdown button:hover {
+        background: #f8fafc;
+    }
+
+    .comment-dropdown button:first-child {
+        border-radius: 8px 8px 0 0;
+    }
+
+    .comment-dropdown button:last-child {
+        border-radius: 0 0 8px 8px;
+    }
+
+    .comment-content {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: #334454;
+        margin: 0.5rem 0;
+        padding-left: 30px;
+        text-align: start;
+    }
+
+    .comment-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        font-size: 0.75rem;
+        padding-left: 30px;
+    }
+
+    .reply-toggle {
+        background: none;
+        border: none;
+        color: #05026C;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .reply-toggle:hover {
+        color: #000000;
+    }
+
+    /* Контейнер для всех ответов */
+    .replies {
+        margin-left: 1.5rem;
+        padding-left: 1rem;
+        margin-top: 10px; /* Небольшой отступ сверху для контейнера ответов */
+    }
+
+    /* Дополнительный отступ для веток ответов второго уровня */
+    .replies .replies {
+        margin-top: 5px;
+    }
+
+    .reply-form {
+        margin-top: 0.5rem;
+        margin-left: 30px;
+    }
+
+    .reply-form textarea {
+        width: 100%;
+        font-size: 24px;
+        font-style: italic;
+        font-weight: 300;
+        color: #1a2c3e;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #d0d8e0;
+        padding: 12px 0 8px 0;
+        outline: none;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+
+    .reply-form textarea:focus {
+        border-bottom-color: #05026C;
+    }
+
+    .submit-reply {
+        background: #171A2A;
+        color: white;
+        border: none;
+        padding: 3px 120px;
+        font-size: 36px;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: 1.5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 16px;
+        font-family: inherit;
+    }
+
+    .submit-reply:hover {
+        background: #251111;
+        transform: scale(0.98);
+    }
+
+    .submit-reply:active {
+        background: #140000;
+    }
+
+    /* Разделительная линия между родительскими комментариями (опционально) */
+    .comment:not(.replies .comment) {
+        border-bottom: 1px solid #eef2f8;
+        padding-bottom: 25px;
+    }
+
+    /* Убираем линию у последнего комментария */
+    .comment:not(.replies .comment):last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    /* Для ответов убираем разделительные линии */
+    .replies .comment {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+</style>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    function getBasePath() {
+        const path = window.location.pathname;
+        if (path.startsWith('/wie/')) {
+            return '/wie';
+        }
+        return '';
+    }
+
+    const BASE_PATH = getBasePath();
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    window.initializeCommentHandlers = function(container) {
+        // Меню с тремя точками
+        container.querySelectorAll('.comment-menu-btn').forEach(btn => {
+            if (btn.hasListener) return;
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const dropdown = this.nextElementSibling;
+                document.querySelectorAll('.comment-dropdown').forEach(d => {
+                    if (d !== dropdown) d.style.display = 'none';
+                });
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+            btn.hasListener = true;
+        });
+
+        // Кнопки "ОТКЛИКНУТЬСЯ"
+        container.querySelectorAll('.reply-toggle').forEach(btn => {
+            if (btn.hasListener) return;
+            btn.addEventListener('click', function() {
+                const commentId = this.dataset.commentId;
+                const replyForm = document.getElementById(`reply-form-${commentId}`);
+                if (replyForm) {
+                    document.querySelectorAll('.reply-form').forEach(form => {
+                        if (form.id !== `reply-form-${commentId}`) {
+                            form.style.display = 'none';
+                        }
+                    });
+                    replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+            btn.hasListener = true;
+        });
+
+        // Отправка ответов - теперь ищем .submit-reply
+        container.querySelectorAll('.submit-reply').forEach(btn => {
+            if (btn.hasListener) return;
+            btn.addEventListener('click', async function() {
+                const parentId = this.dataset.parentId;
+                const replyFormDiv = document.getElementById(`reply-form-${parentId}`);
+                const textarea = replyFormDiv.querySelector('.reply-textarea');
+                const content = textarea.value.trim();
+
+                if (!content) {
+                    alert('Введите текст ответа');
+                    return;
+                }
+
+                const originalText = btn.textContent;
+                btn.textContent = 'ОТПРАВКА...';
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch(`${BASE_PATH}/add-reply-ajax/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: `parent_id=${parentId}&content=${encodeURIComponent(content)}`
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        textarea.value = '';
+                        replyFormDiv.style.display = 'none';
+
+                        const authorName = data.author_name || data.author_username;
+
+                        const newCommentHtml = `
+                            <div class="comment" id="comment-${data.comment_id}">
+                                <div class="comment-header">
+                                    <div class="comment-author-info">
+                                        <a href="${BASE_PATH}/profile/${data.author_username}/" class="comment-author-name">${escapeHtml(authorName).toUpperCase()}</a>
+                                        <div class="comment-date">${data.created_at}</div>
+                                    </div>
+                                    <div class="comment-menu">
+                                        <button class="comment-menu-btn">⋯</button>
+                                        <div class="comment-dropdown" style="display: none;">
+                                            <button class="delete-comment-btn" data-comment-id="${data.comment_id}">УДАЛИТЬ</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="comment-content">${escapeHtml(data.content).replace(/\n/g, '<br>')}</div>
+                                <div class="comment-actions">
+                                    <button class="reply-toggle" data-comment-id="${data.comment_id}">ОТКЛИКНУТЬСЯ</button>
+                                </div>
+                                <div class="reply-form" id="reply-form-${data.comment_id}" style="display: none;">
+                                    <textarea rows="3" placeholder="Ваш ответ..." class="reply-textarea"></textarea>
+                                    <button class="submit-reply" data-parent-id="${data.comment_id}">ОТПРАВИТЬ</button>
+                                </div>
+                            </div>
+                        `;
+
+                        const parentComment = document.getElementById(`comment-${parentId}`);
+                        let repliesContainer = parentComment.querySelector('.replies');
+
+                        if (!repliesContainer) {
+                            repliesContainer = document.createElement('div');
+                            repliesContainer.className = 'replies';
+                            parentComment.appendChild(repliesContainer);
+                        }
+
+                        repliesContainer.insertAdjacentHTML('beforeend', newCommentHtml);
+                        const newComment = repliesContainer.lastElementChild;
+                        window.initializeCommentHandlers(newComment);
+                    } else {
+                        alert('Ошибка: ' + (data.error || 'Не удалось отправить ответ'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Произошла ошибка при отправке');
+                } finally {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            });
+            btn.hasListener = true;
+        });
+
+        // Удаление комментариев
+        container.querySelectorAll('.delete-comment-btn').forEach(btn => {
+            if (btn.hasListener) return;
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const commentId = this.dataset.commentId;
+                if (confirm('Удалить комментарий?')) {
+                    fetch(`${BASE_PATH}/delete-comment/${commentId}/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrftoken }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const commentElement = document.getElementById(`comment-${commentId}`);
+                            if (commentElement) commentElement.remove();
+                        } else {
+                            alert('Ошибка при удалении');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Произошла ошибка при удалении');
+                    });
+                }
+            });
+            btn.hasListener = true;
+        });
+
+        // Выдача предупреждения
+        container.querySelectorAll('.warn-user-btn').forEach(btn => {
+            if (btn.hasListener) return;
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const userId = this.dataset.userId;
+                if (confirm('Выдать предупреждение пользователю?')) {
+                    fetch(`${BASE_PATH}/warn-user/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: `user_id=${userId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'warned') {
+                            alert(`⚠️ Предупреждение выдано. У пользователя ${data.warnings_count}/3 предупреждений.`);
+                            if (data.is_banned) alert('🚫 Пользователь заблокирован!');
+                            const dropdown = btn.closest('.comment-dropdown');
+                            if (dropdown) dropdown.style.display = 'none';
+                        } else {
+                            alert('Ошибка: ' + (data.error || 'Не удалось выдать предупреждение'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Произошла ошибка');
+                    });
+                }
+            });
+            btn.hasListener = true;
+        });
+    };
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.comment-menu')) {
+            document.querySelectorAll('.comment-dropdown').forEach(d => d.style.display = 'none');
+        }
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => window.initializeCommentHandlers(document));
+    } else {
+        window.initializeCommentHandlers(document);
+    }
+</script>

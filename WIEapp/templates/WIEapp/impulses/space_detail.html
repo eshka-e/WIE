@@ -4,19 +4,19 @@
 {% block content %}
 <div class="stream-container">
     <div class="stream-header">
-        <h1>{{ current_space.get_name_display }}</h1>
-        <a href="{% url 'WIEapp:create_impulse' %}" class="create-btn">+ НОВЫЙ ИМПУЛЬС</a>
+        <h2 class="space-title">{{ current_space.get_name_display }}</h2>
     </div>
 
+    <!-- ФИКСИРОВАННАЯ ПЛАШКА С ДВУМЯ РЕЖИМАМИ -->
+    <div class="stream-mode-bar">
+        <button class="mode-btn {% if mode == 'all' %}active{% endif %}" data-mode="all">ОБЩЕЕ</button>
+        <button class="mode-btn {% if mode == 'followed' %}active{% endif %}" data-mode="followed">МОИ ОРИЕНТИРЫ</button>
+    </div>
+
+    <!-- ЛЕНТА ИМПУЛЬСОВ -->
     <div class="impulses-list" id="impulses-list">
-        {% include 'WIEapp/include/impulse_cards.html' with impulses=impulses %}
+        {% include 'WIEapp/include/impulse_cards.html' with impulses=impulses has_next=has_next %}
     </div>
-
-    {% if impulses.has_next %}
-    <div class="loading-trigger" data-next-page="{{ impulses.next_page_number }}" style="text-align: center; padding: 2rem;">
-        <span class="loader">ЗАГРУЗКА...</span>
-    </div>
-    {% endif %}
 </div>
 
 <style>
@@ -31,28 +31,43 @@
         justify-content: space-between;
         align-items: baseline;
         margin-bottom: 2rem;
-        border-left: 4px solid #e03a3a;
-        padding-left: 1.5rem;
     }
 
-    .stream-header h1 {
-        font-size: 2rem;
-        font-weight: normal;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #1a2c3e;
+    .stream-mode-bar {
+        position: sticky;
+        top: 10px;
+        background: rgba(255, 255, 255, 0.62);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(15px);
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        padding: 0.3rem 1rem;
+        margin-bottom: 2rem;
+        border-radius: 4px;
+        z-index: 10;
     }
 
-    .create-btn {
+    .mode-btn {
         background: transparent;
-        border: 1px solid #e03a3a;
-        color: #e03a3a;
-        padding: 0.5rem 1rem;
-        font-family: inherit;
-        font-size: 0.7rem;
+        border: none;
+        font-family: 'Non Bureau', monospace;
+        font-size: 28px;
+        font-weight: 400;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
-        text-decoration: none;
+        color: #171a2a;
+        cursor: pointer;
+        padding: 0.2rem 0;
         transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+        color: #05026c;
+    }
+
+    .mode-btn:hover {
+        color: #03009f;
     }
 
     .loader {
@@ -61,5 +76,169 @@
         text-transform: uppercase;
         letter-spacing: 0.1em;
     }
+
+    @media (max-width: 768px) {
+        .stream-container {
+            padding: 1rem;
+        }
+        .mode-btn {
+            font-size: 18px;
+        }
+        .stream-mode-bar {
+            gap: 1rem;
+            padding: 0.2rem 0.5rem;
+        }
+    }
 </style>
+
+<script>
+    // CSRF-токен уже объявлен в base.html
+    let currentMode = '{{ mode|default:"all" }}';
+    let hasMore = {{ has_next|lower }};
+    let loading = false;
+    let nextPage = null;
+    let loaderElement = null;
+
+    // Резонансы
+    function attachResonanceListeners() {
+        document.querySelectorAll('.reaction-btn').forEach(btn => {
+            btn.removeEventListener('click', resonanceHandler);
+            btn.addEventListener('click', resonanceHandler);
+        });
+    }
+
+    function resonanceHandler(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const btn = e.currentTarget;
+        const impulseId = btn.dataset.impulseId;
+        const type = btn.dataset.type;
+
+        fetch('/api/resonate/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken
+            },
+            credentials: 'same-origin',
+            body: `impulse_id=${impulseId}&resonance_type=${type}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            const card = btn.closest('.impulse-card');
+            if (type === 'heart') {
+                const heartCount = card.querySelector('.heart-reaction .reaction-count');
+                if (heartCount) heartCount.innerText = data.heart_count;
+                if (data.user_heart !== undefined) {
+                    if (data.user_heart) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                }
+            } else {
+                const blastCount = card.querySelector('.blast-reaction .reaction-count');
+                if (blastCount) blastCount.innerText = data.blast_count;
+                if (data.user_blast !== undefined) {
+                    if (data.user_blast) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                }
+            }
+        })
+        .catch(error => console.error('Ошибка резонанса:', error));
+    }
+
+    // Переключение режимов
+    function initModeSwitcher() {
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        const impulsesList = document.getElementById('impulses-list');
+
+        if (modeBtns.length === 0) return;
+
+        modeBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const mode = this.dataset.mode;
+                const spaceName = '{{ current_space.name }}';
+                currentMode = mode;
+                hasMore = true;
+                nextPage = null;
+
+                modeBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                fetch(`/space/${spaceName}/?mode=${mode}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    impulsesList.innerHTML = html;
+                    attachResonanceListeners();
+                    initInfiniteScroll();
+                })
+                .catch(error => console.error('Ошибка переключения:', error));
+            });
+        });
+    }
+
+    // Бесконечный скролл
+    function initInfiniteScroll() {
+        const trigger = document.querySelector('.loading-trigger');
+        if (trigger && hasMore) {
+            nextPage = trigger.dataset.nextPage || null;
+            loaderElement = trigger;
+        } else {
+            nextPage = null;
+            loaderElement = null;
+            hasMore = false;
+        }
+        loading = false;
+    }
+
+    function loadMore() {
+        if (loading || !hasMore || !nextPage) return;
+
+        loading = true;
+        if (loaderElement) loaderElement.style.display = 'block';
+
+        const spaceName = '{{ current_space.name }}';
+
+        fetch(`/space/${spaceName}/?mode=${currentMode}&page=${nextPage}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const impulsesList = document.getElementById('impulses-list');
+            impulsesList.insertAdjacentHTML('beforeend', html);
+
+            const newTrigger = document.querySelector('.loading-trigger');
+            if (newTrigger && newTrigger.dataset.nextPage) {
+                nextPage = newTrigger.dataset.nextPage;
+                if (loaderElement) loaderElement.dataset.nextPage = nextPage;
+                hasMore = true;
+            } else {
+                hasMore = false;
+                if (loaderElement) loaderElement.remove();
+            }
+
+            attachResonanceListeners();
+            loading = false;
+            if (loaderElement) loaderElement.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки:', error);
+            loading = false;
+        });
+    }
+
+    function handleScroll() {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+            loadMore();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        attachResonanceListeners();
+        initModeSwitcher();
+        initInfiniteScroll();
+        window.addEventListener('scroll', handleScroll);
+    });
+</script>
 {% endblock %}
