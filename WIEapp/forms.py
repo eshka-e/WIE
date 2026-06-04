@@ -3,7 +3,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm, UserCreationForm
-from .models import Impulse, Comment, Profile, Tag, Space
+from .models import Impulse, Comment, Profile, Space
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -70,9 +70,6 @@ class ImpulseForm(forms.ModelForm):
         self.fields['video_url'].required = False
         self.fields['space'].required = True
 
-        if self.instance and self.instance.pk:
-            existing_tags = ', '.join([tag.name for tag in self.instance.tags.all()])
-            self.fields['tags'].initial = existing_tags
 
     def clean(self):
         cleaned_data = super().clean()

@@ -13,7 +13,7 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Profile, Impulse, Tag, Comment, Resonance, Landmark, Notification, Space, Report, Warning
+from .models import Profile, Impulse,  Comment, Resonance, Landmark, Notification, Space, Report, Warning
 from .forms import ImpulseForm, CommentForm, ProfileForm, SearchForm, CustomUserCreationForm
 from .utils import generate_verification_token, send_verification_email
 from .models import UserQuestion
@@ -181,7 +181,7 @@ def stream_view(request):
 
     impulses = Impulse.objects.exclude(author_id__in=muted_users).select_related(
         'author__user', 'space'
-    ).prefetch_related('tags').annotate(
+    ).annotate(
         # Подсчёт реакций
         heart_count=Count('resonances', filter=Q(resonances__resonance_type='heart')),
         blast_count=Count('resonances', filter=Q(resonances__resonance_type='blast')),
@@ -258,7 +258,7 @@ def space_detail_view(request, space_name):
     # Базовый запрос с аннотациями
     impulses = Impulse.objects.filter(space=space).exclude(author_id__in=muted_users).select_related(
         'author__user'
-    ).prefetch_related('tags').annotate(
+    ).annotate(
         # Подсчёт реакций
         heart_count=Count('resonances', filter=Q(resonances__resonance_type='heart')),
         blast_count=Count('resonances', filter=Q(resonances__resonance_type='blast')),

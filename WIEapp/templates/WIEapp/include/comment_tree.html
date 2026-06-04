@@ -12,30 +12,31 @@
             {% endif %}
         </div>
 
-        {% if user.is_authenticated %}
-            {% if user.profile != comment.author %}
-                <div class="comment-menu">
-                    <button class="comment-menu-btn">⋯</button>
-                    <div class="comment-dropdown">
+                {% if user.is_authenticated %}
+            <div class="comment-menu">
+                <button class="comment-menu-btn">⋯</button>
+                <div class="comment-dropdown">
+                    <!-- Жалоба: все, кроме автора -->
+                    {% if user.profile != comment.author %}
                         <button class="report-comment-btn" data-comment-id="{{ comment.id }}">ПОЖАЛОВАТЬСЯ</button>
-                    </div>
+                    {% endif %}
+
+                    <!-- Редактирование: только автор -->
+                    {% if user.profile == comment.author %}
+                        <button class="edit-comment-btn" data-comment-id="{{ comment.id }}">РЕДАКТИРОВАТЬ</button>
+                    {% endif %}
+
+                    <!-- Удаление: автор, автор импульса или админ -->
+                    {% if user.profile == comment.author or user.profile == impulse.author or user.is_superuser %}
+                        <button class="delete-comment-btn" data-comment-id="{{ comment.id }}">УДАЛИТЬ</button>
+                    {% endif %}
+
+                    <!-- Предупреждение: ТОЛЬКО АДМИН и НЕ ДЛЯ СВОИХ КОММЕНТАРИЕВ -->
+                    {% if user.is_superuser and user.profile != comment.author %}
+                        <button class="warn-user-btn" data-user-id="{{ comment.author.id }}">ВЫДАТЬ ПРЕДУПРЕЖДЕНИЕ</button>
+                    {% endif %}
                 </div>
-            {% elif user.profile == comment.author or user.profile == impulse.author or user.is_superuser %}
-                <div class="comment-menu">
-                    <button class="comment-menu-btn">⋯</button>
-                    <div class="comment-dropdown">
-                        {% if user.profile == comment.author %}
-                            <button class="edit-comment-btn" data-comment-id="{{ comment.id }}">РЕДАКТИРОВАТЬ</button>
-                        {% endif %}
-                        {% if user.profile == comment.author or user.profile == impulse.author or user.is_superuser %}
-                            <button class="delete-comment-btn" data-comment-id="{{ comment.id }}">УДАЛИТЬ</button>
-                        {% endif %}
-                        {% if user.is_superuser %}
-                            <button class="warn-user-btn" data-user-id="{{ comment.author.id }}">ВЫДАТЬ ПРЕДУПРЕЖДЕНИЕ</button>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endif %}
+            </div>
         {% endif %}
     </div>
 
@@ -589,8 +590,7 @@
         text-transform: uppercase;
         margin: 0;
         color: #05026C;
-                font-family: Waterway;
-
+        font-family: Waterway;
     }
 
     .edit-modal-close {
@@ -721,12 +721,10 @@
         return div.innerHTML;
     }
 
-    // ПЕРЕМЕННЫЕ ДЛЯ МОДАЛОК
     let currentReportCommentId = null;
     let currentDeleteCommentId = null;
     let currentEditCommentId = null;
 
-    // ========== МОДАЛКА ЖАЛОБЫ ==========
     function openReportModal(commentId) {
         currentReportCommentId = commentId;
         const modal = document.getElementById('reportCommentModal');
@@ -741,12 +739,10 @@
         currentReportCommentId = null;
     }
 
-    // ========== МОДАЛКА УДАЛЕНИЯ ==========
     function showDeleteModal(commentId, authorName, content, date) {
         currentDeleteCommentId = commentId;
         const modal = document.getElementById('deleteCommentModal');
         if (!modal) return;
-
         modal.querySelector('.comment-author-preview').textContent = authorName;
         modal.querySelector('.comment-content-preview').textContent = content.length > 100 ? content.substring(0, 100) + '...' : content;
         modal.querySelector('.comment-meta-preview').textContent = date;
@@ -759,12 +755,10 @@
         currentDeleteCommentId = null;
     }
 
-    // ========== МОДАЛКА РЕДАКТИРОВАНИЯ ==========
     function showEditModal(commentId, content) {
         currentEditCommentId = commentId;
         const modal = document.getElementById('editCommentModal');
         if (!modal) return;
-
         const textarea = document.getElementById('editCommentTextarea');
         if (textarea) textarea.value = content;
         modal.style.display = 'flex';
@@ -777,14 +771,11 @@
         currentEditCommentId = null;
     }
 
-    // ========== ИНИЦИАЛИЗАЦИЯ ВСЕХ МОДАЛОК ==========
     function initModals() {
-        // Модалка жалобы
         const reportModal = document.getElementById('reportCommentModal');
         if (reportModal) {
             reportModal.querySelector('.modal-close').onclick = closeReportModal;
             reportModal.querySelector('.modal-cancel').onclick = closeReportModal;
-
             const reportForm = document.getElementById('reportCommentForm');
             if (reportForm) {
                 reportForm.onsubmit = function(e) {
@@ -792,7 +783,6 @@
                     const reason = document.getElementById('reportCommentReason').value;
                     const desc = this.querySelector('textarea')?.value || '';
                     if (!reason) { alert('Выберите причину'); return; }
-
                     fetch(`${BASE_PATH}/api/report-comment/`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
@@ -808,7 +798,6 @@
             }
         }
 
-        // Модалка удаления
         const deleteModal = document.getElementById('deleteCommentModal');
         if (deleteModal) {
             deleteModal.querySelector('.delete-modal-close').onclick = closeDeleteModal;
@@ -829,35 +818,29 @@
             };
         }
 
-        // Модалка редактирования
         const editModal = document.getElementById('editCommentModal');
         if (editModal) {
             editModal.querySelector('.edit-modal-close').onclick = closeEditModal;
             editModal.querySelector('.edit-cancel-btn').onclick = closeEditModal;
-
             const editForm = document.getElementById('editCommentForm');
             if (editForm) {
                 editForm.onsubmit = async function(e) {
                     e.preventDefault();
                     const newContent = document.getElementById('editCommentTextarea').value.trim();
                     if (!newContent) { alert('Введите текст'); return; }
-
                     const btn = this.querySelector('.edit-submit-btn');
                     const originalText = btn.textContent;
                     btn.textContent = 'СОХРАНЕНИЕ...';
                     btn.disabled = true;
-
                     try {
                         const r = await fetch(`${BASE_PATH}/comment/edit/${currentEditCommentId}/`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
                             body: `content=${encodeURIComponent(newContent)}`
                         });
-
                         if (r.ok || r.redirected) {
                             const contentDiv = document.getElementById(`comment-content-${currentEditCommentId}`);
                             if (contentDiv) contentDiv.innerHTML = escapeHtml(newContent).replace(/\n/g, '<br>');
-
                             const header = document.querySelector(`#comment-${currentEditCommentId} .comment-author-info`);
                             if (header && !header.querySelector('.comment-modified')) {
                                 const modified = document.createElement('div');
@@ -880,9 +863,7 @@
         };
     }
 
-    // ========== ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ ОБРАБОТЧИКОВ ==========
     window.initializeCommentHandlers = function(container) {
-        // ТРОЕТОЧИЕ - ОСНОВНОЕ ИСПРАВЛЕНИЕ ТУТ!
         container.querySelectorAll('.comment-menu-btn').forEach(btn => {
             if (btn._handler) return;
             btn.addEventListener('click', function(e) {
@@ -896,7 +877,6 @@
             btn._handler = true;
         });
 
-        // Кнопки ответа
         container.querySelectorAll('.reply-toggle').forEach(btn => {
             if (btn._handler) return;
             btn.addEventListener('click', function() {
@@ -911,7 +891,6 @@
             btn._handler = true;
         });
 
-        // Отправка ответов
         container.querySelectorAll('.submit-reply').forEach(btn => {
             if (btn._handler) return;
             btn.addEventListener('click', async function() {
@@ -920,11 +899,9 @@
                 const textarea = formDiv.querySelector('.reply-textarea');
                 const content = textarea.value.trim();
                 if (!content) { alert('Введите текст'); return; }
-
                 const originalText = this.textContent;
                 this.textContent = 'ОТПРАВКА...';
                 this.disabled = true;
-
                 try {
                     const r = await fetch(`${BASE_PATH}/add-reply-ajax/`, {
                         method: 'POST',
@@ -932,11 +909,9 @@
                         body: `parent_id=${parentId}&content=${encodeURIComponent(content)}`
                     });
                     const data = await r.json();
-
                     if (data.status === 'success') {
                         textarea.value = '';
                         formDiv.style.display = 'none';
-
                         const parentComment = document.getElementById(`comment-${parentId}`);
                         let replies = parentComment.querySelector('.replies');
                         if (!replies) {
@@ -944,7 +919,6 @@
                             replies.className = 'replies';
                             parentComment.appendChild(replies);
                         }
-
                         replies.insertAdjacentHTML('beforeend', `
                             <div class="comment" id="comment-${data.comment_id}">
                                 <div class="comment-header">
@@ -977,14 +951,12 @@
             btn._handler = true;
         });
 
-        // Удаление (с модалкой)
         container.querySelectorAll('.delete-comment-btn').forEach(btn => {
             if (btn._handler) return;
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const commentId = this.dataset.commentId;
                 this.closest('.comment-dropdown')?.classList.remove('show');
-
                 const commentDiv = document.getElementById(`comment-${commentId}`);
                 const author = commentDiv.querySelector('.comment-author-name')?.textContent || '';
                 const content = document.getElementById(`comment-content-${commentId}`)?.textContent || '';
@@ -994,21 +966,18 @@
             btn._handler = true;
         });
 
-        // Редактирование (с модалкой)
         container.querySelectorAll('.edit-comment-btn').forEach(btn => {
             if (btn._handler) return;
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const commentId = this.dataset.commentId;
                 this.closest('.comment-dropdown')?.classList.remove('show');
-
                 const content = document.getElementById(`comment-content-${commentId}`)?.textContent || '';
                 showEditModal(commentId, content);
             });
             btn._handler = true;
         });
 
-        // Жалоба
         container.querySelectorAll('.report-comment-btn').forEach(btn => {
             if (btn._handler) return;
             btn.addEventListener('click', function(e) {
@@ -1019,7 +988,6 @@
             btn._handler = true;
         });
 
-        // Предупреждение
         container.querySelectorAll('.warn-user-btn').forEach(btn => {
             if (btn._handler) return;
             btn.addEventListener('click', function(e) {
@@ -1045,14 +1013,12 @@
         });
     };
 
-    // Закрытие дропдаунов при клике вне
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.comment-menu')) {
             document.querySelectorAll('.comment-dropdown').forEach(d => d.classList.remove('show'));
         }
     });
 
-    // СТАРТ
     document.addEventListener('DOMContentLoaded', function() {
         initModals();
         window.initializeCommentHandlers(document);

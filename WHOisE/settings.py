@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-&nkxdctj(m6qp-+ft3dmf5o*x3!!785us6=6^udj=nr-z=&xvd
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['wewhoise.ru', 'www.wewhoise.ru', '62.109.13.38', 'localhost']
 
 
 # Application definition
@@ -145,6 +145,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 CSRF_FAILURE_VIEW = 'WIEapp.views.csrf_failure'
+
 
 # ========== ПРАВИЛЬНАЯ КОНФИГУРАЦИЯ MICAWBER ==========
 import micawber
