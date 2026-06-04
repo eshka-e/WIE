@@ -1,5 +1,4 @@
 {% load static %}
-{% load micawber_tags %}
 
 {# Группируем импульсы по типу #}
 {% regroup impulses by space.name as grouped_impulses %}
@@ -48,18 +47,16 @@
                         <!-- ЗАГОЛОВОК -->
                         <div class="craft-title-like-nerve">{{ impulse.title|upper }}</div>
 
-                        <!-- ВИДЕО -->
+                        <!-- ВИДЕО ДЛЯ CRAFT -->
                         {% if impulse.video_url %}
-                            <div class="video-wrapper">
-                                {{ impulse.video_url|oembed }}
-                            </div>
-                        {% elif impulse.video_file %}
-                            <div class="video-wrapper">
-                                <video controls preload="metadata">
-                                    <source src="{{ impulse.video_file.url }}" type="video/mp4">
-                                </video>
-                            </div>
-                        {% endif %}
+    <div class="video-wrapper detail-video-wrapper" data-video-url="{{ impulse.video_url }}">
+        {{ impulse.video_url }}
+    </div>
+{% elif impulse.video_file %}
+    <div class="video-wrapper detail-video-wrapper" data-video-url="{{ impulse.video_file.url }}">
+        {{ impulse.video_file.url }}
+    </div>
+{% endif %}
 
                         <!-- ТЕКСТ -->
                         {% if impulse.content %}
@@ -68,13 +65,15 @@
 
                         <!-- РЕАКЦИИ -->
                         <div class="reactions-group">
-                            <button class="reaction-btn heart-reaction" data-type="heart" data-impulse-id="{{ impulse.id }}">
+                            <button class="reaction-btn heart-reaction {% if impulse.user_heart %}active{% endif %}"
+                                    data-type="heart" data-impulse-id="{{ impulse.id }}">
                                 <img class="reaction-icon heart-icon" src="{% static 'img/🫀.png' %}" alt="heart">
-                                <span class="reaction-count">{{ impulse.heart_count|default:0 }}</span>
+                                <span class="reaction-count">[{{ impulse.heart_count|default:0 }}]</span>
                             </button>
-                            <button class="reaction-btn blast-reaction" data-type="blast" data-impulse-id="{{ impulse.id }}">
+                            <button class="reaction-btn blast-reaction {% if impulse.user_blast %}active{% endif %}"
+                                    data-type="blast" data-impulse-id="{{ impulse.id }}">
                                 <img class="reaction-icon blast-icon" src="{% static 'img/boom.png' %}" alt="blast">
-                                <span class="reaction-count">{{ impulse.blast_count|default:0 }}</span>
+                                <span class="reaction-count">[{{ impulse.blast_count|default:0 }}]</span>
                             </button>
                         </div>
 
@@ -87,7 +86,7 @@
             </div>
 
         {% elif group.grouper == 'nerve' %}
-            <!-- СЕКЦИЯ ЧУТКОСТИ -->
+            <!-- СЕКЦИЯ ЧУТКОСТИ (БЕЗ ВИДЕО) -->
             <div class="nerve-section">
                 {% for impulse in group.list %}
                     <a href="{% url 'WIEapp:impulse_detail' impulse.id %}" class="impulse-card nerve-card">
@@ -106,26 +105,24 @@
                         </div>
                         <div class="nerve-title">{{ impulse.title|upper }}</div>
 
-                        {% if impulse.video_url %}
-                            <div class="video-wrapper">
-                                {{ impulse.video_url|oembed }}
-                            </div>
-                        {% endif %}
-
                         {% if impulse.content %}
                             <div class="nerve-content">{{ impulse.content|truncatechars:120|linebreaks }}</div>
                         {% endif %}
 
+                        <!-- РЕАКЦИИ -->
                         <div class="reactions-group">
-                            <button class="reaction-btn heart-reaction" data-type="heart" data-impulse-id="{{ impulse.id }}">
+                            <button class="reaction-btn heart-reaction {% if impulse.user_heart %}active{% endif %}"
+                                    data-type="heart" data-impulse-id="{{ impulse.id }}">
                                 <img class="reaction-icon heart-icon" src="{% static 'img/🫀.png' %}" alt="heart">
-                                <span class="reaction-count">{{ impulse.heart_count|default:0 }}</span>
+                                <span class="reaction-count">[{{ impulse.heart_count|default:0 }}]</span>
                             </button>
-                            <button class="reaction-btn blast-reaction" data-type="blast" data-impulse-id="{{ impulse.id }}">
+                            <button class="reaction-btn blast-reaction {% if impulse.user_blast %}active{% endif %}"
+                                    data-type="blast" data-impulse-id="{{ impulse.id }}">
                                 <img class="reaction-icon blast-icon" src="{% static 'img/boom.png' %}" alt="blast">
-                                <span class="reaction-count">{{ impulse.blast_count|default:0 }}</span>
+                                <span class="reaction-count">[{{ impulse.blast_count|default:0 }}]</span>
                             </button>
                         </div>
+
                         <div class="nerve-comments">
                             откликов [ {{ impulse.comments.count }} ]
                         </div>
@@ -171,7 +168,7 @@
     }
 
     .reaction-btn.active .reaction-count {
-        color: white;
+        color: #171a2a;
     }
 
     .reaction-icon {
@@ -210,8 +207,7 @@
         overflow: hidden;
     }
 
-    .video-wrapper iframe,
-    .video-wrapper video {
+    .video-wrapper iframe {
         width: 100%;
         aspect-ratio: 16 / 9;
         display: block;
@@ -475,6 +471,23 @@
         text-align: left;
     }
 
+    .detail-video-wrapper {
+    width: 100%;
+    margin: 12px 0;
+    position: relative;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.detail-video-wrapper iframe {
+    width: 100%;
+    min-height: 300px;
+    aspect-ratio: 16 / 9;
+    display: block;
+    border: none;
+}
+
     @media (max-width: 1023px) {
         .nerve-content {
             font-size: 20px;
@@ -505,61 +518,103 @@
 </style>
 
 <script>
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
+    // ===== ОБРАБОТКА РЕАКЦИЙ =====
+    function attachCardResonanceListeners() {
+        document.querySelectorAll('.reaction-btn').forEach(btn => {
+            if (btn._listenerAttached) return;
+            btn.addEventListener('click', cardResonanceHandler);
+            btn._listenerAttached = true;
+        });
     }
 
-    const csrftoken = getCookie('csrftoken');
+    function cardResonanceHandler(e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-    document.querySelectorAll('.reaction-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+        const btn = e.currentTarget;
+        const impulseId = btn.dataset.impulseId;
+        const type = btn.dataset.type;
 
-            const impulseId = this.dataset.impulseId;
-            const type = this.dataset.type;
+        fetch('/api/resonate/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken
+            },
+            body: `impulse_id=${impulseId}&resonance_type=${type}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            const card = btn.closest('.impulse-card');
 
-            fetch('/api/resonate/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': csrftoken
-                },
-                body: `impulse_id=${impulseId}&resonance_type=${type}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                const card = this.closest('.impulse-card');
-                if (type === 'heart') {
-                    const heartCount = card.querySelector('.heart-reaction .reaction-count');
-                    if (heartCount) heartCount.innerText = data.heart_count;
-                } else {
-                    const blastCount = card.querySelector('.blast-reaction .reaction-count');
-                    if (blastCount) blastCount.innerText = data.blast_count;
-                }
+            if (type === 'heart') {
+                const heartCount = card.querySelector('.heart-reaction .reaction-count');
+                if (heartCount) heartCount.innerText = `[${data.heart_count}]`;
+                if (data.user_heart) btn.classList.add('active');
+                else btn.classList.remove('active');
+            } else {
+                const blastCount = card.querySelector('.blast-reaction .reaction-count');
+                if (blastCount) blastCount.innerText = `[${data.blast_count}]`;
+                if (data.user_blast) btn.classList.add('active');
+                else btn.classList.remove('active');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
 
-                // Обновляем активное состояние кнопки
-                if (type === 'heart' && data.user_heart !== undefined) {
-                    if (data.user_heart) this.classList.add('active');
-                    else this.classList.remove('active');
-                }
-                if (type === 'blast' && data.user_blast !== undefined) {
-                    if (data.user_blast) this.classList.add('active');
-                    else this.classList.remove('active');
-                }
-            })
-            .catch(error => console.error('Error:', error));
+    // ===== ОБРАБОТКА ВИДЕО (БЕЗ iframe, ПРОСТАЯ КНОПКА) =====
+    function processVideos() {
+        const videoWrappers = document.querySelectorAll('.detail-video-wrapper, .video-wrapper');
+
+        videoWrappers.forEach(wrapper => {
+            if (wrapper._processed) return;
+
+            let videoUrl = wrapper.dataset.videoUrl || wrapper.textContent.trim();
+            if (!videoUrl) return;
+
+            // Определяем платформу для текста кнопки
+            let platform = 'СМОТРЕТЬ ВИДЕО';
+            if (videoUrl.includes('youtu')) {
+                platform = 'СМОТРЕТЬ НА YOUTUBE';
+            } else if (videoUrl.includes('vimeo')) {
+                platform = 'СМОТРЕТЬ НА VIMEO';
+            }
+
+            // Создаём красивую кнопку вместо iframe
+            wrapper.innerHTML = `
+                <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                    color: white;
+                    text-align: center;
+                    padding: 40px 20px;
+                    border-radius: 8px;
+                    text-decoration: none;
+                    font-family: inherit;
+                    transition: all 0.3s ease;
+                    border: 1px solid rgba(255,255,255,0.1);
+                " onmouseover="this.style.background='linear-gradient(135deg, #16213e 0%, #1a1a2e 100%)'; this.style.transform='scale(1.02)';" onmouseout="this.style.background='linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)'; this.style.transform='scale(1)'">
+                    <span style="font-size: 48px;">▶</span>
+                    <span style="font-size: 24px; font-weight: 600; letter-spacing: 2px;">${platform}</span>
+                </a>
+            `;
+
+            wrapper._processed = true;
+            console.log('Видео заменено на кнопку:', platform);
         });
-    });
+    }
+
+    // ===== ЗАПУСК =====
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            attachCardResonanceListeners();
+            setTimeout(processVideos, 100);
+        });
+    } else {
+        attachCardResonanceListeners();
+        setTimeout(processVideos, 100);
+    }
 </script>

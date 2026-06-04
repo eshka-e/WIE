@@ -4,9 +4,37 @@
 {% block content %}
 <div class="auth-container">
     <div class="auth-card">
-        <h2 style="text-align: center;">⚠️ EMAIL УЖЕ ПОДТВЕРЖДЁН</h2>
+        <h2 style="text-align: center;"> EMAIL УЖЕ ПОДТВЕРЖДЁН</h2>
         <p style="text-align: center;">Вы можете войти в систему.</p>
         <div class="auth-footer"><a href="{% url 'WIEapp:login' %}">ВОЙТИ</a></div>
     </div>
 </div>
+
+<style>
+    /* Адаптив */
+    @media (max-width: 768px) {
+        h2 {
+            font-size: 1.2rem !important;
+        }
+
+        p {
+            font-size: 0.9rem !important;
+        }
+
+        .auth-footer a {
+            display: inline-block;
+            padding: 10px 0;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h2 {
+            font-size: 1rem !important;
+        }
+
+        p {
+            font-size: 0.8rem !important;
+        }
+    }
+</style>
 {% endblock %}

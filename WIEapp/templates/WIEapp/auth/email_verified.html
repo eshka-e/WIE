@@ -1,4 +1,3 @@
-
 {% load static %}
 
 {% block content %}
@@ -8,7 +7,7 @@
             <img src="{% static 'WIEapp/images/login.png' %}" alt="verified">
         </div>
 
-        <h2 style="text-align: center; margin-bottom: 1rem;">✅ EMAIL ПОДТВЕРЖДЁН</h2>
+        <h2 style="text-align: center; margin-bottom: 1rem;"> EMAIL ПОДТВЕРЖДЁН</h2>
         <p style="text-align: center;">Теперь вы можете войти в систему.</p>
 
         <div class="auth-footer">
@@ -16,4 +15,37 @@
         </div>
     </div>
 </div>
-{% endblock %}</html>
+
+<style>
+    /* Адаптив */
+    @media (max-width: 768px) {
+        .auth-logo img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        h2 {
+            font-size: 1.2rem;
+        }
+        
+        p {
+            font-size: 0.9rem;
+        }
+        
+        .auth-footer a {
+            display: inline-block;
+            padding: 10px 0;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        h2 {
+            font-size: 1rem;
+        }
+        
+        p {
+            font-size: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}

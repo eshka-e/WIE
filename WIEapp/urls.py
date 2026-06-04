@@ -50,7 +50,6 @@ urlpatterns = [
 
     path('api/resonate/', views.toggle_resonance, name='toggle_resonance'),
     path('api/reply/', views.add_reply_ajax, name='add_reply_ajax'),
-    path('api/landmark/', views.toggle_landmark, name='toggle_landmark'),
     path('api/notifications/count/', views.unread_notifications_count, name='unread_count'),
     path('api/follow/', views.toggle_follow, name='toggle_follow'),
     path('api/mute/', views.toggle_mute, name='toggle_mute'),
@@ -59,10 +58,18 @@ urlpatterns = [
 # В urls.py, в urlpatterns ДОБАВЬ ЭТУ СТРОЧКУ:
 path('api/unban-user/', views.unban_user, name='unban_user'),
 path('api/ban-user/', views.ban_user, name='ban_user'),
+path('api/ask-question/', views.ask_question_api, name='ask_question_api'),
 
     path('add-reply-ajax/', views.add_reply_ajax, name='add_reply_ajax'),
     path('delete-comment/<int:comment_id>/', views.delete_comment, name='delete_comment'),
-    path('warn-user/', views.warn_user, name='warn_user'),
 
-path('faq/', views.faq_view, name='faq'),
+# Добавьте эту строку в urlpatterns
+path('warn-user/', views.warn_user, name='warn_user'),
+path('api/report-impulse/', views.report_impulse, name='report_impulse'),
+path('api/report-comment/', views.report_comment, name='report_comment'),
+path('api/report-user/', views.report_user, name='report_user'),
+path('api/unban-user/', views.unban_user, name='unban_user'),
+# Добавьте эти пути в ваш urls.py
+path('comment/edit/<int:comment_id>/', views.edit_comment_view, name='edit_comment'),
+path('comment/delete/<int:comment_id>/', views.delete_comment_view, name='delete_comment'),
 ]

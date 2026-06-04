@@ -61,6 +61,7 @@
         font-style: normal;
     }
 
+    /* Базовые стили + адаптив */
     .form-container {
         max-width: 700px;
         margin: 0 auto;
@@ -105,6 +106,10 @@
         font-family: inherit;
         font-size: 0.9rem;
         outline: none;
+        box-sizing: border-box;
+        transition: border-bottom-color 0.3s ease;
+        -webkit-appearance: none;
+        appearance: none;
     }
 
     .form-group input:focus,
@@ -112,6 +117,12 @@
     .form-group textarea:focus {
         outline: none;
         border-bottom-color: #4f81b4;
+    }
+
+    /* Стили для select на мобильных */
+    .form-group select {
+        background: white;
+        cursor: pointer;
     }
 
     .form-group textarea {
@@ -138,11 +149,13 @@
         background: #f8fafc;
         padding: 1rem;
         text-align: center;
+        border-radius: 4px;
     }
 
     .media-preview img {
         max-width: 100%;
         max-height: 200px;
+        object-fit: contain;
     }
 
     .form-actions {
@@ -150,6 +163,7 @@
         gap: 1rem;
         margin-bottom: 1.5rem;
         align-items: center;
+        flex-wrap: wrap;
     }
 
     .submit-btn {
@@ -172,6 +186,8 @@
         justify-content: center;
         text-align: center;
         box-sizing: border-box;
+        flex: 1;
+        min-width: 200px;
     }
 
     .submit-btn:hover {
@@ -202,6 +218,8 @@
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
+        flex: 1;
+        min-width: 150px;
     }
 
     .cancel-btn:hover {
@@ -212,6 +230,209 @@
 
     .cancel-btn:active {
         transform: scale(0.98);
+    }
+
+    /* ========== АДАПТИВНЫЕ СТИЛИ ========== */
+
+    /* Планшеты и маленькие ноутбуки (768px - 1024px) */
+    @media (max-width: 1024px) {
+        .form-container {
+            max-width: 90%;
+            padding: 1.8rem;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 1.8rem;
+        }
+
+        .form-group label {
+            font-size: 30px;
+        }
+
+        .submit-btn {
+            font-size: 42px;
+            padding: 0 60px;
+        }
+    }
+
+    /* Мобильные устройства (до 768px) */
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 1.5rem;
+            max-width: 95%;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-group label {
+            font-size: 24px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.7rem;
+            font-size: 16px; /* Предотвращаем автоматическое масштабирование на iOS */
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .submit-btn {
+            font-size: 36px;
+            padding: 0 20px;
+            height: 55px;
+            width: 100%;
+            min-width: auto;
+        }
+
+        .cancel-btn {
+            height: 50px;
+            padding: 0 20px;
+            width: 100%;
+            min-width: auto;
+            font-size: 14px;
+        }
+
+        .media-preview {
+            padding: 0.8rem;
+        }
+
+        .media-preview img {
+            max-height: 150px;
+        }
+    }
+
+    /* Маленькие мобильные устройства (до 480px) */
+    @media (max-width: 480px) {
+        .form-container {
+            padding: 1rem;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            font-size: 20px;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.6rem;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+        }
+
+        .form-hint,
+        .form-error {
+            font-size: 0.65rem;
+        }
+
+        .submit-btn {
+            font-size: 28px;
+            height: 50px;
+        }
+
+        .cancel-btn {
+            height: 45px;
+            font-size: 12px;
+        }
+
+        .media-preview img {
+            max-height: 120px;
+        }
+    }
+
+    /* Для устройств с очень маленькой шириной (до 320px) */
+    @media (max-width: 320px) {
+        h1 {
+            font-size: 20px;
+        }
+
+        .form-group label {
+            font-size: 18px;
+        }
+
+        .submit-btn {
+            font-size: 24px;
+            height: 45px;
+        }
+
+        .cancel-btn {
+            font-size: 11px;
+            height: 40px;
+        }
+    }
+
+    /* Альбомная ориентация на мобильных */
+    @media (max-width: 768px) and (orientation: landscape) {
+        .form-container {
+            padding: 1rem;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+        }
+
+        .form-actions {
+            flex-direction: row;
+        }
+
+        .submit-btn,
+        .cancel-btn {
+            font-size: 24px;
+            height: 45px;
+        }
+    }
+
+    /* Для устройств с высоким DPI (Retina) */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            border-bottom-width: 1.5px;
+        }
+    }
+
+    /* Улучшенная доступность для touch-устройств */
+    @media (hover: none) and (pointer: coarse) {
+        .submit-btn,
+        .cancel-btn,
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            cursor: pointer;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.96);
+        }
+
+        .cancel-btn:active {
+            transform: scale(0.96);
+        }
     }
 </style>
 
@@ -232,8 +453,7 @@
         const previewImage = document.getElementById('preview-image');
         const spaceHint = document.getElementById('space-hint');
 
-        // ПРАВИЛА по ID пространств (посмотри ID в своей базе)
-        // Обычно: vision=1, nerve=2, craft=3
+        // ПРАВИЛА по ID пространств
         const rules = {
             '1': {  // ВИДЕНИЕ (vision)
                 type: 'image',
@@ -256,8 +476,6 @@
         function updateForm() {
             const selectedSpace = spaceSelect.value;
             const rule = rules[selectedSpace];
-
-            console.log('Выбрано пространство ID:', selectedSpace);  // Для отладки
 
             if (!rule) return;
 
@@ -326,6 +544,15 @@
         // Запускаем при загрузке и при смене пространства
         updateForm();
         spaceSelect.addEventListener('change', updateForm);
+
+        // Дополнительные улучшения для мобильных устройств
+        // Убираем эффект масштабирования при фокусе на iOS
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('touchstart', function() {
+                this.style.fontSize = '16px';
+            });
+        });
     });
 </script>
 {% endblock %}

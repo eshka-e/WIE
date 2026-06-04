@@ -36,4 +36,115 @@
         <p class="add-informain">Добро пожаловать в общность исследователей</p>
         </p>
     </div>
+
+    <style>
+        /* АДАПТИВ + МАСШТАБИРОВАНИЕ ШРИФТОВ */
+
+        /* Планшеты */
+        @media (max-width: 1024px) {
+            .content-view {
+                gap: 50px;
+                padding: 0 30px;
+            }
+
+            .content {
+                padding: 0 30px;
+            }
+
+            .h-content {
+                font-size: 52px;
+            }
+
+            .cmih1 {
+                font-size: 70px;
+            }
+
+            .cmih2 {
+                font-size: 28px;
+            }
+
+            .informain, .add-informain {
+                font-size: 20px;
+            }
+        }
+
+        /* Мобильные */
+        @media (max-width: 768px) {
+            .content-view {
+                flex-direction: column;
+                gap: 30px;
+                text-align: center;
+                padding: 0 20px;
+            }
+
+            .h-content {
+                text-align: center;
+                font-size: 42px;
+            }
+
+            .content {
+                padding: 0 20px;
+            }
+
+            .cmih1 {
+                font-size: 52px;
+            }
+
+            .cmih2 {
+                font-size: 24px;
+            }
+
+            .informain, .add-informain {
+                font-size: 18px;
+            }
+
+            .informain {
+                text-align: left;
+            }
+        }
+
+        /* Маленькие телефоны */
+        @media (max-width: 480px) {
+            .content-view {
+                gap: 20px;
+                padding: 0 15px;
+            }
+
+            .content {
+                padding: 0 15px;
+            }
+
+            .h-content {
+                font-size: 32px;
+            }
+
+            .cmih1 {
+                font-size: 40px;
+            }
+
+            .cmih2 {
+                font-size: 20px;
+            }
+
+            .informain, .add-informain {
+                font-size: 16px;
+            }
+        }
+
+        /* Очень маленькие */
+        @media (max-width: 320px) {
+            .h-content {
+                font-size: 28px;
+            }
+
+            .cmih1 {
+                font-size: 34px;
+            }
+
+            .informain, .add-informain {
+                font-size: 14px;
+            }
+        }
+    </style>
+
 {% endblock content %}

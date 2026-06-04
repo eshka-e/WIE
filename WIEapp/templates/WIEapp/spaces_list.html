@@ -1,4 +1,3 @@
-
 {% load static %}
 
 {% block content %}
@@ -15,9 +14,9 @@
         <!-- ЧУТКОСТЬ -->
         <a href="{% url 'WIEapp:space_detail' 'nerve' %}" class="space-card" data-original-img="{% static 'img/nerve-placeholder.png' %}" data-hover-img="{% static 'img/nerve-hover.png' %}">
             <div class="space-image">
-                <img src="{% static 'img/nerve-placeholder.png' %}" alt="ЧУТКОСТЬ" class="card-img">
+                <img src="{% static 'img/nerve-placeholder.png' %}" alt="ЧУВСТВО" class="card-img">
             </div>
-            <h2>ЧУТКОСТЬ</h2>
+            <h2>ЧУВСТВО</h2>
         </a>
 
         <!-- РЕМЕСЛО -->
@@ -39,12 +38,12 @@
 </div>
 
 <style>
+    /* БАЗОВЫЕ СТИЛИ */
     .spaces-container {
         font-family: 'Non Bureau', sans-serif;
         max-width: 1400px;
         margin: 0 auto;
-        padding: 5px;
-        overflow-x: auto;
+        padding: 20px;
     }
 
     .spaces-row {
@@ -53,8 +52,7 @@
         justify-content: center;
         gap: 25px;
         align-items: flex-start;
-        flex-wrap: nowrap; /* Запрещаем перенос на новую строку */
-        min-width: min-content;
+        flex-wrap: wrap;
     }
 
     /* КАРТОЧКА — исходное состояние */
@@ -65,31 +63,33 @@
         color: inherit;
         background: transparent;
         width: 320px;
-        height: 740px;
         border-radius: 5px;
         transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         overflow: hidden;
         border: none;
         box-shadow: none;
         position: relative;
-        flex-shrink: 0; /* Запрещаем сжатие карточек */
     }
 
-    /* Увеличение при наведении */
-    .space-card:hover {
-        width: 404px;
-        height: 800px;
-        border-radius: 5px;
+    /* Увеличение при наведении (только для мыши) */
+    @media (hover: hover) and (pointer: fine) {
+        .space-card:hover {
+            transform: scale(1.05);
+        }
+
+        .space-card:hover h2 {
+            font-size: 80px;
+        }
     }
 
-    /* Блок изображения — отступы 5px сверху, слева, справа */
+    /* Блок изображения */
     .space-image {
         margin: 5px 5px 0 5px;
         border-radius: 3px;
         overflow: hidden;
         background-color: #f4f7fc;
-        flex: 1 1 auto;
-        min-height: 0;
+        aspect-ratio: 320 / 620;
+        width: 100%;
     }
 
     .space-image img {
@@ -101,12 +101,12 @@
         border-radius: 5px;
     }
 
-    /* Заголовок — размер 70px, центрирование */
+    /* Заголовок */
     .space-card h2 {
         font-size: 60px;
         font-weight: 400;
         text-align: center;
-        margin: 0;
+        margin: 15px 0 10px 0;
         letter-spacing: 0.02em;
         text-transform: uppercase;
         color: #171A2A;
@@ -115,25 +115,119 @@
         width: 100%;
     }
 
-    /* При наведении шрифт заголовка 90px */
-    .space-card:hover h2 {
-        font-size: 80px;
-    }
-
-    /* Адаптив для мобильных устройств - горизонтальная прокрутка */
-    @media (max-width: 780px) {
-        .spaces-container {
-            overflow-x: auto;
-        }
-        .spaces-row {
-            gap: 1rem;
-            justify-content: flex-start;
-            padding-bottom: 1rem;
-        }
-    }
-
     .space-card:hover {
         cursor: pointer;
+    }
+
+    /* ============================================ */
+    /* АДАПТИВ ДЛЯ ПЛАНШЕТОВ (до 900px) */
+    /* ============================================ */
+    @media (max-width: 900px) {
+        .spaces-container {
+            padding: 15px;
+        }
+
+        .spaces-row {
+            gap: 20px;
+        }
+
+        .space-card {
+            width: 280px;
+        }
+
+        .space-image {
+            aspect-ratio: 280 / 540;
+        }
+
+        .space-card h2 {
+            font-size: 50px;
+            margin: 12px 0 8px 0;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .space-card:hover h2 {
+                font-size: 65px;
+            }
+        }
+    }
+
+    /* ============================================ */
+    /* АДАПТИВ ДЛЯ МОБИЛЬНЫХ (до 650px) */
+    /* Карточки встают друг под друга */
+    /* ============================================ */
+    @media (max-width: 650px) {
+        .spaces-container {
+            padding: 10px;
+        }
+
+        .spaces-row {
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .space-card {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .space-image {
+            aspect-ratio: 1 / 1.2;
+            margin: 0;
+            border-radius: 8px;
+        }
+
+        .space-image img {
+            border-radius: 8px;
+        }
+
+        .space-card h2 {
+            font-size: 48px;
+            margin: 12px 0 5px 0;
+        }
+
+        /* Убираем масштабирование на тач-устройствах */
+        @media (hover: hover) and (pointer: fine) {
+            .space-card:hover {
+                transform: scale(1.02);
+            }
+
+            .space-card:hover h2 {
+                font-size: 54px;
+            }
+        }
+    }
+
+    /* ============================================ */
+    /* ОЧЕНЬ МАЛЕНЬКИЕ ТЕЛЕФОНЫ (до 480px) */
+    /* ============================================ */
+    @media (max-width: 480px) {
+        .spaces-container {
+            padding: 8px;
+        }
+
+        .spaces-row {
+            gap: 25px;
+        }
+
+        .space-card {
+            max-width: 100%;
+        }
+
+        .space-card h2 {
+            font-size: 38px;
+            margin: 10px 0 5px 0;
+        }
+
+        .space-image {
+            aspect-ratio: 1 / 1.3;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .space-card:hover h2 {
+                font-size: 42px;
+            }
+        }
     }
 </style>
 
@@ -142,11 +236,10 @@
 (function() {
     // Функция для проверки загрузки изображений и создания fallback при необходимости
     function handleImageFallback(imgElement, originalSrc, hoverSrc, cardTitle) {
-        // Проверяем, загрузилось ли оригинальное изображение
         imgElement.onerror = function() {
             if (!imgElement.getAttribute('data-fallback-set')) {
                 imgElement.setAttribute('data-fallback-set', 'true');
-                // Создаем canvas-заглушку, если изображение не найдено
+                // Создаем canvas-заглушку
                 const canvas = document.createElement('canvas');
                 canvas.width = 400;
                 canvas.height = 500;
@@ -158,11 +251,10 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(cardTitle, canvas.width/2, canvas.height/2);
-                
+
                 const fallbackSrc = canvas.toDataURL('image/png');
                 imgElement.src = fallbackSrc;
-                
-                // Также обновляем data-атрибуты для hover
+
                 const parentCard = imgElement.closest('.space-card');
                 if (parentCard && !parentCard.getAttribute('data-hover-fallback-set')) {
                     parentCard.setAttribute('data-hover-fallback-set', 'true');
@@ -182,54 +274,45 @@
                 }
             }
         };
-        
-        // Устанавливаем оригинальное изображение
+
         imgElement.src = originalSrc;
     }
-    
-    // Инициализация всех карточек
+
     document.addEventListener('DOMContentLoaded', function() {
         const cards = document.querySelectorAll('.space-card');
-        
+
         cards.forEach(function(card) {
             const imgElement = card.querySelector('.space-image img');
             if (!imgElement) return;
-            
+
             const title = card.querySelector('h2')?.innerText || 'Пространство';
-            
-            // Получаем пути к изображениям из data-атрибутов (которые уже заполнены тегами static)
+
             let originalSrc = card.getAttribute('data-original-img');
             let hoverSrc = card.getAttribute('data-hover-img');
-            
-            // Если пути не заданы, генерируем заглушки
-            if (!originalSrc || originalSrc === '') {
-                originalSrc = '';
-            }
-            if (!hoverSrc || hoverSrc === '') {
-                hoverSrc = '';
-            }
-            
-            // Сохраняем пути в data-атрибуты
+
             card.setAttribute('data-original-img', originalSrc);
             card.setAttribute('data-hover-img', hoverSrc);
-            
-            // Обрабатываем fallback для изображений
+
             handleImageFallback(imgElement, originalSrc, hoverSrc, title);
-            
-            // Обработчики наведения для смены изображения
-            card.addEventListener('mouseenter', function() {
-                const hoverImg = this.getAttribute('data-hover-img');
-                if (hoverImg && hoverImg !== '' && imgElement.src !== hoverImg) {
-                    imgElement.src = hoverImg;
-                }
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                const originalImg = this.getAttribute('data-original-img');
-                if (originalImg && originalImg !== '' && imgElement.src !== originalImg) {
-                    imgElement.src = originalImg;
-                }
-            });
+
+            // Только для устройств с мышью (не тач)
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+            if (!isTouchDevice) {
+                card.addEventListener('mouseenter', function() {
+                    const hoverImg = this.getAttribute('data-hover-img');
+                    if (hoverImg && hoverImg !== '' && imgElement.src !== hoverImg) {
+                        imgElement.src = hoverImg;
+                    }
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    const originalImg = this.getAttribute('data-original-img');
+                    if (originalImg && originalImg !== '' && imgElement.src !== originalImg) {
+                        imgElement.src = originalImg;
+                    }
+                });
+            }
         });
     });
 })();

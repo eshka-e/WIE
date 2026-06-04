@@ -6,7 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WHOisE — ВХОД</title>
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <style>
+        /* Адаптив */
+        @media (max-width: 768px) {
+            .auth-logo img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .submit-btn {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .form-group input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
 </head>
+<body>
 {% block content %}
 <div class="auth-container">
     <div class="auth-card">
@@ -18,7 +38,6 @@
             {% csrf_token %}
 
             <div class="form-group">
-
                 <input type="email" name="email" id="id_email"
                        placeholder="you@example.com" required>
             </div>
@@ -52,3 +71,5 @@
     </div>
 </div>
 {% endblock %}
+</body>
+</html>

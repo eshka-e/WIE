@@ -10,7 +10,7 @@
 
     <div class="impulses-list" id="impulses-list">
         {% include 'WIEapp/include/impulse_cards.html' with impulses=impulses has_next=has_next %}
-    </div>
+  </div>
 </div>
 
 <style>
@@ -19,9 +19,10 @@
         margin: 0 auto;
         padding: 2rem;
     }
+
     .stream-mode-bar {
         position: sticky;
-        top: 10px; /* ← ОТСТУП 15 ПИКСЕЛЕЙ ОТ ВЕРХА */
+        top: 10px;
         background: rgba(255, 255, 255, 0.62);
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(15px);
@@ -35,6 +36,7 @@
         border-radius: 4px;
         z-index: 10;
     }
+
     .mode-btn {
         background: transparent;
         border: none;
@@ -48,78 +50,61 @@
         padding: 0.2rem 0;
         transition: all 0.2s;
     }
+
     .mode-btn.active {
         color: #05026c;
-
     }
+
     .mode-btn:hover {
         color: #03009f;
+    }
+
+    @media (max-width: 768px) {
+        .stream-container {
+            padding: 1rem;
+        }
+        .stream-mode-bar {
+            gap: 1rem;
+            padding: 0.2rem 0.8rem;
+            top: 5px;
+        }
+        .mode-btn {
+            font-size: 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stream-container {
+            padding: 0.5rem;
+        }
+        .stream-mode-bar {
+            gap: 0.5rem;
+            padding: 0.2rem 0.5rem;
+        }
+        .mode-btn {
+            font-size: 14px;
+        }
     }
 </style>
 
 <script>
-    // CSRF-токен уже объявлен в base.html, не объявляем заново!
     let currentMode = '{{ mode|default:"all" }}';
     let hasMore = {{ has_next|lower }};
     let loading = false;
     let nextPage = null;
     let loaderElement = null;
 
-    // Резонансы
     function attachResonanceListeners() {
-        document.querySelectorAll('.reaction-btn').forEach(btn => {
-            btn.removeEventListener('click', resonanceHandler);
-            btn.addEventListener('click', resonanceHandler);
-        });
+        if (typeof attachCardResonanceListeners === 'function') {
+            attachCardResonanceListeners();
+        }
     }
 
-    function resonanceHandler(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const btn = e.currentTarget;
-        const impulseId = btn.dataset.impulseId;
-        const type = btn.dataset.type;
-
-        fetch('/api/resonate/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrftoken
-            },
-            credentials: 'same-origin',
-            body: `impulse_id=${impulseId}&resonance_type=${type}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            const card = btn.closest('.impulse-card');
-            if (type === 'heart') {
-                const heartCount = card.querySelector('.heart-reaction .reaction-count');
-                if (heartCount) heartCount.innerText = data.heart_count;
-                if (data.user_heart !== undefined) {
-                    if (data.user_heart) btn.classList.add('active');
-                    else btn.classList.remove('active');
-                }
-            } else {
-                const blastCount = card.querySelector('.blast-reaction .reaction-count');
-                if (blastCount) blastCount.innerText = data.blast_count;
-                if (data.user_blast !== undefined) {
-                    if (data.user_blast) btn.classList.add('active');
-                    else btn.classList.remove('active');
-                }
-            }
-        })
-        .catch(error => console.error('Ошибка резонанса:', error));
-    }
-
-    // Переключение режимов
     function initModeSwitcher() {
         const modeBtns = document.querySelectorAll('.mode-btn');
         const impulsesList = document.getElementById('impulses-list');
 
-        if (modeBtns.length === 0) {
-            console.log('Кнопки .mode-btn не найдены');
-            return;
-        }
+        if (modeBtns.length === 0) return;
 
         modeBtns.forEach(btn => {
             btn.addEventListener('click', function(e) {
@@ -146,7 +131,6 @@
         });
     }
 
-    // Бесконечный скролл
     function initInfiniteScroll() {
         const trigger = document.querySelector('.loading-trigger');
         if (trigger && hasMore) {

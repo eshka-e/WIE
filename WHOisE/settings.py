@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'WIEapp.apps.WIEappConfig',
     'micawber.contrib.mcdjango',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -143,3 +145,17 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 CSRF_FAILURE_VIEW = 'WIEapp.views.csrf_failure'
+
+# ========== ПРАВИЛЬНАЯ КОНФИГУРАЦИЯ MICAWBER ==========
+import micawber
+from micawber.providers import Provider
+
+# Базовая инициализация
+oembed_providers = micawber.bootstrap_basic()
+
+# Добавление провайдеров (правильный способ)
+oembed_providers.register('https://www.youtube.com/watch?v=*', Provider('https://www.youtube.com/oembed'))
+oembed_providers.register('https://youtu.be/*', Provider('https://www.youtube.com/oembed'))
+oembed_providers.register('https://vimeo.com/*', Provider('https://vimeo.com/api/oembed.json'))
+
+OEMBED_PROVIDERS = oembed_providers

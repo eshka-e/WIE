@@ -2,18 +2,16 @@
 {% load static %}
 
 {% block content %}
-<div class="stream-container">
+<div class="stream-container {% if current_space.name == 'craft' %}craft-container{% elif current_space.name == 'nerve' %}nerve-container{% else %}default-container{% endif %}">
     <div class="stream-header">
         <h2 class="space-title">{{ current_space.get_name_display }}</h2>
     </div>
 
-    <!-- ФИКСИРОВАННАЯ ПЛАШКА С ДВУМЯ РЕЖИМАМИ -->
     <div class="stream-mode-bar">
         <button class="mode-btn {% if mode == 'all' %}active{% endif %}" data-mode="all">ОБЩЕЕ</button>
         <button class="mode-btn {% if mode == 'followed' %}active{% endif %}" data-mode="followed">МОИ ОРИЕНТИРЫ</button>
     </div>
 
-    <!-- ЛЕНТА ИМПУЛЬСОВ -->
     <div class="impulses-list" id="impulses-list">
         {% include 'WIEapp/include/impulse_cards.html' with impulses=impulses has_next=has_next %}
     </div>
@@ -21,9 +19,21 @@
 
 <style>
     .stream-container {
-        max-width: 800px;
+        width: 1200px;
         margin: 0 auto;
         padding: 2rem;
+    }
+
+    .default-container {
+        max-width: 800px;
+    }
+
+    .nerve-container {
+        max-width: 900px;
+    }
+
+    .craft-container {
+        max-width: 1200px;
     }
 
     .stream-header {
@@ -31,6 +41,10 @@
         justify-content: space-between;
         align-items: baseline;
         margin-bottom: 2rem;
+    }
+
+    .space-title {
+        font-size: 32px;
     }
 
     .stream-mode-bar {
@@ -70,16 +84,24 @@
         color: #03009f;
     }
 
-    .loader {
-        font-size: 0.7rem;
-        color: #8a9cb0;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
+    @media (max-width: 1024px) {
+        .stream-container {
+            width: 100%;
+            padding: 1.5rem;
+        }
+        .craft-container {
+            max-width: 95%;
+        }
     }
 
     @media (max-width: 768px) {
         .stream-container {
             padding: 1rem;
+        }
+        .default-container,
+        .nerve-container,
+        .craft-container {
+            max-width: 100%;
         }
         .mode-btn {
             font-size: 18px;
@@ -87,65 +109,30 @@
         .stream-mode-bar {
             gap: 1rem;
             padding: 0.2rem 0.5rem;
+            top: 5px;
+        }
+        .space-title {
+            font-size: 24px;
+        }
+        .stream-header {
+            margin-bottom: 1rem;
         }
     }
 </style>
 
 <script>
-    // CSRF-токен уже объявлен в base.html
     let currentMode = '{{ mode|default:"all" }}';
     let hasMore = {{ has_next|lower }};
     let loading = false;
     let nextPage = null;
     let loaderElement = null;
 
-    // Резонансы
     function attachResonanceListeners() {
-        document.querySelectorAll('.reaction-btn').forEach(btn => {
-            btn.removeEventListener('click', resonanceHandler);
-            btn.addEventListener('click', resonanceHandler);
-        });
+        if (typeof attachCardResonanceListeners === 'function') {
+            attachCardResonanceListeners();
+        }
     }
 
-    function resonanceHandler(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const btn = e.currentTarget;
-        const impulseId = btn.dataset.impulseId;
-        const type = btn.dataset.type;
-
-        fetch('/api/resonate/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrftoken
-            },
-            credentials: 'same-origin',
-            body: `impulse_id=${impulseId}&resonance_type=${type}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            const card = btn.closest('.impulse-card');
-            if (type === 'heart') {
-                const heartCount = card.querySelector('.heart-reaction .reaction-count');
-                if (heartCount) heartCount.innerText = data.heart_count;
-                if (data.user_heart !== undefined) {
-                    if (data.user_heart) btn.classList.add('active');
-                    else btn.classList.remove('active');
-                }
-            } else {
-                const blastCount = card.querySelector('.blast-reaction .reaction-count');
-                if (blastCount) blastCount.innerText = data.blast_count;
-                if (data.user_blast !== undefined) {
-                    if (data.user_blast) btn.classList.add('active');
-                    else btn.classList.remove('active');
-                }
-            }
-        })
-        .catch(error => console.error('Ошибка резонанса:', error));
-    }
-
-    // Переключение режимов
     function initModeSwitcher() {
         const modeBtns = document.querySelectorAll('.mode-btn');
         const impulsesList = document.getElementById('impulses-list');
@@ -178,7 +165,6 @@
         });
     }
 
-    // Бесконечный скролл
     function initInfiniteScroll() {
         const trigger = document.querySelector('.loading-trigger');
         if (trigger && hasMore) {

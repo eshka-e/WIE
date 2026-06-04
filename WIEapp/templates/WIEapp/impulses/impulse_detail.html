@@ -7,7 +7,7 @@
     <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
     <div class="detail-navbar">
         <a href="javascript:history.back()" class="nav-back">
-            <img class="back-link" src="{% static 'img/back.png' %}" alt="avatar">
+            <img class="back-link" src="{% static 'img/back.png' %}" alt="back">
         </a>
 
         <div class="nav-actions">
@@ -29,22 +29,23 @@
         </div>
     </div>
 
-    <!-- МЕДИА С УВЕЛИЧЕННОЙ ВЫСОТОЙ -->
-    {% if impulse.image or impulse.video_url or impulse.video_file %}
-    <div class="detail-media-container">
-        {% if impulse.image %}
-            <img src="{{ impulse.image.url }}" alt="{{ impulse.title }}" class="detail-media">
-        {% elif impulse.video_url %}
-            <div class="detail-video-wrapper">
-                {{ impulse.video_url|oembed }}
-            </div>
-        {% elif impulse.video_file %}
-            <video controls class="detail-media">
-                <source src="{{ impulse.video_file.url }}" type="video/mp4">
-            </video>
-        {% endif %}
-    </div>
+    <!-- МЕДИА -->
+    <!-- МЕДИА -->
+{% if impulse.image or impulse.video_url or impulse.video_file %}
+<div class="detail-media-container">
+    {% if impulse.image %}
+        <img src="{{ impulse.image.url }}" alt="{{ impulse.title }}" class="detail-media">
+    {% elif impulse.video_url %}
+        <div class="detail-video-wrapper">
+            {{ impulse.video_url }}  <!-- Просто ссылка, скрипт её заменит -->
+        </div>
+    {% elif impulse.video_file %}
+        <video controls class="detail-media">
+            <source src="{{ impulse.video_file.url }}" type="video/mp4">
+        </video>
     {% endif %}
+</div>
+{% endif %}
 
     <!-- ЗАГОЛОВОК + РЕАКЦИИ -->
     <div class="title-reactions-row">
@@ -76,14 +77,14 @@
     </div>
     {% endif %}
 
-    <!-- АВТОР — ТУТ ДОБАВЛЕНА ССЫЛКА -->
+    <!-- АВТОР -->
     <div class="author-info-card">
         <a href="{% url 'WIEapp:user_profile' impulse.author.user.username %}" class="author-link">
             <div class="author-avatar">
                 {% if impulse.author.avatar %}
                     <img src="{{ impulse.author.avatar.url }}" alt="{{ impulse.author.user.username }}">
                 {% else %}
-                    <div class="avatar-placeholder">{{ impulse.author.user.username|make_list|first|upper }}</div>
+                   <img src="{% static 'img/logo-main.png' %}" alt="avatar">
                 {% endif %}
             </div>
         </a>
@@ -118,6 +119,38 @@
     </div>
 </div>
 
+<!-- МОДАЛЬНОЕ ОКНО ЖАЛОБЫ -->
+<div id="reportModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>ПОЖАЛОВАТЬСЯ</h2>
+            <span class="modal-close">&times;</span>
+        </div>
+        <form id="reportForm">
+            {% csrf_token %}
+            <div class="modal-form-group">
+                <label>ПРИЧИНА ЖАЛОБЫ</label>
+                <select name="reason" id="reportReason" required>
+                    <option value="">-- ВЫБЕРИТЕ ПРИЧИНУ --</option>
+                    <option value="spam">Спам</option>
+                    <option value="harassment">Оскорбления / домогательства</option>
+                    <option value="illegal">Незаконный контент</option>
+                    <option value="offtopic">Не по теме</option>
+                    <option value="other">Другое</option>
+                </select>
+            </div>
+            <div class="modal-form-group">
+                <label>ПОДРОБНОСТИ (НЕОБЯЗАТЕЛЬНО)</label>
+                <textarea name="description" rows="4" placeholder="Опишите ситуацию подробнее..."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button type="submit" class="modal-submit">ОТПРАВИТЬ</button>
+                <button type="button" class="modal-cancel">ОТМЕНА</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <style>
     .impulse-detail-container {
         max-width: 100%;
@@ -130,7 +163,6 @@
         text-decoration: none;
     }
 
-    /* Панель навигации */
     .detail-navbar {
         display: flex;
         justify-content: space-between;
@@ -212,7 +244,6 @@
         color: #cc0000;
     }
 
-    /* Медиа контейнер */
     .detail-media-container {
         width: 100%;
         margin: 1.5rem 0;
@@ -248,7 +279,6 @@
         object-fit: contain;
     }
 
-    /* Заголовок и реакции */
     .title-reactions-row {
         display: flex;
         justify-content: space-between;
@@ -319,7 +349,6 @@
         color: #334454;
     }
 
-    /* Контент */
     .detail-content {
         font-size: 25px;
         font-weight: 400;
@@ -330,7 +359,6 @@
         text-align: left;
     }
 
-    /* Автор — ОБНОВЛЕННЫЕ СТИЛИ С ССЫЛКАМИ */
     .author-info-card {
         display: flex;
         align-items: center;
@@ -394,7 +422,6 @@
 
     .author-name-link:hover .author-name {
         color: #05026C;
-
     }
 
     .post-time {
@@ -405,7 +432,6 @@
         text-align: left;
     }
 
-    /* Комментарии */
     .comments-section {
         margin: 2rem 0;
         padding: 0 70px;
@@ -421,7 +447,6 @@
         text-align: left;
     }
 
-    /* НОВЫЕ СТИЛИ ДЛЯ ФОРМЫ РОДИТЕЛЬСКОГО КОММЕНТАРИЯ */
     .new-comment {
         margin-top: 2rem;
         padding: 1rem 70px 0 70px;
@@ -452,7 +477,7 @@
         color: white;
         border: none;
         padding: 3px 120px;
-        font-size: 48px;
+        font-size: 30px;
         font-weight: 800;
         font-style: italic;
         letter-spacing: 1.5px;
@@ -477,7 +502,185 @@
         padding: 2rem;
     }
 
-    /* Адаптив для мобильных */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        max-width: 600px;
+        width: 90%;
+        border-radius: 4px;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .modal-header {
+        margin-bottom: 2rem;
+        text-align: left;
+    }
+
+    .modal-header h2 {
+        font-family: 'Waterway', sans-serif;
+        font-size: 34px;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
+        border-left: none;
+        padding-left: 0;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        font-size: 2rem;
+        cursor: pointer;
+        color: #171a2a;
+        transition: color 0.2s ease;
+    }
+
+    .modal-close:hover {
+        color: #03009f;
+    }
+
+    .modal-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-form-group label {
+        display: block;
+        font-family: 'Waterway', sans-serif;
+        font-size: 34px;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+        text-align: left;
+    }
+
+    .modal-form-group input,
+    .modal-form-group select,
+    .modal-form-group textarea {
+        width: 100%;
+        background: white;
+        border: none;
+        border-bottom: 2px solid #171a2a;
+        padding: 0.8rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .modal-form-group input:focus,
+    .modal-form-group select:focus,
+    .modal-form-group textarea:focus {
+        outline: none;
+        border-bottom-color: #03009f;
+    }
+
+    .modal-form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        align-items: center;
+    }
+
+    .modal-submit {
+        background: #171A2A;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 0 60px;
+        height: 60px;
+        line-height: 1;
+        font-size: 48px;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: 1.5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .modal-submit:hover {
+        background: #03009f;
+        transform: scale(0.98);
+    }
+
+    .modal-cancel {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        border-radius: 3px;
+        color: #8a9cb0;
+        height: 60px;
+        line-height: 1;
+        padding: 0 24px;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-family: inherit;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+
+    .modal-cancel:hover {
+        border-color: #03009f;
+        color: #03009f;
+        transform: scale(0.98);
+    }
+
+    .success-toast {
+        position: fixed;
+        bottom: 100px;
+        right: 20px;
+        background: #cfdfff;
+        border-left: 4px solid #03009f;
+        padding: 12px 20px;
+        z-index: 1001;
+        border-radius: 4px;
+    }
+
+    @media (max-width: 600px) {
+        .modal-content {
+            padding: 1rem;
+        }
+        .modal-submit {
+            font-size: 28px;
+            padding: 0 30px;
+            height: 50px;
+        }
+        .modal-form-group label {
+            font-size: 24px;
+        }
+    }
+
     @media (max-width: 768px) {
         .detail-navbar,
         .title-reactions-row,
@@ -514,9 +717,13 @@
             max-height: 40vh;
             min-height: 300px;
         }
+
+        .submit-btn {
+            font-size: 28px;
+            padding: 3px 40px;
+        }
     }
 
-    /* Для планшетов */
     @media (min-width: 769px) and (max-width: 1024px) {
         .detail-video-wrapper iframe {
             height: 50vh;
@@ -531,54 +738,232 @@
 </style>
 
 <script>
-    // Меню
-    const menuBtn = document.getElementById('menuDotsBtn');
-    const dropdown = document.getElementById('actionDropdown');
+// ==================== ТОЛЬКО ДЛЯ IMPULSE_DETAIL ====================
+(function() {
+    // Проверяем, не инициализирована ли уже главная страница
+    if (window.__impulseDetailReady) return;
 
-    if (menuBtn) {
-        menuBtn.addEventListener('click', (e) => {
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+    const impulseId = '{{ impulse.id }}';
+
+    // ===== РЕАКЦИИ =====
+    function handleReactionClick(type) {
+        if (!csrftoken) {
+            alert('Ошибка безопасности');
+            return;
+        }
+
+        fetch('/api/resonate/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken
+            },
+            body: `impulse_id=${impulseId}&resonance_type=${type}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            const heartSpan = document.querySelector('.heart-reaction .reaction-count');
+            const blastSpan = document.querySelector('.blast-reaction .reaction-count');
+            if (heartSpan) heartSpan.innerText = `[${data.heart_count}]`;
+            if (blastSpan) blastSpan.innerText = `[${data.blast_count}]`;
+
+            const heartBtn = document.querySelector('.heart-reaction');
+            const blastBtn = document.querySelector('.blast-reaction');
+            if (heartBtn) data.user_heart ? heartBtn.classList.add('active') : heartBtn.classList.remove('active');
+            if (blastBtn) data.user_blast ? blastBtn.classList.add('active') : blastBtn.classList.remove('active');
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Не удалось поставить реакцию');
+        });
+    }
+
+    // ===== ВЫПАДАЮЩЕЕ МЕНЮ =====
+    function initDropdown() {
+        const menuBtn = document.getElementById('menuDotsBtn');
+        const dropdown = document.getElementById('actionDropdown');
+        if (!menuBtn || !dropdown) return;
+
+        // Убираем старые обработчики
+        const newMenuBtn = menuBtn.cloneNode(true);
+        menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
+
+        const finalMenuBtn = document.getElementById('menuDotsBtn');
+        finalMenuBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            dropdown.classList.toggle('show');
+            const drop = document.getElementById('actionDropdown');
+            if (drop) drop.classList.toggle('show');
         });
 
-        document.addEventListener('click', (e) => {
-            if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('show');
+        document.addEventListener('click', function(e) {
+            const drop = document.getElementById('actionDropdown');
+            const btn = document.getElementById('menuDotsBtn');
+            if (drop && btn && !btn.contains(e.target) && !drop.contains(e.target)) {
+                drop.classList.remove('show');
             }
         });
     }
 
-    // Жалоба
-    const reportBtn = document.getElementById('reportBtn');
-    if (reportBtn) {
-        reportBtn.addEventListener('click', () => {
-            alert('Функция жалобы будет доступна в ближайшее время');
-            dropdown.classList.remove('show');
-        });
+    // ===== МОДАЛКА ЖАЛОБЫ =====
+    function initReportModal() {
+        const reportBtn = document.getElementById('reportBtn');
+        const modal = document.getElementById('reportModal');
+        if (!reportBtn || !modal) return;
+
+        reportBtn.onclick = function(e) {
+            e.preventDefault();
+            const dropdown = document.getElementById('actionDropdown');
+            if (dropdown) dropdown.classList.remove('show');
+            modal.style.display = 'flex';
+        };
+
+        const closeBtn = modal.querySelector('.modal-close');
+        const cancelBtn = modal.querySelector('.modal-cancel');
+        if (closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
+        if (cancelBtn) cancelBtn.onclick = () => modal.style.display = 'none';
+
+        window.onclick = (e) => {
+            if (e.target === modal) modal.style.display = 'none';
+        };
+
+        const reportForm = document.getElementById('reportForm');
+        if (reportForm) {
+            reportForm.onsubmit = function(e) {
+                e.preventDefault();
+                const reason = document.getElementById('reportReason').value;
+                const description = this.querySelector('textarea')?.value || '';
+
+                if (!reason) {
+                    alert('Пожалуйста, выберите причину жалобы');
+                    return;
+                }
+
+                fetch('/api/report-impulse/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: `impulse_id=${impulseId}&reason=${encodeURIComponent(reason)}&description=${encodeURIComponent(description)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Жалоба отправлена. Спасибо!');
+                        modal.style.display = 'none';
+                        this.reset();
+                    } else {
+                        alert('Ошибка: ' + (data.error || 'Не удалось отправить жалобу'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ошибка соединения. Попробуйте позже.');
+                });
+            };
+        }
     }
 
-    // Реакции
-    document.querySelectorAll('.reaction-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const impulseId = this.dataset.impulseId;
-            const type = this.dataset.type;
+    // ===== ГЛАВНАЯ ИНИЦИАЛИЗАЦИЯ =====
+    document.addEventListener('DOMContentLoaded', function() {
+        // Реакции
+        const heartBtn = document.querySelector('.heart-reaction');
+        const blastBtn = document.querySelector('.blast-reaction');
 
-            fetch('{% url "WIEapp:toggle_resonance" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: `impulse_id=${impulseId}&resonance_type=${type}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.querySelector('.heart-reaction .reaction-count').innerText = data.heart_count;
-                document.querySelector('.blast-reaction .reaction-count').innerText = data.blast_count;
-                this.classList.toggle('active');
-            })
-            .catch(error => console.error('Error:', error));
-        });
+        if (heartBtn) {
+            heartBtn.onclick = (e) => {
+                e.preventDefault();
+                handleReactionClick('heart');
+            };
+        }
+        if (blastBtn) {
+            blastBtn.onclick = (e) => {
+                e.preventDefault();
+                handleReactionClick('blast');
+            };
+        }
+
+        initDropdown();
+        initReportModal();
+
+        // Помечаем, что главная инициализация выполнена
+        window.__impulseDetailReady = true;
+    });
+})();
+
+ document.addEventListener('DOMContentLoaded', function() {
+        console.log('Скрипт запущен');
+
+        const videoWrapper = document.querySelector('.detail-video-wrapper');
+        console.log('Найден wrapper:', videoWrapper);
+
+        if (videoWrapper) {
+            let videoUrl = videoWrapper.textContent.trim();
+            console.log('URL видео:', videoUrl);
+
+            let embedUrl = null;
+
+            // YouTube
+            if (videoUrl.includes('youtu.be')) {
+                console.log('Найдено YouTube (youtu.be)');
+                const videoId = videoUrl.split('/').pop().split('?')[0];
+                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            }
+            else if (videoUrl.includes('youtube.com/watch')) {
+                console.log('Найдено YouTube (watch)');
+                const urlParams = new URLSearchParams(videoUrl.split('?')[1]);
+                const videoId = urlParams.get('v');
+                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            }
+            // Vimeo
+            else if (videoUrl.includes('vimeo.com')) {
+                console.log('Найдено Vimeo');
+                const videoId = videoUrl.split('/').pop().split('?')[0];
+                embedUrl = `https://player.vimeo.com/video/${videoId}`;
+            }
+
+            if (embedUrl) {
+                // Очищаем wrapper и вставляем iframe
+                videoWrapper.innerHTML = '';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = embedUrl;
+                iframe.width = '100%';
+                iframe.height = '500';
+                iframe.frameBorder = '0';
+                iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+                iframe.allowFullscreen = true;
+                iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+
+                // Добавляем стили к iframe
+                iframe.style.width = '100%';
+                iframe.style.height = '500px';
+                iframe.style.border = 'none';
+                iframe.style.borderRadius = '12px';
+
+                videoWrapper.appendChild(iframe);
+                console.log('Iframe вставлен с принудительными стилями');
+            } else {
+                console.log('Не удалось распознать видео URL');
+                videoWrapper.innerHTML = `<a href="${videoUrl}" target="_blank" style="display: block; padding: 20px; text-align: center; color: #05026C;">Открыть видео →</a>`;
+            }
+        }
     });
 </script>
 {% endblock %}

@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
@@ -7,6 +6,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WHOisE — ВХОД</title>
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <style>
+        /* Адаптив */
+        @media (max-width: 768px) {
+            .auth-logo img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .inf {
+                font-size: 24px !important;
+                margin: 15px 20px !important;
+                text-align: center !important;
+            }
+
+            .auth-footer a {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .inf {
+                font-size: 20px !important;
+                margin: 10px 15px !important;
+            }
+
+            .auth-footer a {
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 {% block content %}
 <div class="auth-container">
@@ -15,7 +44,7 @@
             <img src="{% static 'img/mail.png' %}" alt="mail">
         </div>
 
-        <p class="inf" >Мы отправили ссылку для подтверждения на ваш email.</p>
+        <p class="inf">Мы отправили ссылку для подтверждения на ваш email.</p>
         <p class="inf">Перейдите по ней, чтобы завершить регистрацию.</p>
 
         <div class="auth-footer">

@@ -65,6 +65,7 @@ class Comment(models.Model):
     content = models.TextField()
     parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     created_at = models.DateTimeField(auto_now_add=True)
+    deleted_by_moderator = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['created_at']
@@ -134,24 +135,23 @@ class Notification(models.Model):
     def __str__(self):
         return f"{self.recipient.user.username} — {self.get_notification_type_display()}"
 
+
 class Report(models.Model):
     REASON_CHOICES = [
         ('spam', 'Спам'),
-        ('harassment', 'Оскорбления'),
+        ('harassment', 'Оскорбления / домогательства'),
         ('illegal', 'Незаконный контент'),
         ('other', 'Другое'),
     ]
 
     reporter = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='reports_made')
-    reported_user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='reports_received')
+    reported_user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='reports_received', null=True, blank=True)
+    reported_impulse = models.ForeignKey(Impulse, on_delete=models.CASCADE, null=True, blank=True)
+    reported_comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, blank=True)
     reason = models.CharField(max_length=50, choices=REASON_CHOICES)
-    description = models.TextField(blank=True)
-    status = models.CharField(max_length=20, default='pending')  # pending, reviewed, rejected
+    description = models.TextField(blank=True)  # ← ДОЛЖНО БЫТЬ
+    status = models.CharField(max_length=20, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.reporter.user.username} -> {self.reported_user.user.username} ({self.reason})"
-
 
 class Warning(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='warnings')
@@ -162,3 +162,25 @@ class Warning(models.Model):
 
     def __str__(self):
         return f"Warning for {self.user.user.username} by {self.moderator.user.username}"
+
+class UserQuestion(models.Model):
+    TOPIC_CHOICES = [
+        ('platform', 'О платформе'),
+        ('rules', 'Правила и модерация'),
+        ('technical', 'Технические проблемы'),
+        ('account', 'Аккаунт и профиль'),
+        ('other', 'Другое'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Ожидает ответа'),
+        ('answered', 'Ответ дан'),
+    ]
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, blank=True)
+    email = models.EmailField()
+    topic = models.CharField(max_length=20, choices=TOPIC_CHOICES)
+    question = models.CharField(max_length=255)
+    context = models.TextField(blank=True)
+    answer = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    answered_at = models.DateTimeField(null=True, blank=True)

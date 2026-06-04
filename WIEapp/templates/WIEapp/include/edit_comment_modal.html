@@ -1,0 +1,196 @@
+{% load static %}
+
+<div class="edit-comment-modal-overlay" id="editCommentModal" style="display: none;">
+    <div class="edit-comment-modal-content">
+        <div class="edit-comment-modal-header">
+            <h1>РЕДАКТИРОВАТЬ ОТКЛИК</h1>
+            <button class="edit-comment-modal-close">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'WIEapp:edit_comment' comment.id %}" class="edit-comment-form">
+            {% csrf_token %}
+            <div class="edit-comment-form-group">
+                <textarea name="content" rows="6" class="edit-comment-textarea" required>{{ comment.content }}</textarea>
+            </div>
+            <div class="edit-comment-actions">
+                <button type="submit" class="edit-comment-submit-btn">СОХРАНИТЬ</button>
+                <button type="button" class="edit-comment-cancel-btn">ОТМЕНА</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .edit-comment-modal-overlay {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .edit-comment-modal-content {
+        background: white;
+        max-width: 700px;
+        width: 90%;
+        margin: 0 auto;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .edit-comment-modal-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .edit-comment-modal-header h1 {
+        font-size: 34px;
+        font-weight: normal;
+        text-transform: uppercase;
+        margin: 0;
+        color: #05026C;
+    }
+
+    .edit-comment-modal-close {
+        font-size: 2rem;
+        cursor: pointer;
+        color: #8a9cb0;
+        background: none;
+        border: none;
+    }
+
+    .edit-comment-modal-close:hover {
+        color: #03009f;
+    }
+
+    .edit-comment-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .edit-comment-textarea {
+        width: 100%;
+        font-size: 24px;
+        font-style: italic;
+        font-weight: 300;
+        color: #1a2c3e;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #d0d8e0;
+        padding: 12px 0 8px 0;
+        outline: none;
+        font-family: inherit;
+        resize: vertical;
+    }
+
+    .edit-comment-textarea:focus {
+        border-bottom-color: #05026C;
+    }
+
+    .edit-comment-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 2rem;
+    }
+
+    .edit-comment-submit-btn {
+        background: #171A2A;
+        color: white;
+        border: none;
+        padding: 3px 60px;
+        height: 60px;
+        font-size: 32px;
+        font-weight: 800;
+        font-style: italic;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    .edit-comment-submit-btn:hover {
+        background: #03009f;
+        transform: scale(0.98);
+    }
+
+    .edit-comment-cancel-btn {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        color: #8a9cb0;
+        height: 60px;
+        padding: 0 24px;
+        font-size: 16px;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-family: inherit;
+    }
+
+    .edit-comment-cancel-btn:hover {
+        border-color: #05026c;
+        color: #05026c;
+        transform: scale(0.98);
+    }
+
+    @media (max-width: 768px) {
+        .edit-comment-submit-btn {
+            font-size: 24px;
+            padding: 3px 30px;
+            height: 50px;
+        }
+        .edit-comment-modal-header h1 {
+            font-size: 28px;
+        }
+        .edit-comment-textarea {
+            font-size: 18px;
+        }
+    }
+</style>
+
+<script>
+    (function() {
+        let currentEditModal = null;
+
+        window.showEditCommentModal = function(commentId) {
+            if (currentEditModal) {
+                currentEditModal.remove();
+            }
+
+            fetch(`/comment/edit/${commentId}/`)
+                .then(response => response.text())
+                .then(html => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const modal = tempDiv.querySelector('#editCommentModal');
+
+                    if (modal) {
+                        document.body.appendChild(modal);
+                        currentEditModal = modal;
+                        modal.style.display = 'flex';
+
+                        const closeBtn = modal.querySelector('.edit-comment-modal-close');
+                        const cancelBtn = modal.querySelector('.edit-comment-cancel-btn');
+
+                        const closeModal = () => {
+                            modal.style.display = 'none';
+                            setTimeout(() => {
+                                if (currentEditModal) currentEditModal.remove();
+                                currentEditModal = null;
+                            }, 300);
+                        };
+
+                        if (closeBtn) closeBtn.onclick = closeModal;
+                        if (cancelBtn) cancelBtn.onclick = closeModal;
+
+                        window.onclick = (e) => {
+                            if (e.target === modal) closeModal();
+                        };
+                    }
+                })
+                .catch(error => console.error('Error loading edit modal:', error));
+        };
+    })();
+</script>

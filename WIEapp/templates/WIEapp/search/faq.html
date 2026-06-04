@@ -1,10 +1,651 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-факю
-</body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="faq-container">
+
+    <!-- Шапка страницы -->
+    <div class="faq-header">
+            <img src="{% static 'img/faq.png' %}" alt="auto">
+    </div>
+
+
+
+    <!-- Раздел: О ПЛАТФОРМЕ -->
+    <div class="faq-section">
+        <h2 class="faq-section-title">О ПЛАТФОРМЕ</h2>
+
+        <div class="faq-accordion">
+            <!-- Вопрос 1 -->
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span class="faq-question">ЧТО ТАКОЕ WHOISE?</span>
+                    <span class="faq-icon">*</span>
+                </button>
+                <div class="faq-panel">
+                    <p class="faq-answer">
+                        Whoise — это цифровое арт-пространство, стирающее границы между привычным пониманием форума и платформой для креативного самовыражения. Здесь вы можете создавать импульсы, оставлять отклики и находить резонанс в четырёх пространствах: ПОТОК, ВИДЕНИЕ, ЧУТКОСТЬ и РЕМЕСЛО.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Вопрос 2 -->
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span class="faq-question">ЧТО ТАКОЕ "ПРОСТРАНСТВА"?</span>
+                    <span class="faq-icon">*</span>
+                </button>
+                <div class="faq-panel">
+                    <p class="faq-answer">
+                        Пространства — это тематические разделы платформы:<br>
+                        • <strong>ВИДЕНИЕ</strong> — для визуальных работ (обязательно изображение)<br>
+                        • <strong>ЧУТКОСТЬ</strong> — для личных эссе и рефлексии (только текст)<br>
+                        • <strong>РЕМЕСЛО</strong> — для туториалов и процессов (обязательно видео)<br>
+                        • <strong>ПОТОК</strong> — лента всех импульсов.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Вопрос 3 -->
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span class="faq-question">ЧТО ТАКОЕ "СЛЕД"?</span>
+                    <span class="faq-icon">*</span>
+                </button>
+                <div class="faq-panel">
+                    <p class="faq-answer">
+                        "След" — это пользователь платформы. Вы оставляете цифровые следы: импульсы, отклики, резонансы. Ваш профиль — это ваша карта следов.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Вопрос 4 -->
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span class="faq-question">ЧТО ТАКОЕ "РЕЗОНАНС"?</span>
+                    <span class="faq-icon">*</span>
+                </button>
+                <div class="faq-panel">
+                    <p class="faq-answer">
+                        Резонанс — это аналог лайка, но с двумя типами отклика:<br>
+                        - <strong> Сердечный резонанс</strong> — эмпатия, чувство, уязвимость<br>
+                        - <strong> Взрывной резонанс</strong> — энергия, согласие, импульс
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Раздел: ПРАВИЛА И МОДЕРАЦИЯ -->
+    <div class="faq-section">
+        <h2 class="faq-section-title">ПРАВИЛА И МОДЕРАЦИЯ</h2>
+
+        <div class="faq-accordion">
+            <!-- Вопрос 5 -->
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span class="faq-question">ПРАВИЛА ПЛАТФОРМЫ</span>
+                    <span class="faq-icon">*</span>
+                </button>
+                <div class="faq-panel">
+                    <p class="faq-answer">
+                        Запрещены оскорбления, спам, незаконный контент. Мы ценим уважительное отношение к другим Следам. За нарушения — предупреждения или бан. Три предупреждения ведут к автоматической блокировке аккаунта.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Вопрос 6 -->
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span class="faq-question">КАК ПОЖАЛОВАТЬСЯ НА КОНТЕНТ?</span>
+                    <span class="faq-icon">*</span>
+                </button>
+                <div class="faq-panel">
+                    <p class="faq-answer">
+                        Нажмите на три точки (⋮) рядом с контентом и выберите «ПОЖАЛОВАТЬСЯ». Укажите причину — модератор рассмотрит жалобу.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Вопрос 7 -->
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span class="faq-question">ЧТО ТАКОЕ "ЗАГЛУШИТЬ"?</span>
+                    <span class="faq-icon">*</span>
+                </button>
+                <div class="faq-panel">
+                    <p class="faq-answer">
+                        Заглушить пользователя — значит скрыть его посты из вашей ленты. При этом вы остаётесь подписанными на него (или нет). Разглушить можно в любой момент.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Раздел: АККАУНТ И ПРОФИЛЬ -->
+    <div class="faq-section">
+        <h2 class="faq-section-title">АККАУНТ И ПРОФИЛЬ</h2>
+
+        <div class="faq-accordion">
+            <!-- Вопрос 8 -->
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span class="faq-question">КАК ИЗМЕНИТЬ ПРОФИЛЬ?</span>
+                    <span class="faq-icon">*</span>
+                </button>
+                <div class="faq-panel">
+                    <p class="faq-answer">
+                        Перейдите в свой профиль (иконка пользователя в панели) и нажмите «ИЗМЕНИТЬ». Вы можете изменить аватар, баннер, имя (display_name) и описание (bio).
+                    </p>
+                </div>
+            </div>
+
+            <!-- Вопрос 9 -->
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span class="faq-question">ЧТО ТАКОЕ "ОРИЕНТИРЫ" И "СЛЕДОВАТЕЛИ"?</span>
+                    <span class="faq-icon">*</span>
+                </button>
+                <div class="faq-panel">
+                    <p class="faq-answer">
+                        <strong>Ориентиры</strong> — это подписки на других пользователей. <strong>Следователи</strong> — это те, кто подписан на вас.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Вопрос 10 -->
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span class="faq-question">КАК РАБОТАЮТ УВЕДОМЛЕНИЯ?</span>
+                    <span class="faq-icon">*</span>
+                </button>
+                <div class="faq-panel">
+                    <p class="faq-answer">
+                        Вы получаете уведомления, когда кто-то оставляет отклик на ваш импульс, отвечает на ваш комментарий, входит с вами в резонанс или подписывается на вас.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка "Задать вопрос" -->
+    <div class="faq-footer">
+        <button class="form-impuls-btn" id="askQuestionBtn">
+            <span class="plus">+</span>
+            <span class="bar-text">НЕ НАШЛИ ОТВЕТ? ЗАДАТЬ ВОПРОС</span>
+        </button>
+    </div>
+
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО ЗАДАТЬ ВОПРОС -->
+<div id="askModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>ЗАДАТЬ ВОПРОС</h2>
+            <span class="modal-close">&times;</span>
+        </div>
+        <form id="askQuestionForm" method="post">
+            {% csrf_token %}
+            <div class="modal-form-group">
+                <label>ТЕМА</label>
+                <select name="topic" id="questionTopic" required>
+                    <option value="">-- ВЫБЕРИТЕ ТЕМУ --</option>
+                    <option value="platform">О ПЛАТФОРМЕ</option>
+                    <option value="rules">ПРАВИЛА И МОДЕРАЦИЯ</option>
+                    <option value="technical">ТЕХНИЧЕСКИЕ ПРОБЛЕМЫ</option>
+                    <option value="account">АККАУНТ И ПРОФИЛЬ</option>
+                    <option value="other">ДРУГОЕ</option>
+                </select>
+            </div>
+            <div class="modal-form-group">
+                <label>ВОПРОС</label>
+                <input type="text" name="question" id="questionTitle" placeholder="КРАТКО СФОРМУЛИРУЙТЕ ВОПРОС" required>
+            </div>
+            <div class="modal-form-group">
+                <label>КОНТЕКСТ / ОПИСАНИЕ</label>
+                <textarea name="context" id="questionContext" rows="5" placeholder="ПОДРОБНО ОПИШИТЕ СИТУАЦИЮ..."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button type="submit" class="modal-submit">ОТПРАВИТЬ</button>
+                <button type="button" class="modal-cancel">ОТМЕНА</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- УВЕДОМЛЕНИЕ ОБ УСПЕХЕ -->
+<div id="successToast" class="success-toast" style="display: none;">
+    <div class="toast-content">
+        <div class="toast-title">✓ ВОПРОС ОТПРАВЛЕН</div>
+        <div class="toast-message">Ответ придёт на почту в ближайшее время</div>
+    </div>
+</div>
+
+<style>
+    .faq-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: 'Non Bureau', sans-serif;
+        color: #0A1128;
+    }
+
+    .faq-header {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        position: relative;
+        margin-bottom: 30px;
+        width: 100%;
+        height: auto;
+        padding-left: 50px;
+        box-sizing: border-box;
+    }
+
+    .faq-header img {
+        max-width: 800px;
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .faq-main-title {
+        font-size: 38px;
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -1.5px;
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    .faq-bg-text {
+        font-size: 40px;
+        font-weight: 300;
+        line-height: 1;
+        color: #171a2a;
+        text-align: right;
+        letter-spacing: -1px;
+        text-transform: uppercase;
+    }
+
+    .faq-sub-header {
+        border-bottom: 1px solid #171a2a;
+        padding-bottom: 8px;
+        margin-bottom: 40px;
+    }
+
+    .faq-sub-header span {
+        font-size: 20px;
+        font-weight: 300;
+        letter-spacing: -0.5px;
+        text-transform: uppercase;
+    }
+
+    .form-impuls-btn {
+        background: white;
+        color: #05026C;
+        border: 3px solid #05026C;
+        border-radius: 4px;
+        padding: 3px 120px;
+        font-size: 45px;
+        font-weight: 500;
+        font-style: italic;
+        letter-spacing: 1.5px;
+        transition: all 0.2s ease;
+        margin-top: 16px;
+        font-family: inherit;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+
+    .form-impuls-btn .plus {
+        margin-right: 100px;
+        flex-shrink: 0;
+    }
+
+    .form-impuls-btn .bar-text {
+        flex: 1;
+        text-align: center;
+    }
+
+    .faq-section {
+        margin-bottom: 45px;
+    }
+
+    .faq-section-title {
+        font-family: 'Non Bureau', 'Times New Roman', serif;
+        font-weight: 500;
+        font-style: italic;
+        font-size: 55px;
+        text-align: left;
+        margin: 60px 70px;
+        padding: 0;
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+    }
+
+    .faq-item {
+        padding-top: 20px;
+        border-bottom: 2px solid #171a2a;
+    }
+
+    .faq-trigger {
+        width: 100%;
+        background: none;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        cursor: pointer;
+        text-align: left;
+        color: #0A1128;
+        transition: color 0.2s ease;
+    }
+
+    .faq-trigger:hover {
+        color: #03009f;
+    }
+
+    .faq-question {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        text-transform: uppercase;
+    }
+
+    .faq-icon {
+        font-size: 40px;
+        font-weight: bold;
+        transition: transform 0.3s ease;
+        user-select: none;
+    }
+
+    .faq-panel {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+        padding: 0;
+    }
+
+    .faq-answer {
+        font-size: 20px;
+        line-height: 1.5;
+        color: #05026c;
+        margin: 0;
+        padding-bottom: 15px;
+        text-align: left;
+    }
+
+    .faq-item.active .faq-panel {
+        max-height: 1000px;
+        transition: max-height 0.5s cubic-bezier(1, 0, 1, 0);
+    }
+
+    /* МОДАЛЬНОЕ ОКНО — стили из формы */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        max-width: 600px;
+        width: 90%;
+        border-radius: 4px;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .modal-header {
+        margin-bottom: 2rem;
+        text-align: left;
+    }
+
+    .modal-header h2 {
+        font-family: 'Waterway', sans-serif;
+        font-size: 34px;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
+        border-left: none;
+        padding-left: 0;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        font-size: 2rem;
+        cursor: pointer;
+        color: #171a2a;
+        transition: color 0.2s ease;
+    }
+
+    .modal-close:hover {
+        color: #03009f;
+    }
+
+    .modal-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-form-group label {
+        display: block;
+        font-family: 'Waterway', sans-serif;
+        font-size: 34px;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+        text-align: left;
+    }
+
+    .modal-form-group input,
+    .modal-form-group select,
+    .modal-form-group textarea {
+        width: 100%;
+        background: white;
+        border: none;
+        border-bottom: 2px solid #171a2a;
+        padding: 0.8rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .modal-form-group input:focus,
+    .modal-form-group select:focus,
+    .modal-form-group textarea:focus {
+        outline: none;
+        border-bottom-color: #03009f;
+    }
+
+    .modal-form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        align-items: center;
+    }
+
+    .modal-submit {
+        background: #171A2A;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 0 60px;
+        height: 60px;
+        line-height: 1;
+        font-size: 48px;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: 1.5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .modal-submit:hover {
+        background: #03009f;
+        transform: scale(0.98);
+    }
+
+    .modal-cancel {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        border-radius: 3px;
+        color: #8a9cb0;
+        height: 60px;
+        line-height: 1;
+        padding: 0 24px;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-family: inherit;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+
+    .modal-cancel:hover {
+        border-color: #03009f;
+        color: #03009f;
+        transform: scale(0.98);
+    }
+
+    .success-toast {
+        position: fixed;
+        bottom: 100px;
+        right: 20px;
+        background: #cfdfff;
+        border-left: 4px solid #03009f;
+        padding: 12px 20px;
+        z-index: 1001;
+        border-radius: 4px;
+    }
+
+    @media (max-width: 600px) {
+        .faq-main-title {
+            font-size: 26px;
+        }
+        .faq-bg-text {
+            font-size: 32px;
+        }
+        .form-impuls-btn {
+            font-size: 24px;
+            padding: 3px 20px;
+        }
+        .form-impuls-btn .plus {
+            margin-right: 20px;
+        }
+        .modal-content {
+            padding: 1rem;
+        }
+        .modal-submit {
+            font-size: 28px;
+            padding: 0 30px;
+            height: 50px;
+        }
+        .modal-form-group label {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    // Аккордеон
+    document.addEventListener('DOMContentLoaded', function () {
+        const accordionTriggers = document.querySelectorAll('.faq-trigger');
+        accordionTriggers.forEach(trigger => {
+            trigger.addEventListener('click', function () {
+                const item = this.parentElement;
+                const icon = this.querySelector('.faq-icon');
+                item.classList.toggle('active');
+                icon.textContent = item.classList.contains('active') ? '−' : '+';
+            });
+        });
+    });
+
+    // Модальное окно
+    const modal = document.getElementById('askModal');
+    const askBtn = document.getElementById('askQuestionBtn');
+    const closeBtn = document.querySelector('.modal-close');
+    const cancelBtn = document.querySelector('.modal-cancel');
+
+    askBtn?.addEventListener('click', () => modal.style.display = 'flex');
+    closeBtn?.addEventListener('click', () => modal.style.display = 'none');
+    cancelBtn?.addEventListener('click', () => modal.style.display = 'none');
+    window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+    // Отправка вопроса
+    document.getElementById('askQuestionForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetch('/api/ask-question/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken
+            },
+            body: new URLSearchParams(new FormData(this))
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                modal.style.display = 'none';
+                this.reset();
+                const toast = document.getElementById('successToast');
+                toast.style.display = 'flex';
+                setTimeout(() => toast.style.display = 'none', 4000);
+            }
+        })
+        .catch(error => console.error('Ошибка:', error));
+    });
+</script>
+{% endblock %}

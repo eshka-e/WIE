@@ -1,3 +1,6 @@
+from datetime import timezone
+from django.db.models import Count, Exists, OuterRef, Q, Value
+from django.db.models.functions import Coalesce  # если нужно, но для Value достаточно
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
@@ -10,9 +13,12 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Profile, Impulse, Tag, Comment, Resonance, Landmark, Notification, Space
+from .models import Profile, Impulse, Tag, Comment, Resonance, Landmark, Notification, Space, Report, Warning
 from .forms import ImpulseForm, CommentForm, ProfileForm, SearchForm, CustomUserCreationForm
 from .utils import generate_verification_token, send_verification_email
+from .models import UserQuestion
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 def home(request):
@@ -159,6 +165,8 @@ def unread_notifications_count(request):
     return JsonResponse({'count': count})
 
 
+from django.db.models import Exists, OuterRef, Count, Q
+
 @login_required
 def stream_view(request):
     mode = request.GET.get('mode', 'all')
@@ -173,7 +181,26 @@ def stream_view(request):
 
     impulses = Impulse.objects.exclude(author_id__in=muted_users).select_related(
         'author__user', 'space'
-    ).prefetch_related('tags', 'resonances')
+    ).prefetch_related('tags').annotate(
+        # Подсчёт реакций
+        heart_count=Count('resonances', filter=Q(resonances__resonance_type='heart')),
+        blast_count=Count('resonances', filter=Q(resonances__resonance_type='blast')),
+        # Флаги реакций текущего пользователя
+        user_heart=Exists(
+            Resonance.objects.filter(
+                impulse=OuterRef('pk'),
+                user=user_profile,
+                resonance_type='heart'
+            )
+        ),
+        user_blast=Exists(
+            Resonance.objects.filter(
+                impulse=OuterRef('pk'),
+                user=user_profile,
+                resonance_type='blast'
+            )
+        )
+    )
 
     if mode == 'followed':
         followed_users = Landmark.objects.filter(
@@ -197,14 +224,15 @@ def stream_view(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render(request, 'WIEapp/include/impulse_cards.html', {
             'impulses': impulses_page,
-            'has_next': impulses_page.has_next()  # ← передаём флаг
+            'has_next': impulses_page.has_next()
         })
 
     return render(request, 'WIEapp/impulses/stream.html', {
         'impulses': impulses_page,
         'mode': mode,
-        'has_next': impulses_page.has_next(),  # ← передаём флаг
-        'spaces': Space.objects.all()
+        'has_next': impulses_page.has_next(),
+        'spaces': Space.objects.all(),
+        'current_space_name': 'ПОТОК',
     })
 
 @login_required
@@ -213,6 +241,7 @@ def spaces_list_view(request):
     return render(request, 'WIEapp/spaces_list.html', {'spaces': spaces})
 
 
+@login_required
 @login_required
 def space_detail_view(request, space_name):
     space = get_object_or_404(Space, name=space_name)
@@ -226,10 +255,29 @@ def space_detail_view(request, space_name):
         is_muted=True
     ).values_list('target_id', flat=True)
 
-    # Базовый запрос
+    # Базовый запрос с аннотациями
     impulses = Impulse.objects.filter(space=space).exclude(author_id__in=muted_users).select_related(
         'author__user'
-    ).prefetch_related('tags', 'resonances')
+    ).prefetch_related('tags').annotate(
+        # Подсчёт реакций
+        heart_count=Count('resonances', filter=Q(resonances__resonance_type='heart')),
+        blast_count=Count('resonances', filter=Q(resonances__resonance_type='blast')),
+        # Флаги реакций текущего пользователя
+        user_heart=Exists(
+            Resonance.objects.filter(
+                impulse=OuterRef('pk'),
+                user=user_profile,
+                resonance_type='heart'
+            )
+        ),
+        user_blast=Exists(
+            Resonance.objects.filter(
+                impulse=OuterRef('pk'),
+                user=user_profile,
+                resonance_type='blast'
+            )
+        )
+    )
 
     if mode == 'followed':
         followed_users = Landmark.objects.filter(
@@ -260,6 +308,7 @@ def space_detail_view(request, space_name):
         'current_space': space,
         'mode': mode,
         'has_next': impulses_page.has_next(),
+        'current_space_name': space.get_name_display(),
     })
 @login_required
 def impulse_detail_view(request, impulse_id):
@@ -305,6 +354,7 @@ def impulse_detail_view(request, impulse_id):
         'blast_count': impulse.resonances.filter(resonance_type='blast').count(),
         'user_heart': user_heart,
         'user_blast': user_blast,
+
     })
 
 
@@ -358,6 +408,9 @@ def delete_impulse_view(request, impulse_id):
     return render(request, 'WIEapp/impulses/impulse_confirm_delete.html', {'impulse': impulse})
 
 
+from django.db.models import Count, Exists, OuterRef, Q
+
+
 def profile_view(request, username=None):
     if username:
         user = get_object_or_404(User, username=username)
@@ -370,7 +423,7 @@ def profile_view(request, username=None):
 
     profile = get_object_or_404(Profile, user=user)
 
-    # Если профиль заглушён текущим пользователем — показываем заглушку
+    # Проверка на заглушку
     if request.user.is_authenticated and not is_own_profile:
         is_muted_by_me = Landmark.objects.filter(
             follower=request.user.profile,
@@ -381,10 +434,29 @@ def profile_view(request, username=None):
         if is_muted_by_me:
             return render(request, 'WIEapp/profile/muted_profile.html', {'profile': profile})
 
-    # Импульсы пользователя (без фильтрации по заглушке — это его собственный контент)
-    impulses = Impulse.objects.filter(author=profile).select_related('space').order_by('-created_at')
+    # Импульсы пользователя С АННОТАЦИЯМИ
+    impulses = Impulse.objects.filter(author=profile).select_related('space').annotate(
+        heart_count=Count('resonances', filter=Q(resonances__resonance_type='heart')),
+        blast_count=Count('resonances', filter=Q(resonances__resonance_type='blast')),
+        user_heart=Exists(
+            Resonance.objects.filter(
+                impulse=OuterRef('pk'),
+                user=request.user.profile,
+                resonance_type='heart'
+            )
+        ) if request.user.is_authenticated else Value(False),
+        user_blast=Exists(
+            Resonance.objects.filter(
+                impulse=OuterRef('pk'),
+                user=request.user.profile,
+                resonance_type='blast'
+            )
+        ) if request.user.is_authenticated else Value(False)
+    ).order_by('-created_at')
+
     impulses_count = impulses.count()
 
+    # Группировка по пространствам
     impulses_by_space = {}
     for impulse in impulses:
         space_key = impulse.space.name
@@ -432,7 +504,6 @@ def profile_view(request, username=None):
         'is_following': is_following,
         'is_muted': is_muted,
     })
-
 
 
 @login_required
@@ -555,10 +626,12 @@ def toggle_resonance(request):
 
         if existing:
             existing.delete()
+            user_has = False
         else:
             Resonance.objects.create(
                 user=user_profile, impulse=impulse, resonance_type=resonance_type
             )
+            user_has = True
             if impulse.author != user_profile:
                 Notification.objects.create(
                     recipient=impulse.author,
@@ -571,10 +644,11 @@ def toggle_resonance(request):
         return JsonResponse({
             'heart_count': impulse.resonances.filter(resonance_type='heart').count(),
             'blast_count': impulse.resonances.filter(resonance_type='blast').count(),
+            'user_heart': resonance_type == 'heart' and user_has,
+            'user_blast': resonance_type == 'blast' and user_has,
         })
 
     return JsonResponse({'error': 'no target'}, status=400)
-
 
 @login_required
 @require_http_methods(['POST'])
@@ -774,56 +848,27 @@ def delete_comment(request, comment_id):
 
 @login_required
 @require_http_methods(['POST'])
-def unban_user(request):
-    """Разбан пользователя (только для админов)"""
-    if not request.user.is_superuser:
-        return JsonResponse({'error': 'permission denied'}, status=403)
-
-    user_id = request.POST.get('user_id')
-    if not user_id:
-        return JsonResponse({'error': 'no user_id'}, status=400)
-
-    target_profile = get_object_or_404(Profile, id=user_id)
-
-    # Активируем пользователя
-    target_profile.user.is_active = True
-    target_profile.user.save()
-
-    # Опционально: сбросить активные предупреждения
-    # Warning.objects.filter(user=target_profile, is_active=True).update(is_active=False)
-
-    return JsonResponse({'status': 'unbanned'})
-
-
-# ЕСЛИ У ТЕБЯ НЕТ ЭТОЙ ФУНКЦИИ, ДОБАВЬ (ОНА УЖЕ ДОЛЖНА БЫТЬ, НО НА ВСЯКИЙ СЛУЧАЙ)
-@login_required
-@require_http_methods(['POST'])
 def warn_user(request):
-    """Выдача предупреждения (только для админов)"""
     if not request.user.is_superuser:
         return JsonResponse({'error': 'permission denied'}, status=403)
 
     user_id = request.POST.get('user_id')
-    if not user_id:
-        return JsonResponse({'error': 'no user_id'}, status=400)
+    reason = request.POST.get('reason', 'Нарушение правил платформы')
 
     target_profile = get_object_or_404(Profile, id=user_id)
 
-    # Нельзя выдавать предупреждение админу
     if target_profile.user.is_superuser:
         return JsonResponse({'error': 'cannot warn an admin'}, status=400)
 
-    # Создаём предупреждение
     Warning.objects.create(
         user=target_profile,
         moderator=request.user.profile,
-        reason='Нарушение правил платформы'
+        reason=reason
     )
 
     warnings_count = Warning.objects.filter(user=target_profile, is_active=True).count()
     is_banned = False
 
-    # Три предупреждения → бан
     if warnings_count >= 3:
         target_profile.user.is_active = False
         target_profile.user.save()
@@ -835,36 +880,224 @@ def warn_user(request):
         'is_banned': is_banned
     })
 
+
 @login_required
 @require_http_methods(['POST'])
 def ban_user(request):
-    """Мгновенный бан пользователя (только для админов)"""
     if not request.user.is_superuser:
         return JsonResponse({'error': 'permission denied'}, status=403)
 
     user_id = request.POST.get('user_id')
-    if not user_id:
-        return JsonResponse({'error': 'no user_id'}, status=400)
+    reason = request.POST.get('reason', 'Мгновенный бан за грубое нарушение')
 
     target_profile = get_object_or_404(Profile, id=user_id)
 
-    # Нельзя банить админа
     if target_profile.user.is_superuser:
         return JsonResponse({'error': 'cannot ban an admin'}, status=400)
 
-    # Баним пользователя
     target_profile.user.is_active = False
     target_profile.user.save()
 
-    # Опционально: добавить запись в Warning с особым типом
     Warning.objects.create(
         user=target_profile,
         moderator=request.user.profile,
-        reason='Мгновенный бан за грубое нарушение'
+        reason=reason
     )
 
     return JsonResponse({'status': 'banned'})
 
+
+@login_required
+@require_http_methods(['POST'])
+def unban_user(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'permission denied'}, status=403)
+
+    user_id = request.POST.get('user_id')
+    reason = request.POST.get('reason', 'Разбан по решению администрации')
+
+    target_profile = get_object_or_404(Profile, id=user_id)
+
+    target_profile.user.is_active = True
+    target_profile.user.save()
+
+    # Опционально: можно создать уведомление о разбане
+    Notification.objects.create(
+        recipient=target_profile,
+        sender=request.user.profile,
+        notification_type='moderation',
+        metadata={'action': 'unban', 'reason': reason}
+    )
+
+    return JsonResponse({'status': 'unbanned'})
+
+
 def faq_view(request):
     form = SearchForm(request.GET or None)
     return render(request, 'WIEapp/search/faq.html', {'form': form})
+
+@login_required
+def ask_question_api(request):
+    if request.method == 'POST':
+        topic = request.POST.get('topic')
+        question = request.POST.get('question')
+        context = request.POST.get('context', '')
+        user_profile = request.user.profile
+        UserQuestion.objects.create(
+            user=user_profile,
+            email=user_profile.user.email,
+            topic=topic,
+            question=question,
+            context=context
+        )
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+@login_required
+def admin_answer_question(request, question_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'permission denied'}, status=403)
+
+    question = get_object_or_404(UserQuestion, id=question_id)
+
+    if request.method == 'POST':
+        answer = request.POST.get('answer')
+        question.answer = answer
+        question.status = 'answered'
+        question.answered_at = timezone.now()
+        question.save()
+
+        # ОТПРАВКА ПИСЬМА ПОЛЬЗОВАТЕЛЮ
+        send_mail(
+            subject=f'Ответ на ваш вопрос | WHOisE',
+            message=f'Здравствуйте!\n\nВы спрашивали:\n"{question.question}"\n\nОтвет администратора:\n{answer}\n\nС уважением, команда WHOisE',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[question.email],
+            fail_silently=False,
+        )
+
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+@login_required
+def report_impulse(request):
+    if request.method == 'POST':
+        try:
+            impulse_id = request.POST.get('impulse_id')
+            reason = request.POST.get('reason')
+            description = request.POST.get('description', '')
+
+            impulse = get_object_or_404(Impulse, id=impulse_id)
+
+            Report.objects.create(
+                reporter=request.user.profile,
+                reported_impulse=impulse,
+                reason=reason,
+                description=description,
+                status='pending'
+            )
+
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'invalid method'}, status=400)
+
+@login_required
+def report_user(request):
+    if request.method == 'POST':
+        target_id = request.POST.get('user_id')
+        reason = request.POST.get('reason')
+        description = request.POST.get('description', '')
+
+        if not target_id or not reason:
+            return JsonResponse({'error': 'Не хватает данных'}, status=400)
+
+        target_profile = get_object_or_404(Profile, id=target_id)
+
+        if target_profile == request.user.profile:
+            return JsonResponse({'error': 'Нельзя жаловаться на себя'}, status=400)
+
+        # Проверь, что в модели Report есть поле description
+        Report.objects.create(
+            reporter=request.user.profile,
+            reported_user=target_profile,
+            reason=reason,
+            description=description,
+            status='pending'
+        )
+        return JsonResponse({'status': 'reported'})
+
+    return JsonResponse({'error': 'invalid method'}, status=400)
+
+@login_required
+def report_comment(request):
+    if request.method == 'POST':
+        comment_id = request.POST.get('comment_id')
+        reason = request.POST.get('reason')
+        description = request.POST.get('description', '')
+
+        comment = get_object_or_404(Comment, id=comment_id)
+
+        Report.objects.create(
+            reporter=request.user.profile,
+            reported_comment=comment,
+            reason=reason,
+            description=description,
+            status='pending'
+        )
+
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'error': 'invalid method'}, status=400)
+
+
+@login_required
+def edit_comment_view(request, comment_id):
+    """Редактирование комментария"""
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    # Проверка прав: только автор комментария
+    if comment.author != request.user.profile:
+        messages.error(request, 'У вас нет прав на редактирование этого комментария')
+        return redirect('WIEapp:impulse_detail', impulse_id=comment.impulse.id)
+
+    if request.method == 'POST':
+        new_content = request.POST.get('content', '').strip()
+        if new_content:
+            comment.content = new_content
+            comment.is_modified = True
+            comment.save()
+            messages.success(request, 'Комментарий обновлён')
+        return redirect('WIEapp:impulse_detail', impulse_id=comment.impulse.id)
+
+    # GET запрос — показываем форму редактирования
+    return render(request, 'WIEapp/include/edit_comment_modal.html', {
+        'comment': comment
+    })
+
+
+@login_required
+def delete_comment_view(request, comment_id):
+    """Удаление комментария с подтверждением"""
+    comment = get_object_or_404(Comment, id=comment_id)
+    user_profile = request.user.profile
+
+    # Права: автор комментария, автор импульса или админ
+    if user_profile != comment.author and user_profile != comment.impulse.author and not user_profile.user.is_superuser:
+        messages.error(request, 'У вас нет прав на удаление этого комментария')
+        return redirect('WIEapp:impulse_detail', impulse_id=comment.impulse.id)
+
+    if request.method == 'POST':
+        impulse_id = comment.impulse.id
+        comment.delete()
+        messages.success(request, 'Комментарий удалён')
+        return redirect('WIEapp:impulse_detail', impulse_id=impulse_id)
+
+    # GET запрос — показываем модальное окно подтверждения
+    return render(request, 'WIEapp/include/delete_comment_modal.html', {
+        'comment': comment
+    })

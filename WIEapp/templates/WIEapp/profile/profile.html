@@ -56,11 +56,15 @@
                 <button type="submit" class="btn-logout">ВЫХОД</button>
             </form>
             <div class="nav-actions">
-                <button class="menu-dots-btn" id="more-menu-btn-self">⋮</button>
-                <div class="dropdown-menu" id="more-dropdown-self">
-                    <a href="{% url 'WIEapp:faq' %}" class="dropdown-item">❓ FAQ / ПОМОЩЬ</a>
-                </div>
-            </div>
+    <button class="menu-dots-btn" id="more-menu-btn-self">⋮</button>
+    <div class="dropdown-menu" id="more-dropdown-self">
+        {% if user.is_superuser %}
+            <a href="/admin/" target="_blank" class="dropdown-item admin-link">🔧 АДМИН-ПАНЕЛЬ</a>
+            <div class="dropdown-divider"></div>
+        {% endif %}
+        <a href="{% url 'WIEapp:faq' %}" class="dropdown-item">FAQ / ПОМОЩЬ</a>
+    </div>
+</div>
         </div>
         {% endif %}
 
@@ -74,23 +78,23 @@
             <div class="nav-actions">
                 <button class="menu-dots-btn" id="more-menu-btn">⋮</button>
                 <div class="dropdown-menu" id="more-dropdown">
-                    <button id="mute-btn" class="dropdown-item">
+                    <button id="mute-btn" class="dropdown-item" data-user-id="{{ profile.id }}">
                         {% if is_muted %}РАЗГЛУШИТЬ{% else %}ЗАГЛУШИТЬ{% endif %}
                     </button>
-                    <button id="report-btn" class="dropdown-item report">ПОЖАЛОВАТЬСЯ</button>
+                    <button id="report-btn" class="dropdown-item report" data-user-id="{{ profile.id }}">ПОЖАЛОВАТЬСЯ</button>
 
                     {% if user.is_superuser %}
                     <div class="dropdown-divider"></div>
                     <div class="dropdown-header">АДМИН-ПАНЕЛЬ</div>
-                    <button id="warn-btn" class="dropdown-item warn-admin">⚠ ВЫДАТЬ ПРЕДУПРЕЖДЕНИЕ</button>
-                    <button id="ban-btn" class="dropdown-item ban-admin">🔨 БАН</button>
+                    <button id="warn-btn" class="dropdown-item warn-admin" data-user-id="{{ profile.id }}">ВЫДАТЬ ПРЕДУПРЕЖДЕНИЕ</button>
+                    <button id="ban-btn" class="dropdown-item ban-admin" data-user-id="{{ profile.id }}">БАН</button>
                     {% if profile.user.is_active == False %}
-                    <button id="unban-btn" class="dropdown-item unban-admin">🔄 РАЗБАНИТЬ</button>
+                    <button id="unban-btn" class="dropdown-item unban-admin" data-user-id="{{ profile.id }}">РАЗБАНИТЬ</button>
                     {% endif %}
                     {% endif %}
 
                     <div class="dropdown-divider"></div>
-                    <a href="{% url 'WIEapp:faq' %}" class="dropdown-item">❓ FAQ / ПОМОЩЬ</a>
+                    <a href="{% url 'WIEapp:faq' %}" class="dropdown-item">FAQ / ПОМОЩЬ</a>
                 </div>
             </div>
         </div>
@@ -127,8 +131,7 @@
                     <div class="space-section">
                         <h2 class="space-title">{{ space.name }}</h2>
                         <div class="space-impulses">
-                            {% include 'WIEapp/include/impulse_cards.html' with impulses=space.impulses %}
-                        </div>
+{% include 'WIEapp/include/impulse_cards.html' with impulses=space.impulses %}                        </div>
                     </div>
                 {% endfor %}
             {% else %}
@@ -138,15 +141,6 @@
             {% endif %}
         </section>
     </div>
-</div>
-
-<div id="notification-toast" class="notification-toast" style="display: none;">
-    <div class="toast-icon" id="toast-icon"></div>
-    <div class="toast-content">
-        <div class="toast-title" id="toast-title"></div>
-        <div class="toast-message" id="toast-message"></div>
-    </div>
-    <button class="toast-close" onclick="closeToast()">×</button>
 </div>
 
 <style>
@@ -229,6 +223,8 @@
         font-size: 68px;
         letter-spacing: 0.1em;
         margin: 0.5rem 0 0.2rem 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
     .username-tag {
@@ -236,6 +232,7 @@
         color: #171a2a;
         font-size: 32px;
         margin: -0.5rem 0 1rem 0;
+        word-wrap: break-word;
     }
 
     .profile-stats {
@@ -243,6 +240,7 @@
         justify-content: center;
         gap: 2rem;
         margin: 1rem 0;
+        flex-wrap: wrap;
     }
 
     .stat-item {
@@ -278,6 +276,7 @@
         gap: 1rem;
         margin: 1rem 0 2rem 0;
         align-items: center;
+        flex-wrap: wrap;
     }
 
     .btn-edit {
@@ -291,6 +290,12 @@
         text-decoration: none;
         display: inline-block;
         font-style: italic;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-edit:hover {
+        background: rgba(23, 26, 42, 0.05);
     }
 
     .btn-logout {
@@ -305,6 +310,10 @@
         cursor: pointer;
     }
 
+    .btn-logout:hover {
+        background: rgba(153, 0, 2, 0.05);
+    }
+
     .profile-buttons {
         display: flex;
         justify-content: center;
@@ -312,6 +321,7 @@
         gap: 0.75rem;
         margin: 1rem 0;
         position: relative;
+        flex-wrap: wrap;
     }
 
     .follow-btn-custom {
@@ -340,6 +350,7 @@
 
     .follow-back-custom:hover {
         background: rgba(153, 0, 2, 0.05);
+        transform: scale(0.98);
     }
 
     .follow-already-custom {
@@ -371,6 +382,8 @@
         line-height: 1;
         align-items: center;
         justify-content: center;
+        width: 40px;
+        height: 40px;
     }
 
     .menu-dots-btn:hover {
@@ -384,7 +397,7 @@
         background: white;
         border-radius: 12px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        min-width: 180px;
+        min-width: 200px;
         display: none;
         z-index: 100;
         overflow: hidden;
@@ -408,6 +421,7 @@
         cursor: pointer;
         transition: background 0.2s;
         text-decoration: none;
+        box-sizing: border-box;
     }
 
     .dropdown-item:hover {
@@ -455,6 +469,7 @@
         letter-spacing: 0.02em;
         font-weight: normal;
         line-height: 1.2;
+        word-wrap: break-word;
     }
 
     .space-title {
@@ -467,6 +482,7 @@
         padding: 0;
         letter-spacing: -0.01em;
         line-height: 1.1;
+        word-wrap: break-word;
     }
 
     .form-impuls-btn {
@@ -488,6 +504,12 @@
         justify-content: space-between;
         width: 100%;
         box-sizing: border-box;
+        cursor: pointer;
+    }
+
+    .form-impuls-btn:hover {
+        transform: scale(0.98);
+        background: #f8fafc;
     }
 
     .form-impuls-btn .plus {
@@ -520,6 +542,7 @@
         box-sizing: border-box;
         letter-spacing: 0.02em;
         line-height: 1.2;
+        word-wrap: break-word;
     }
 
     .bio-content .placeholder-text {
@@ -560,232 +583,671 @@
         margin: 0;
     }
 
-    .notification-toast {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        min-width: 300px;
-        max-width: 400px;
-        background: #ffeded;
-        border-radius: 8px;
-        padding: 16px 20px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        z-index: 9999;
-        border-left: 4px solid;
-        animation: slideIn 0.3s ease-out;
+    /* ========== АДАПТИВНЫЕ СТИЛИ ========== */
+
+    @media (max-width: 1024px) {
+        .profile-content { padding-right: 30px; }
+        .space-title { margin: 40px 40px; font-size: 45px; }
+        .bio-content:has(p:not(.placeholder-text)) p { padding-left: 50px; padding-right: 50px; font-size: 30px; }
+        .main-username { font-size: 50px; }
+        .username-tag { font-size: 28px; }
+        .section-label { font-size: 48px; }
+        .form-impuls-btn { padding: 3px 60px; font-size: 36px; }
+        .form-impuls-btn .plus { margin-right: 50px; }
+        .avatar { width: 200px; height: 200px; }
+        .avatar-wrapper { margin-top: -125px; }
+        .profile-cover { height: 250px; }
     }
-
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-
-    .notification-toast.warning { border-left-color: #ffaa66; }
-    .notification-toast.ban { border-left-color: #ff4444; }
-
-    .toast-icon { font-size: 24px; width: 32px; text-align: center; }
-    .toast-content { flex: 1; }
-    .toast-title { font-weight: bold; margin-bottom: 4px; font-size: 14px; }
-    .toast-message { font-size: 12px; opacity: 0.9; }
-    .toast-close { background: none; border: none; font-size: 20px; cursor: pointer; opacity: 0.6; }
 
     @media (max-width: 768px) {
-        .profile-content { padding-right: 20px; }
-        .space-title { margin: 40px 20px; font-size: 40px; }
-        .bio-content:has(p:not(.placeholder-text)) p { padding-left: 20px; padding-right: 20px; font-size: 24px; }
-        .main-username { font-size: 40px; }
-        .username-tag { font-size: 24px; }
-        .section-label { font-size: 40px; }
-        .form-impuls-btn { padding: 3px 40px; font-size: 28px; }
-        .form-impuls-btn .plus { margin-right: 30px; }
-        .notification-toast { bottom: 20px; right: 20px; left: 20px; max-width: none; }
+        .profile-content { padding-right: 20px; padding-left: 20px; }
+        .space-title { margin: 30px 20px; font-size: 35px; }
+        .bio-content:has(p:not(.placeholder-text)) p { padding-left: 20px; padding-right: 20px; font-size: 24px; padding-bottom: 20px; }
+        .main-username { font-size: 36px; letter-spacing: 0.05em; }
+        .username-tag { font-size: 20px; margin: -0.3rem 0 0.8rem 0; }
+        .profile-stats { gap: 1.5rem; }
+        .stat-value { font-size: 28px; }
+        .stat-label { font-size: 18px; }
+        .section-label { font-size: 36px; margin: 20px 0 0 0; }
+        .form-impuls-btn { padding: 3px 30px; font-size: 28px; border-width: 2px; }
+        .form-impuls-btn .plus { margin-right: 20px; font-size: 32px; }
+        .avatar { width: 150px; height: 150px; }
+        .avatar-wrapper { margin-top: -90px; margin-bottom: 10px; }
+        .profile-cover { height: 200px; }
+        .cover-placeholder span { font-size: 0.7rem; }
+        .profile-actions, .profile-buttons { gap: 0.5rem; }
+        .btn-edit, .btn-logout, .follow-back-custom, .follow-already-custom { padding: 3px 15px; font-size: 13px; }
+        .menu-dots-btn { width: 35px; height: 35px; font-size: 1.3rem; }
+        .dropdown-menu { min-width: 180px; right: -10px; }
+        .dropdown-item { padding: 10px 14px; font-size: 0.8rem; }
+    }
+
+    @media (max-width: 480px) {
+        .profile-content { padding-right: 15px; padding-left: 15px; }
+        .space-title { margin: 20px 10px; font-size: 28px; }
+        .bio-content:has(p:not(.placeholder-text)) p { padding-left: 10px; padding-right: 10px; font-size: 20px; line-height: 1.3; }
+        .main-username { font-size: 28px; }
+        .username-tag { font-size: 16px; }
+        .profile-stats { gap: 1rem; }
+        .stat-value { font-size: 22px; }
+        .stat-label { font-size: 14px; }
+        .section-label { font-size: 28px; }
+        .form-impuls-btn { padding: 2px 20px; font-size: 22px; border-width: 2px; }
+        .form-impuls-btn .plus { margin-right: 10px; font-size: 26px; }
+        .form-impuls-btn .bar-text { font-size: 20px; }
+        .avatar { width: 120px; height: 120px; }
+        .avatar-wrapper { margin-top: -70px; }
+        .profile-cover { height: 150px; }
+        .btn-edit, .btn-logout, .follow-back-custom, .follow-already-custom { padding: 2px 12px; font-size: 11px; }
+        .menu-dots-btn { width: 30px; height: 30px; font-size: 1.2rem; }
+        .dropdown-menu { min-width: 160px; }
+        .dropdown-item { padding: 8px 12px; font-size: 0.75rem; }
+        .bio-content .placeholder-text { font-size: 0.9rem; }
+        .no-impulses { padding: 20px 0; }
+        .no-impulses .placeholder-text { font-size: 0.9rem; }
+    }
+
+    @media (max-width: 320px) {
+        .main-username { font-size: 24px; }
+        .username-tag { font-size: 14px; }
+        .stat-value { font-size: 18px; }
+        .stat-label { font-size: 12px; }
+        .section-label { font-size: 24px; }
+        .space-title { font-size: 24px; margin: 15px 5px; }
+        .form-impuls-btn { font-size: 18px; }
+        .form-impuls-btn .bar-text { font-size: 16px; }
+        .avatar { width: 100px; height: 100px; }
+        .avatar-wrapper { margin-top: -60px; }
+        .profile-cover { height: 120px; }
+    }
+
+    @media (max-width: 768px) and (orientation: landscape) {
+        .profile-cover { height: 150px; }
+        .avatar { width: 100px; height: 100px; }
+        .avatar-wrapper { margin-top: -60px; }
+        .main-username { font-size: 32px; }
+        .username-tag { font-size: 18px; }
+        .space-title { margin: 20px 20px; font-size: 30px; }
+        .section-label { font-size: 32px; }
+    }
+
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .btn-edit, .btn-logout, .follow-back-custom, .follow-already-custom { border-width: 0.5px; }
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+        .btn-edit:active, .btn-logout:active, .follow-back-custom:active, .form-impuls-btn:active, .menu-dots-btn:active {
+            transform: scale(0.96);
+        }
+        .dropdown-item:active { background: #f0f2f5; }
+    }
+
+    /* ===== МОДАЛЬНЫЕ ОКНА (как в impulse_detail) ===== */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        max-width: 600px;
+        width: 90%;
+        border-radius: 4px;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .modal-header {
+        margin-bottom: 2rem;
+        text-align: left;
+    }
+
+    .modal-header h2 {
+        font-family: 'Waterway', sans-serif;
+        font-size: 34px;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
+        border-left: none;
+        padding-left: 0;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        font-size: 2rem;
+        cursor: pointer;
+        color: #171a2a;
+        transition: color 0.2s ease;
+    }
+
+    .modal-close:hover {
+        color: #03009f;
+    }
+
+    .modal-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-form-group label {
+        display: block;
+        font-family: 'Waterway', sans-serif;
+        font-size: 34px;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+        text-align: left;
+    }
+
+    .modal-form-group input,
+    .modal-form-group select,
+    .modal-form-group textarea {
+        width: 100%;
+        background: white;
+        border: none;
+        border-bottom: 2px solid #171a2a;
+        padding: 0.8rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .modal-form-group input:focus,
+    .modal-form-group select:focus,
+    .modal-form-group textarea:focus {
+        outline: none;
+        border-bottom-color: #03009f;
+    }
+
+    .modal-form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        align-items: center;
+    }
+
+    .modal-submit {
+        background: #171A2A;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 0 60px;
+        height: 60px;
+        line-height: 1;
+        font-size: 48px;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: 1.5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .modal-submit:hover {
+        background: #03009f;
+        transform: scale(0.98);
+    }
+
+    .modal-cancel {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        border-radius: 3px;
+        color: #8a9cb0;
+        height: 60px;
+        line-height: 1;
+        padding: 0 24px;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-family: inherit;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+
+    .modal-cancel:hover {
+        border-color: #03009f;
+        color: #03009f;
+        transform: scale(0.98);
+    }
+
+    @media (max-width: 600px) {
+        .modal-content { padding: 1rem; }
+        .modal-submit { font-size: 28px; padding: 0 30px; height: 50px; }
+        .modal-form-group label { font-size: 24px; }
     }
 </style>
 
 <script>
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+    // CSRF-токен уже объявлен в base.html, используем его
+
+    // ========== МЕНЮ ДЛЯ СВОЕГО ПРОФИЛЯ ==========
+    function initSelfMenu() {
+        const moreBtnSelf = document.getElementById('more-menu-btn-self');
+        const moreDropdownSelf = document.getElementById('more-dropdown-self');
+
+        if (moreBtnSelf && moreDropdownSelf) {
+            moreBtnSelf.onclick = function(e) {
+                e.stopPropagation();
+                moreDropdownSelf.classList.toggle('show');
+            };
+            document.addEventListener('click', function() {
+                moreDropdownSelf.classList.remove('show');
+            });
+            moreDropdownSelf.onclick = function(e) {
+                e.stopPropagation();
+            };
         }
-        return cookieValue;
     }
 
-    const csrftoken = getCookie('csrftoken');
-    let toastTimeout = null;
+    // ========== МЕНЮ ДЛЯ ЧУЖОГО ПРОФИЛЯ ==========
+    function initOtherMenu() {
+        const moreBtn = document.getElementById('more-menu-btn');
+        const moreDropdown = document.getElementById('more-dropdown');
 
-    function showToast(title, message, type = 'info') {
-        const toast = document.getElementById('notification-toast');
-        const toastTitle = document.getElementById('toast-title');
-        const toastMessage = document.getElementById('toast-message');
-        const toastIcon = document.getElementById('toast-icon');
-
-        toast.classList.remove('warning', 'ban');
-        toast.classList.add(type);
-        toastIcon.textContent = type === 'warning' ? '⚠️' : '🔨';
-        toastTitle.textContent = title;
-        toastMessage.textContent = message;
-        toast.style.display = 'flex';
-
-        if (toastTimeout) clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => {
-            toast.style.display = 'none';
-        }, 5000);
+        if (moreBtn && moreDropdown) {
+            moreBtn.onclick = function(e) {
+                e.stopPropagation();
+                moreDropdown.classList.toggle('show');
+            };
+            document.addEventListener('click', function() {
+                moreDropdown.classList.remove('show');
+            });
+            moreDropdown.onclick = function(e) {
+                e.stopPropagation();
+            };
+        }
     }
 
-    function closeToast() {
-        const toast = document.getElementById('notification-toast');
-        toast.style.display = 'none';
-        if (toastTimeout) clearTimeout(toastTimeout);
+    // ========== ПОДПИСКА ==========
+    function initFollowButton() {
+        const followBtn = document.getElementById('follow-btn');
+        if (followBtn) {
+            followBtn.onclick = function() {
+                fetch('/api/follow/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: `user_id=${this.dataset.userId}`
+                }).then(() => location.reload()).catch(error => console.error('Ошибка:', error));
+            };
+        }
     }
 
-    // Подписка/отписка
-    const followBtn = document.getElementById('follow-btn');
-    if (followBtn) {
-        followBtn.addEventListener('click', function() {
-            fetch('/api/follow/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
-                body: `user_id=${this.dataset.userId}`
-            })
-            .then(() => location.reload())
-            .catch(error => console.error('Ошибка:', error));
-        });
+    // ========== ЗАГЛУШИТЬ ==========
+    function initMuteButton() {
+        const muteBtn = document.getElementById('mute-btn');
+        if (muteBtn) {
+            muteBtn.onclick = function() {
+                fetch('/api/mute/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: `user_id=${this.dataset.userId}`
+                }).then(() => location.reload()).catch(error => console.error('Ошибка:', error));
+            };
+        }
     }
 
-    // Заглушить/разглушить
-    const muteBtn = document.getElementById('mute-btn');
-    if (muteBtn) {
-        muteBtn.addEventListener('click', function() {
-            fetch('/api/mute/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
-                body: `user_id={{ profile.id }}`
-            })
-            .then(() => location.reload())
-            .catch(error => console.error('Ошибка:', error));
-        });
-    }
+    // ========== ЖАЛОБА С МОДАЛЬНЫМ ОКНОМ ==========
+    function initReportButton() {
+        const reportBtn = document.getElementById('report-btn');
+        if (!reportBtn) return;
 
-    // Жалоба
-    const reportBtn = document.getElementById('report-btn');
-    if (reportBtn) {
-        reportBtn.addEventListener('click', function() {
-            const reason = prompt('Укажите причину жалобы:');
-            if (reason) {
+        if (!document.getElementById('reportUserModal')) {
+            const modalHtml = `
+                <div id="reportUserModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header"><h2>ПОЖАЛОВАТЬСЯ</h2><span class="modal-close">&times;</span></div>
+                        <form id="reportUserForm">
+                            <div class="modal-form-group">
+                                <label>ПРИЧИНА ЖАЛОБЫ</label>
+                                <select name="reason" id="reportUserReason" required>
+                                    <option value="">-- ВЫБЕРИТЕ ПРИЧИНУ --</option>
+                                    <option value="spam">Спам</option>
+                                    <option value="harassment">Оскорбления / домогательства</option>
+                                    <option value="illegal">Незаконный контент</option>
+                                    <option value="other">Другое</option>
+                                </select>
+                            </div>
+                            <div class="modal-form-group">
+                                <label>ПОДРОБНОСТИ (НЕОБЯЗАТЕЛЬНО)</label>
+                                <textarea name="description" rows="4" placeholder="Опишите ситуацию подробнее..."></textarea>
+                            </div>
+                            <div class="modal-buttons">
+                                <button type="submit" class="modal-submit">ОТПРАВИТЬ</button>
+                                <button type="button" class="modal-cancel">ОТМЕНА</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        const modal = document.getElementById('reportUserModal');
+        const closeBtn = modal.querySelector('.modal-close');
+        const cancelBtn = modal.querySelector('.modal-cancel');
+        const form = document.getElementById('reportUserForm');
+
+        function openModal() { modal.style.display = 'flex'; }
+        function closeModal() { modal.style.display = 'none'; form.reset(); }
+
+        reportBtn.onclick = (e) => {
+            e.preventDefault();
+            const dropdown = document.getElementById('more-dropdown');
+            if (dropdown) dropdown.classList.remove('show');
+            openModal();
+        };
+
+        if (closeBtn) closeBtn.onclick = closeModal;
+        if (cancelBtn) cancelBtn.onclick = closeModal;
+        window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        if (form) {
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                const reason = document.getElementById('reportUserReason').value;
+                const description = form.querySelector('textarea')?.value || '';
+                if (!reason) { alert('Выберите причину жалобы'); return; }
+
                 fetch('/api/report-user/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
-                    body: `user_id={{ profile.id }}&reason=${encodeURIComponent(reason)}`
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: `user_id=${reportBtn.dataset.userId}&reason=${encodeURIComponent(reason)}&description=${encodeURIComponent(description)}`
                 })
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
-                    if (data.status === 'reported') alert('Жалоба отправлена');
-                    else alert('Ошибка: ' + data.error);
+                    if (data.status === 'reported') {
+                        alert('Жалоба отправлена');
+                        closeModal();
+                    } else {
+                        alert('Ошибка: ' + (data.error || 'Не удалось отправить'));
+                    }
                 })
-                .catch(error => console.error('Ошибка:', error));
-            }
-        });
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ошибка соединения');
+                });
+            };
+        }
     }
 
-    // Выдать предупреждение (админ)
-    const warnBtn = document.getElementById('warn-btn');
-    if (warnBtn) {
-        warnBtn.addEventListener('click', function() {
-            if (confirm(`Выдать предупреждение @{{ profile.user.username }}?`)) {
-                fetch('/api/warn-user/', {
+    // ========== ПРЕДУПРЕЖДЕНИЕ (АДМИН) С МОДАЛКОЙ ==========
+    function initWarnButton() {
+        const warnBtn = document.getElementById('warn-btn');
+        if (!warnBtn) return;
+
+        if (!document.getElementById('warnUserModal')) {
+            const modalHtml = `
+                <div id="warnUserModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header"><h2>ВЫДАТЬ ПРЕДУПРЕЖДЕНИЕ</h2><span class="modal-close">&times;</span></div>
+                        <form id="warnUserForm">
+                            <div class="modal-form-group">
+                                <label>ПРИЧИНА ПРЕДУПРЕЖДЕНИЯ</label>
+                                <textarea name="reason" rows="4" placeholder="Укажите причину..." required></textarea>
+                            </div>
+                            <div class="modal-buttons">
+                                <button type="submit" class="modal-submit">ВЫДАТЬ</button>
+                                <button type="button" class="modal-cancel">ОТМЕНА</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        const modal = document.getElementById('warnUserModal');
+        const closeBtn = modal.querySelector('.modal-close');
+        const cancelBtn = modal.querySelector('.modal-cancel');
+        const form = document.getElementById('warnUserForm');
+
+        function openModal() { modal.style.display = 'flex'; }
+        function closeModal() { modal.style.display = 'none'; form.reset(); }
+
+        warnBtn.onclick = (e) => {
+            e.preventDefault();
+            const dropdown = document.getElementById('more-dropdown');
+            if (dropdown) dropdown.classList.remove('show');
+            openModal();
+        };
+
+        if (closeBtn) closeBtn.onclick = closeModal;
+        if (cancelBtn) cancelBtn.onclick = closeModal;
+        window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        if (form) {
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                const reason = form.querySelector('textarea').value.trim();
+                if (!reason) { alert('Укажите причину'); return; }
+
+                fetch('/warn-user/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
-                    body: `user_id={{ profile.id }}`
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: `user_id=${warnBtn.dataset.userId}&reason=${encodeURIComponent(reason)}`
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'warned') {
-                        showToast('ПРЕДУПРЕЖДЕНИЕ', `${data.warnings_count}/3`, 'warning');
-                        if (data.is_banned) showToast('БАН', '3 предупреждения', 'ban');
-                        setTimeout(() => location.reload(), 2000);
+                        alert(`⚠️ Предупреждение выдано. ${data.warnings_count}/3`);
+                        if (data.is_banned) alert('🚫 Пользователь заблокирован');
+                        closeModal();
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + (data.error || 'Не удалось выдать предупреждение'));
                     }
                 })
-                .catch(error => console.error('Ошибка:', error));
-            }
-        });
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ошибка соединения');
+                });
+            };
+        }
     }
 
-    // Бан (админ)
-    const banBtn = document.getElementById('ban-btn');
-    if (banBtn) {
-        banBtn.addEventListener('click', function() {
-            if (confirm(`Забанить @{{ profile.user.username }}?`)) {
+    // ========== БАН (АДМИН) С МОДАЛКОЙ ==========
+    function initBanButton() {
+        const banBtn = document.getElementById('ban-btn');
+        if (!banBtn) return;
+
+        if (!document.getElementById('banUserModal')) {
+            const modalHtml = `
+                <div id="banUserModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header"><h2>ЗАБАНИТЬ ПОЛЬЗОВАТЕЛЯ</h2><span class="modal-close">&times;</span></div>
+                        <form id="banUserForm">
+                            <div class="modal-form-group">
+                                <label>ПРИЧИНА БАНА</label>
+                                <textarea name="reason" rows="4" placeholder="Укажите причину..." required></textarea>
+                            </div>
+                            <div class="modal-buttons">
+                                <button type="submit" class="modal-submit">ЗАБАНИТЬ</button>
+                                <button type="button" class="modal-cancel">ОТМЕНА</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        const modal = document.getElementById('banUserModal');
+        const closeBtn = modal.querySelector('.modal-close');
+        const cancelBtn = modal.querySelector('.modal-cancel');
+        const form = document.getElementById('banUserForm');
+
+        function openModal() { modal.style.display = 'flex'; }
+        function closeModal() { modal.style.display = 'none'; form.reset(); }
+
+        banBtn.onclick = (e) => {
+            e.preventDefault();
+            const dropdown = document.getElementById('more-dropdown');
+            if (dropdown) dropdown.classList.remove('show');
+            openModal();
+        };
+
+        if (closeBtn) closeBtn.onclick = closeModal;
+        if (cancelBtn) cancelBtn.onclick = closeModal;
+        window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        if (form) {
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                const reason = form.querySelector('textarea').value.trim();
+                if (!reason) { alert('Укажите причину'); return; }
+
                 fetch('/api/ban-user/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
-                    body: `user_id={{ profile.id }}`
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: `user_id=${banBtn.dataset.userId}&reason=${encodeURIComponent(reason)}`
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'banned') {
-                        showToast('ПОЛЬЗОВАТЕЛЬ ЗАБАНЕН', `@{{ profile.user.username }}`, 'ban');
-                        setTimeout(() => location.reload(), 2000);
+                        alert('🔨 Пользователь забанен');
+                        closeModal();
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + (data.error || 'Не удалось забанить'));
                     }
                 })
-                .catch(error => console.error('Ошибка:', error));
-            }
-        });
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ошибка соединения');
+                });
+            };
+        }
     }
 
-    // Разбан (админ)
-    const unbanBtn = document.getElementById('unban-btn');
-    if (unbanBtn) {
-        unbanBtn.addEventListener('click', function() {
-            if (confirm(`Разбанить @{{ profile.user.username }}?`)) {
+    // ========== РАЗБАН (АДМИН) С МОДАЛКОЙ ==========
+    function initUnbanButton() {
+        const unbanBtn = document.getElementById('unban-btn');
+        if (!unbanBtn) return;
+
+        if (!document.getElementById('unbanUserModal')) {
+            const modalHtml = `
+                <div id="unbanUserModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header"><h2>РАЗБАНИТЬ ПОЛЬЗОВАТЕЛЯ</h2><span class="modal-close">&times;</span></div>
+                        <form id="unbanUserForm">
+                            <div class="modal-form-group">
+                                <label>ПРИЧИНА РАЗБАНА</label>
+                                <textarea name="reason" rows="4" placeholder="Укажите причину..." required></textarea>
+                            </div>
+                            <div class="modal-buttons">
+                                <button type="submit" class="modal-submit">РАЗБАНИТЬ</button>
+                                <button type="button" class="modal-cancel">ОТМЕНА</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        const modal = document.getElementById('unbanUserModal');
+        const closeBtn = modal.querySelector('.modal-close');
+        const cancelBtn = modal.querySelector('.modal-cancel');
+        const form = document.getElementById('unbanUserForm');
+
+        function openModal() { modal.style.display = 'flex'; }
+        function closeModal() { modal.style.display = 'none'; form.reset(); }
+
+        unbanBtn.onclick = (e) => {
+            e.preventDefault();
+            const dropdown = document.getElementById('more-dropdown');
+            if (dropdown) dropdown.classList.remove('show');
+            openModal();
+        };
+
+        if (closeBtn) closeBtn.onclick = closeModal;
+        if (cancelBtn) cancelBtn.onclick = closeModal;
+        window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        if (form) {
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                const reason = form.querySelector('textarea').value.trim();
+                if (!reason) { alert('Укажите причину'); return; }
+
                 fetch('/api/unban-user/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
-                    body: `user_id={{ profile.id }}`
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: `user_id=${unbanBtn.dataset.userId}&reason=${encodeURIComponent(reason)}`
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'unbanned') {
-                        showToast('РАЗБАНЕН', `@{{ profile.user.username }}`, 'warning');
-                        setTimeout(() => location.reload(), 2000);
+                        alert('🔄 Пользователь разбанен');
+                        closeModal();
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + (data.error || 'Не удалось разбанить'));
                     }
                 })
-                .catch(error => console.error('Ошибка:', error));
-            }
-        });
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ошибка соединения');
+                });
+            };
+        }
     }
 
-    // Меню для чужого профиля
-    const moreBtn = document.getElementById('more-menu-btn');
-    const moreDropdown = document.getElementById('more-dropdown');
-    if (moreBtn) {
-        moreBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            moreDropdown.classList.toggle('show');
-        });
-        document.addEventListener('click', () => moreDropdown.classList.remove('show'));
-        moreDropdown?.addEventListener('click', (e) => e.stopPropagation());
-    }
-
-    // Меню для своего профиля
-    const moreBtnSelf = document.getElementById('more-menu-btn-self');
-    const moreDropdownSelf = document.getElementById('more-dropdown-self');
-    if (moreBtnSelf) {
-        moreBtnSelf.addEventListener('click', (e) => {
-            e.stopPropagation();
-            moreDropdownSelf.classList.toggle('show');
-        });
-        document.addEventListener('click', () => moreDropdownSelf?.classList.remove('show'));
-        moreDropdownSelf?.addEventListener('click', (e) => e.stopPropagation());
-    }
+    // ========== ИНИЦИАЛИЗАЦИЯ ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        initSelfMenu();
+        initOtherMenu();
+        initFollowButton();
+        initMuteButton();
+        initReportButton();
+        initWarnButton();
+        initBanButton();
+        initUnbanButton();
+    });
 </script>
 {% endblock %}

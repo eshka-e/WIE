@@ -1,0 +1,216 @@
+{% load static %}
+
+<div class="delete-comment-modal-overlay" id="deleteCommentModal" style="display: none;">
+    <div class="delete-comment-modal-content">
+        <div class="delete-comment-modal-header">
+            <h1>УДАЛИТЬ ОТКЛИК?</h1>
+            <button class="delete-comment-modal-close">&times;</button>
+        </div>
+
+        <div class="comment-preview">
+            <div class="comment-author-preview">{{ comment.author.display_name|default:comment.author.user.username|upper }}</div>
+            <div class="comment-content-preview">{{ comment.content|truncatechars:100 }}</div>
+            <div class="comment-meta-preview">
+                {{ comment.created_at|date:"d.m.Y" }} в {{ comment.created_at|date:"H:i" }}
+            </div>
+        </div>
+
+        <p class="delete-comment-warning">Отклик будет стёрт навсегда.</p>
+
+        <form method="post" action="{% url 'WIEapp:delete_comment' comment.id %}" class="delete-comment-form">
+            {% csrf_token %}
+            <div class="delete-comment-actions">
+                <button type="submit" class="delete-comment-confirm-btn">ДА, СТЕРЕТЬ</button>
+                <button type="button" class="delete-comment-cancel-btn">ОТМЕНА</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .delete-comment-modal-overlay {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-comment-modal-content {
+        background: white;
+        max-width: 700px;
+        width: 90%;
+        margin: 0 auto;
+        padding: 2rem;
+        position: relative;
+        border-radius: 0;
+    }
+
+    .delete-comment-modal-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .delete-comment-modal-header h1 {
+        font-size: 34px;
+        font-weight: normal;
+        text-transform: uppercase;
+        margin: 0;
+        color: #e03a3a;
+    }
+
+    .delete-comment-modal-close {
+        font-size: 2rem;
+        cursor: pointer;
+        color: #8a9cb0;
+        background: none;
+        border: none;
+    }
+
+    .delete-comment-modal-close:hover {
+        color: #e03a3a;
+    }
+
+    .comment-preview {
+        background: #f8fafc;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .comment-author-preview {
+        font-size: 20px;
+        font-weight: bold;
+        color: #171A2A;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-content-preview {
+        font-size: 0.9rem;
+        color: #334454;
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .comment-meta-preview {
+        font-size: 0.7rem;
+        color: #8a9cb0;
+    }
+
+    .delete-comment-warning {
+        color: #171a2a;
+        font-size: 1rem;
+        margin-bottom: 2rem;
+        padding: 0.8rem;
+        background: #fff5f5;
+        text-transform: uppercase;
+        font-style: italic;
+    }
+
+    .delete-comment-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .delete-comment-confirm-btn {
+        background: #171A2A;
+        color: white;
+        border: none;
+        padding: 0 60px;
+        height: 60px;
+        font-size: 32px;
+        font-weight: 800;
+        font-style: italic;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    .delete-comment-confirm-btn:hover {
+        background: #000000;
+        transform: scale(0.98);
+    }
+
+    .delete-comment-cancel-btn {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        color: #8a9cb0;
+        height: 60px;
+        padding: 0 24px;
+        font-size: 16px;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-family: inherit;
+    }
+
+    .delete-comment-cancel-btn:hover {
+        border-color: #05026c;
+        color: #05026c;
+        transform: scale(0.98);
+    }
+
+    @media (max-width: 768px) {
+        .delete-comment-confirm-btn {
+            font-size: 24px;
+            padding: 0 30px;
+            height: 50px;
+        }
+        .delete-comment-modal-header h1 {
+            font-size: 28px;
+        }
+    }
+</style>
+
+<script>
+    (function() {
+        let currentModal = null;
+
+        window.showDeleteCommentModal = function(commentId) {
+            // Удаляем старый модал, если есть
+            if (currentModal) {
+                currentModal.remove();
+            }
+
+            // Загружаем модальное окно
+            fetch(`/comment/delete/${commentId}/`)
+                .then(response => response.text())
+                .then(html => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const modal = tempDiv.querySelector('#deleteCommentModal');
+
+                    if (modal) {
+                        document.body.appendChild(modal);
+                        currentModal = modal;
+                        modal.style.display = 'flex';
+
+                        // Обработчики закрытия
+                        const closeBtn = modal.querySelector('.delete-comment-modal-close');
+                        const cancelBtn = modal.querySelector('.delete-comment-cancel-btn');
+
+                        const closeModal = () => {
+                            modal.style.display = 'none';
+                            setTimeout(() => {
+                                if (currentModal) currentModal.remove();
+                                currentModal = null;
+                            }, 300);
+                        };
+
+                        if (closeBtn) closeBtn.onclick = closeModal;
+                        if (cancelBtn) cancelBtn.onclick = closeModal;
+
+                        window.onclick = (e) => {
+                            if (e.target === modal) closeModal();
+                        };
+                    }
+                })
+                .catch(error => console.error('Error loading modal:', error));
+        };
+    })();
+</script>

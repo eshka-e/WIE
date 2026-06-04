@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>whoise</title>
-</head>
+
 {% block content %}
 <div class="signals-page">
     <div class="signals-header">
@@ -19,23 +15,28 @@
             {% for notification in notifications %}
             <div class="notification-item {% if not notification.is_read %}unread{% endif %}" data-id="{{ notification.id }}"
                 {% if notification.notification_type == 'landmark' %}
-                    {% url 'WIEapp:profile' notification.sender.user.username as profile_url %}
-                    data-url="{% if profile_url %}{{ profile_url }}{% endif %}"
-                {% else %}
+                    data-url="{% url 'WIEapp:profile' %}"
+                {% elif notification.impulse %}
                     data-url="{% url 'WIEapp:impulse_detail' notification.impulse.id %}"
+                {% else %}
+                    data-url=""
                 {% endif %}
             >
                 <div class="notification-icon">
                     {% if notification.notification_type == 'comment' %}💬
                     {% elif notification.notification_type == 'reply' %}↩️
                     {% elif notification.notification_type == 'resonance' %}
-                        {% if notification.metadata.resonance_type == 'heart' %}            <img style="height: 25px; width: 25px" src="{% static 'img/🫀.png' %}" alt="Логотип WHOisE">
-                        {% else %} <img style="height: 30px; width: 30px" src="{% static 'img/boom.png' %}" alt="Логотип WHOisE">
+                        {% if notification.metadata.resonance_type == 'heart' %}
+                            <img style="height: 25px; width: 25px" src="{% static 'img/🫀.png' %}" alt="heart">
+                        {% else %}
+                            <img style="height: 30px; width: 30px" src="{% static 'img/boom.png' %}" alt="blast">
                         {% endif %}
                     {% elif notification.notification_type == 'landmark' %}👁️
+                    {% elif notification.notification_type == 'moderation' %}🚫
                     {% else %}📢
                     {% endif %}
                 </div>
+
                 <div class="notification-content">
                     <div class="notification-text">
                         <strong>@{{ notification.sender.user.username }}</strong>
@@ -54,12 +55,22 @@
                             <span class="impulse-title">«{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»</span>
                         {% elif notification.notification_type == 'landmark' %}
                             теперь ваш последователь
+                        {% elif notification.notification_type == 'moderation' %}
+                            {% if notification.metadata.action == 'delete' %}
+                                модератор удалил ваш комментарий
+                                <span class="impulse-title">«{{ notification.impulse.title|default:'Без названия'|truncatechars:50 }}»</span>
+                                <div class="notification-meta">Причина: {{ notification.metadata.reason }}</div>
+                            {% elif notification.metadata.action == 'warning' %}
+                                получили предупреждение от модератора
+                                <div class="notification-meta">Причина: {{ notification.metadata.reason }}</div>
+                            {% endif %}
                         {% endif %}
                     </div>
                     <div class="notification-meta">
                         <span class="time">{{ notification.created_at|timesince }} назад</span>
                     </div>
                 </div>
+
                 <div class="notification-actions">
                     <button class="delete-notification" data-id="{{ notification.id }}">СТЕРЕТЬ</button>
                 </div>
@@ -81,14 +92,12 @@
         overflow-x: hidden;
     }
 
-    /* Новый контейнер для всей страницы сигналов */
     .signals-page {
         max-width: 100%;
         margin: 0 auto;
         padding: 0 70px;
     }
 
-    /* Шапка с заголовком и кнопкой */
     .signals-header {
         display: flex;
         justify-content: space-between;
@@ -104,7 +113,6 @@
         font-size: 3rem;
     }
 
-    /* Контейнер уведомлений без верхнего заголовка */
     .notifications-container {
         width: 100%;
         margin-top: 0;
@@ -125,7 +133,7 @@
 
     .mark-all-btn:hover {
         background: #ffeded;
-         color: #990002;
+        color: #990002;
     }
 
     .notifications-list {
@@ -149,11 +157,6 @@
         box-sizing: border-box;
     }
 
-    .notification-item {
-        border: none;
-        border-radius: 0;
-    }
-
     .notification-item:hover {
         background: #E6E8FF;
     }
@@ -169,10 +172,6 @@
 
     .notification-item.unread:hover {
         background: #E6D9F0;
-    }
-
-    .notification-item.unread:active {
-        background: #D7BCE1;
     }
 
     .notification-icon {
@@ -239,15 +238,6 @@
         color: #304361;
     }
 
-    .delete-notification:active {
-        color: #171A2A;
-    }
-
-    .notification-item.no-link {
-        cursor: default;
-        opacity: 0.7;
-    }
-
     .empty-notifications {
         text-align: center;
         padding: 4rem 2rem;
@@ -270,32 +260,25 @@
         .signals-page {
             padding: 0 20px;
         }
-
         .signals-header {
             flex-direction: column;
             align-items: flex-start;
         }
-
         .mark-all-btn {
             align-self: flex-end;
         }
-
         .notification-item {
-            padding: 1rem 1rem;
+            padding: 1rem;
             gap: 1rem;
         }
-
         .notification-actions {
             opacity: 1;
-            margin-left: 0;
         }
-
         .notification-icon {
             width: 32px;
             height: 32px;
             font-size: 1.1rem;
         }
-
         .notification-text {
             font-size: 0.9rem;
         }
@@ -327,14 +310,6 @@
         if (markAllBtn && !hasUnread) {
             markAllBtn.style.display = 'none';
         }
-
-        document.querySelectorAll('.notification-item').forEach(item => {
-            if (!item.dataset.url || item.dataset.url === '') {
-                item.classList.add('no-link');
-            }
-        });
-
-        console.log('Страница загружена, непрочитанных:', document.querySelectorAll('.notification-item.unread').length);
     });
 
     document.querySelectorAll('.notification-item').forEach(item => {
@@ -348,10 +323,7 @@
             const id = this.dataset.id;
             const isUnread = this.classList.contains('unread');
 
-            if (!url || url === '') {
-                console.log('Нет URL для перехода');
-                return;
-            }
+            if (!url || url === '') return;
 
             if (isUnread) {
                 fetch(`/api/notifications/${id}/mark-read/`, {
@@ -365,7 +337,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        this.classList.remove('unread');
+                        item.classList.remove('unread');
                         const remainingUnread = document.querySelectorAll('.notification-item.unread').length;
                         const markAllBtn = document.getElementById('markAllRead');
                         if (markAllBtn && remainingUnread === 0) {
@@ -388,8 +360,6 @@
             const id = this.dataset.id;
             const item = this.closest('.notification-item');
 
-            console.log('Удаляем уведомление:', id);
-
             fetch(`/api/notifications/${id}/delete/`, {
                 method: 'POST',
                 headers: {
@@ -400,11 +370,9 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Ответ на удаление:', data);
                 if (data.status === 'success') {
                     item.remove();
-                    const remainingItems = document.querySelectorAll('.notification-item').length;
-                    if (remainingItems === 0) {
+                    if (document.querySelectorAll('.notification-item').length === 0) {
                         location.reload();
                     }
                     const remainingUnread = document.querySelectorAll('.notification-item.unread').length;
@@ -421,8 +389,6 @@
     const markAllBtn = document.getElementById('markAllRead');
     if (markAllBtn) {
         markAllBtn.addEventListener('click', function() {
-            console.log('Клик по кнопке "Пометить всё"');
-
             fetch('/api/notifications/mark-all-read/', {
                 method: 'POST',
                 headers: {
@@ -433,13 +399,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Ответ на mark-all-read:', data);
                 if (data.status === 'success') {
                     document.querySelectorAll('.notification-item.unread').forEach(item => {
                         item.classList.remove('unread');
                     });
                     markAllBtn.style.display = 'none';
-                    console.log('Все уведомления отмечены как прочитанные');
                 }
             })
             .catch(error => console.error('Ошибка при пометке всех:', error));

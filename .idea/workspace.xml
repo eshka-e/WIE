@@ -4,31 +4,41 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a820307f-927b-4bc0-8aa3-0ad8fe519a3c" name="Changes" comment="error pages, profile, black-list, I don't remember yet">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/comment_tree.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/search/faq.html" afterDir="false" />
+    <list default="true" id="a820307f-927b-4bc0-8aa3-0ad8fe519a3c" name="Changes" comment="subscription pages, a system of bans and warnings">
+      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/delete_comment_modal.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/edit_comment_modal.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WIEapp/templatetags/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WIEapp/templatetags/video_tags.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/resonance.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WHOisE/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/WHOisE/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WHOisE/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/WHOisE/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_already_verified.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_already_verified.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_verified.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_verified.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_verify_failed.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_verify_failed.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/login.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_complete.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_complete.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_confirm.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_confirm.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_done.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_done.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_confirm_delete.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_confirm_delete.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/verify_email_sent.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/verify_email_sent.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_form.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/space_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/space_detail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/stream.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/stream.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/comment_tree.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/comment_tree.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/impulse_cards.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/impulse_cards.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/followers.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/followers.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/landmarks.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/landmarks.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/landing.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/landing.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/notifications.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/notifications.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/search/faq.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/search/faq.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/spaces_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/spaces_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/base.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WIEapp/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/auth.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/auth.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,6 +52,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="CSS File" />
+        <option value="JavaScript File" />
         <option value="Python Script" />
         <option value="HTML File" />
       </list>
@@ -67,24 +78,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "last_opened_file_path": "C:/Users/User/Desktop/WHOisE/static/fonts",
-    "list.type.of.created.stylesheet": "CSS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/User/Desktop/WHOisE/static/fonts&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\User\Desktop\WHOisE\static\fonts" />
@@ -152,7 +163,13 @@
       <workItem from="1777899887363" duration="27753000" />
       <workItem from="1778232401273" duration="66150000" />
       <workItem from="1778760597395" duration="1935000" />
-      <workItem from="1779435616615" duration="9157000" />
+      <workItem from="1779435616615" duration="43401000" />
+      <workItem from="1780193067825" duration="10647000" />
+      <workItem from="1780469779327" duration="18305000" />
+      <workItem from="1780506040141" duration="537000" />
+      <workItem from="1780507084513" duration="1590000" />
+      <workItem from="1780530335181" duration="377000" />
+      <workItem from="1780531224554" duration="2698000" />
     </task>
     <task id="LOCAL-00001" summary="start and setting">
       <option name="closed" value="true" />
@@ -186,7 +203,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777966409684</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="subscription pages, a system of bans and warnings">
+      <option name="closed" value="true" />
+      <created>1779550916091</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1779550916091</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -219,6 +244,7 @@
     <MESSAGE value="registration settings" />
     <MESSAGE value="registration edits,&#10;error pages, spaces, I don't remember yet" />
     <MESSAGE value="error pages, profile, black-list, I don't remember yet" />
-    <option name="LAST_COMMIT_MESSAGE" value="error pages, profile, black-list, I don't remember yet" />
+    <MESSAGE value="subscription pages, a system of bans and warnings" />
+    <option name="LAST_COMMIT_MESSAGE" value="subscription pages, a system of bans and warnings" />
   </component>
 </project>

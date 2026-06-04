@@ -278,6 +278,9 @@ body {
     .auth-footer a {
         font-size: 16px;
     }
+    .submit-btn {
+                width: 100%;
+                box-sizing: border-box;
 }
 
 .inf {

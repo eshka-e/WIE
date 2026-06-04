@@ -7,31 +7,39 @@
                 {{ comment.author.display_name|default:comment.author.user.username|upper }}
             </a>
             <div class="comment-date">{{ comment.created_at|date:"d.m.Y" }} в {{ comment.created_at|date:"H:i" }}</div>
+            {% if comment.is_modified %}
+            <div class="comment-modified">(изменён)</div>
+            {% endif %}
         </div>
 
-        <!-- МЕНЮ С ТРЕМЯ ТОЧКАМИ -->
         {% if user.is_authenticated %}
-            {% if user.profile == comment.author or user.profile == impulse.author or user.is_superuser %}
-            <div class="comment-menu">
-                <button class="comment-menu-btn">⋯</button>
-                <div class="comment-dropdown" style="display: none;">
-                    {% if user.profile == comment.author %}
-                        <button class="edit-comment-btn" data-comment-id="{{ comment.id }}">РЕДАКТИРОВАТЬ</button>
-                        <button class="delete-comment-btn" data-comment-id="{{ comment.id }}">УДАЛИТЬ</button>
-                    {% endif %}
-                    {% if user.profile == impulse.author or user.is_superuser %}
-                        <button class="delete-comment-btn" data-comment-id="{{ comment.id }}">УДАЛИТЬ (как автор импульса)</button>
-                    {% endif %}
-                    {% if user.is_superuser %}
-                        <button class="warn-user-btn" data-user-id="{{ comment.author.id }}">ВЫДАТЬ ПРЕДУПРЕЖДЕНИЕ</button>
-                    {% endif %}
+            {% if user.profile != comment.author %}
+                <div class="comment-menu">
+                    <button class="comment-menu-btn">⋯</button>
+                    <div class="comment-dropdown">
+                        <button class="report-comment-btn" data-comment-id="{{ comment.id }}">ПОЖАЛОВАТЬСЯ</button>
+                    </div>
                 </div>
-            </div>
+            {% elif user.profile == comment.author or user.profile == impulse.author or user.is_superuser %}
+                <div class="comment-menu">
+                    <button class="comment-menu-btn">⋯</button>
+                    <div class="comment-dropdown">
+                        {% if user.profile == comment.author %}
+                            <button class="edit-comment-btn" data-comment-id="{{ comment.id }}">РЕДАКТИРОВАТЬ</button>
+                        {% endif %}
+                        {% if user.profile == comment.author or user.profile == impulse.author or user.is_superuser %}
+                            <button class="delete-comment-btn" data-comment-id="{{ comment.id }}">УДАЛИТЬ</button>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                            <button class="warn-user-btn" data-user-id="{{ comment.author.id }}">ВЫДАТЬ ПРЕДУПРЕЖДЕНИЕ</button>
+                        {% endif %}
+                    </div>
+                </div>
             {% endif %}
         {% endif %}
     </div>
 
-    <div class="comment-content">{{ comment.content|linebreaks }}</div>
+    <div class="comment-content" id="comment-content-{{ comment.id }}">{{ comment.content|linebreaks }}</div>
 
     <div class="comment-actions">
         <button class="reply-toggle" data-comment-id="{{ comment.id }}">ОТКЛИКНУТЬСЯ</button>
@@ -42,7 +50,6 @@
         <button class="submit-reply" data-parent-id="{{ comment.id }}">ОТПРАВИТЬ</button>
     </div>
 
-    <!-- РЕКУРСИВНЫЙ ВЫЗОВ -->
     {% if comment.replies.all %}
     <div class="replies">
         {% for reply in comment.replies.all %}
@@ -52,26 +59,97 @@
     {% endif %}
 </div>
 
+<!-- МОДАЛЬНОЕ ОКНО ЖАЛОБЫ (только один раз) -->
+{% if not forloop.parentloop %}
+<div id="reportCommentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>ПОЖАЛОВАТЬСЯ НА КОММЕНТАРИЙ</h2>
+            <span class="modal-close">&times;</span>
+        </div>
+        <form id="reportCommentForm">
+            {% csrf_token %}
+            <div class="modal-form-group">
+                <label>ПРИЧИНА ЖАЛОБЫ</label>
+                <select name="reason" id="reportCommentReason" required>
+                    <option value="">-- ВЫБЕРИТЕ ПРИЧИНУ --</option>
+                    <option value="spam">Спам</option>
+                    <option value="harassment">Оскорбления / домогательства</option>
+                    <option value="illegal">Незаконный контент</option>
+                    <option value="offtopic">Не по теме</option>
+                    <option value="other">Другое</option>
+                </select>
+            </div>
+            <div class="modal-form-group">
+                <label>ПОДРОБНОСТИ (НЕОБЯЗАТЕЛЬНО)</label>
+                <textarea name="description" rows="4" placeholder="Опишите ситуацию подробнее..."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button type="submit" class="modal-submit">ОТПРАВИТЬ</button>
+                <button type="button" class="modal-cancel">ОТМЕНА</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО УДАЛЕНИЯ -->
+<div id="deleteCommentModal" class="delete-modal">
+    <div class="delete-modal-content">
+        <div class="delete-modal-header">
+            <h1>УДАЛИТЬ ОТКЛИК?</h1>
+            <button class="delete-modal-close">&times;</button>
+        </div>
+        <div class="comment-preview">
+            <div class="comment-author-preview"></div>
+            <div class="comment-content-preview"></div>
+            <div class="comment-meta-preview"></div>
+        </div>
+        <p class="delete-warning">Отклик будет стёрт навсегда.</p>
+        <div class="delete-actions">
+            <button class="delete-confirm-btn">ДА, СТЕРЕТЬ</button>
+            <button class="delete-cancel-btn">ОТМЕНА</button>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ -->
+<div id="editCommentModal" class="edit-modal">
+    <div class="edit-modal-content">
+        <div class="edit-modal-header">
+            <h1>РЕДАКТИРОВАТЬ ОТКЛИК</h1>
+            <button class="edit-modal-close">&times;</button>
+        </div>
+        <form id="editCommentForm">
+            {% csrf_token %}
+            <div class="edit-form-group">
+                <textarea name="content" id="editCommentTextarea" rows="6" class="edit-textarea" required></textarea>
+            </div>
+            <div class="edit-actions">
+                <button type="submit" class="edit-submit-btn">СОХРАНИТЬ</button>
+                <button type="button" class="edit-cancel-btn">ОТМЕНА</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <style>
+    /* ОСНОВНЫЕ СТИЛИ КОММЕНТАРИЕВ */
     .comment {
-        margin-bottom: 25px; /* Увеличено с 20px до 25px */
+        margin-bottom: 25px;
         padding-bottom: 0;
     }
 
-    /* Отступ между родительскими комментариями */
     .comment:not(.replies .comment) {
         margin-bottom: 25px;
     }
 
-    /* Для комментариев внутри дерева ответов */
     .replies .comment {
-        margin-bottom: 15px; /* 15px между ответами внутри ветки */
+        margin-bottom: 15px;
         margin-top: 15px;
         padding-bottom: 0;
         border-bottom: none;
     }
 
-    /* Убираем лишний margin у последнего комментария в ветке */
     .replies .comment:last-child {
         margin-bottom: 0;
     }
@@ -113,6 +191,13 @@
         margin-bottom: 10px;
     }
 
+    .comment-modified {
+        font-size: 12px;
+        color: #8a9cb0;
+        font-style: italic;
+        margin-top: -8px;
+    }
+
     .comment-menu {
         position: relative;
         flex-shrink: 0;
@@ -141,6 +226,11 @@
         min-width: 200px;
         z-index: 100;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        display: none;
+    }
+
+    .comment-dropdown.show {
+        display: block;
     }
 
     .comment-dropdown button {
@@ -158,14 +248,6 @@
 
     .comment-dropdown button:hover {
         background: #f8fafc;
-    }
-
-    .comment-dropdown button:first-child {
-        border-radius: 8px 8px 0 0;
-    }
-
-    .comment-dropdown button:last-child {
-        border-radius: 0 0 8px 8px;
     }
 
     .comment-content {
@@ -199,21 +281,16 @@
         color: #000000;
     }
 
-    /* Контейнер для всех ответов */
     .replies {
         margin-left: 1.5rem;
         padding-left: 1rem;
-        margin-top: 10px; /* Небольшой отступ сверху для контейнера ответов */
-    }
-
-    /* Дополнительный отступ для веток ответов второго уровня */
-    .replies .replies {
-        margin-top: 5px;
+        margin-top: 10px;
     }
 
     .reply-form {
         margin-top: 0.5rem;
         margin-left: 30px;
+        display: none;
     }
 
     .reply-form textarea {
@@ -227,7 +304,6 @@
         border-bottom: 2px solid #d0d8e0;
         padding: 12px 0 8px 0;
         outline: none;
-        transition: all 0.2s ease;
         font-family: inherit;
     }
 
@@ -243,9 +319,7 @@
         font-size: 36px;
         font-weight: 800;
         font-style: italic;
-        letter-spacing: 1.5px;
         cursor: pointer;
-        transition: all 0.2s ease;
         margin-top: 16px;
         font-family: inherit;
     }
@@ -255,56 +329,391 @@
         transform: scale(0.98);
     }
 
-    .submit-reply:active {
-        background: #140000;
-    }
-
-    /* Разделительная линия между родительскими комментариями (опционально) */
     .comment:not(.replies .comment) {
         border-bottom: 1px solid #eef2f8;
         padding-bottom: 25px;
     }
 
-    /* Убираем линию у последнего комментария */
     .comment:not(.replies .comment):last-child {
         border-bottom: none;
         padding-bottom: 0;
     }
 
-    /* Для ответов убираем разделительные линии */
-    .replies .comment {
-        border-bottom: none;
-        padding-bottom: 0;
+    /* МОДАЛКА ЖАЛОБЫ */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        max-width: 500px;
+        width: 90%;
+        border-radius: 4px;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #e03a3a;
+        padding-left: 1rem;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.3rem;
+        text-transform: uppercase;
+    }
+
+    .modal-close {
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: #8a9cb0;
+    }
+
+    .modal-close:hover {
+        color: #e03a3a;
+    }
+
+    .modal-form-group {
+        margin-bottom: 1rem;
+    }
+
+    .modal-form-group label {
+        display: block;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: #e03a3a;
+        margin-bottom: 0.3rem;
+    }
+
+    .modal-form-group select,
+    .modal-form-group textarea {
+        width: 100%;
+        background: #f8fafc;
+        border: 1px solid #dce5ec;
+        padding: 0.6rem;
+        font-family: inherit;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .modal-submit {
+        background: transparent;
+        border: 1px solid #e03a3a;
+        color: #e03a3a;
+        padding: 0.5rem 1.5rem;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+    .modal-cancel {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        color: #8a9cb0;
+        padding: 0.5rem 1.5rem;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+    /* МОДАЛКА УДАЛЕНИЯ */
+    .delete-modal {
+        display: none;
+        position: fixed;
+        z-index: 1001;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-modal-content {
+        background: white;
+        max-width: 700px;
+        width: 90%;
+        padding: 2rem;
+    }
+
+    .delete-modal-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .delete-modal-header h1 {
+        font-size: 34px;
+        font-weight: normal;
+        text-transform: uppercase;
+        margin: 0;
+        color: #e03a3a;
+        font-family: Waterway;
+    }
+
+    .delete-modal-close {
+        font-size: 2rem;
+        cursor: pointer;
+        color: #8a9cb0;
+        background: none;
+        border: none;
+    }
+
+    .delete-modal-close:hover {
+        color: #e03a3a;
+    }
+
+    .comment-preview {
+        background: #f8fafc;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .comment-author-preview {
+        font-size: 20px;
+        font-weight: bold;
+        color: #171A2A;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-content-preview {
+        font-size: 0.9rem;
+        color: #334454;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-meta-preview {
+        font-size: 0.7rem;
+        color: #8a9cb0;
+    }
+
+    .delete-warning {
+        color: #171a2a;
+        font-size: 1rem;
+        margin-bottom: 2rem;
+        padding: 0.8rem;
+        background: #fff5f5;
+        text-transform: uppercase;
+        font-style: italic;
+    }
+
+    .delete-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .delete-confirm-btn {
+        background: #171A2A;
+        color: white;
+        border: none;
+        padding: 0 60px;
+        height: 60px;
+        font-size: 32px;
+        font-weight: 800;
+        font-style: italic;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    .delete-confirm-btn:hover {
+        background: #000000;
+    }
+
+    .delete-cancel-btn {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        color: #8a9cb0;
+        height: 60px;
+        padding: 0 24px;
+        font-size: 16px;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+    .delete-cancel-btn:hover {
+        border-color: #05026c;
+        color: #05026c;
+    }
+
+    /* МОДАЛКА РЕДАКТИРОВАНИЯ */
+    .edit-modal {
+        display: none;
+        position: fixed;
+        z-index: 1001;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .edit-modal-content {
+        background: white;
+        max-width: 700px;
+        width: 90%;
+        padding: 2rem;
+    }
+
+    .edit-modal-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .edit-modal-header h1 {
+        font-size: 34px;
+        font-weight: normal;
+        text-transform: uppercase;
+        margin: 0;
+        color: #05026C;
+                font-family: Waterway;
+
+    }
+
+    .edit-modal-close {
+        font-size: 2rem;
+        cursor: pointer;
+        color: #8a9cb0;
+        background: none;
+        border: none;
+    }
+
+    .edit-modal-close:hover {
+        color: #03009f;
+    }
+
+    .edit-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .edit-textarea {
+        width: 100%;
+        font-size: 24px;
+        font-style: italic;
+        font-weight: 300;
+        color: #1a2c3e;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #d0d8e0;
+        padding: 12px 0 8px 0;
+        outline: none;
+        font-family: inherit;
+        resize: vertical;
+    }
+
+    .edit-textarea:focus {
+        border-bottom-color: #05026C;
+    }
+
+    .edit-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 2rem;
+    }
+
+    .edit-submit-btn {
+        background: #171A2A;
+        color: white;
+        border: none;
+        padding: 3px 60px;
+        height: 60px;
+        font-size: 32px;
+        font-weight: 800;
+        font-style: italic;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    .edit-submit-btn:hover {
+        background: #03009f;
+    }
+
+    .edit-cancel-btn {
+        background: transparent;
+        border: 1px solid #dce5ec;
+        color: #8a9cb0;
+        height: 60px;
+        padding: 0 24px;
+        font-size: 16px;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+    .edit-cancel-btn:hover {
+        border-color: #05026c;
+        color: #05026c;
+    }
+
+    @media (max-width: 768px) {
+        .delete-confirm-btn, .edit-submit-btn {
+            font-size: 24px;
+            padding: 0 30px;
+            height: 50px;
+        }
+        .delete-modal-header h1, .edit-modal-header h1 {
+            font-size: 28px;
+        }
+        .edit-textarea {
+            font-size: 18px;
+        }
+        .submit-reply {
+            font-size: 28px;
+            padding: 3px 40px;
+        }
+        .comment-author-name {
+            font-size: 22px;
+        }
+        .reply-form textarea {
+            font-size: 18px;
+        }
     }
 </style>
 
 <script>
+(function() {
+    if (window.__commentHandlersReady) return;
+
     function getCookie(name) {
-        let cookieValue = null;
+        let value = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    value = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
                 }
             }
         }
-        return cookieValue;
+        return value;
     }
 
     const csrftoken = getCookie('csrftoken');
-
-    function getBasePath() {
-        const path = window.location.pathname;
-        if (path.startsWith('/wie/')) {
-            return '/wie';
-        }
-        return '';
-    }
-
-    const BASE_PATH = getBasePath();
+    const BASE_PATH = window.location.pathname.startsWith('/wie/') ? '/wie' : '';
 
     function escapeHtml(text) {
         const div = document.createElement('div');
@@ -312,90 +721,245 @@
         return div.innerHTML;
     }
 
+    // ПЕРЕМЕННЫЕ ДЛЯ МОДАЛОК
+    let currentReportCommentId = null;
+    let currentDeleteCommentId = null;
+    let currentEditCommentId = null;
+
+    // ========== МОДАЛКА ЖАЛОБЫ ==========
+    function openReportModal(commentId) {
+        currentReportCommentId = commentId;
+        const modal = document.getElementById('reportCommentModal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeReportModal() {
+        const modal = document.getElementById('reportCommentModal');
+        if (modal) modal.style.display = 'none';
+        const form = document.getElementById('reportCommentForm');
+        if (form) form.reset();
+        currentReportCommentId = null;
+    }
+
+    // ========== МОДАЛКА УДАЛЕНИЯ ==========
+    function showDeleteModal(commentId, authorName, content, date) {
+        currentDeleteCommentId = commentId;
+        const modal = document.getElementById('deleteCommentModal');
+        if (!modal) return;
+
+        modal.querySelector('.comment-author-preview').textContent = authorName;
+        modal.querySelector('.comment-content-preview').textContent = content.length > 100 ? content.substring(0, 100) + '...' : content;
+        modal.querySelector('.comment-meta-preview').textContent = date;
+        modal.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        const modal = document.getElementById('deleteCommentModal');
+        if (modal) modal.style.display = 'none';
+        currentDeleteCommentId = null;
+    }
+
+    // ========== МОДАЛКА РЕДАКТИРОВАНИЯ ==========
+    function showEditModal(commentId, content) {
+        currentEditCommentId = commentId;
+        const modal = document.getElementById('editCommentModal');
+        if (!modal) return;
+
+        const textarea = document.getElementById('editCommentTextarea');
+        if (textarea) textarea.value = content;
+        modal.style.display = 'flex';
+        if (textarea) textarea.focus();
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('editCommentModal');
+        if (modal) modal.style.display = 'none';
+        currentEditCommentId = null;
+    }
+
+    // ========== ИНИЦИАЛИЗАЦИЯ ВСЕХ МОДАЛОК ==========
+    function initModals() {
+        // Модалка жалобы
+        const reportModal = document.getElementById('reportCommentModal');
+        if (reportModal) {
+            reportModal.querySelector('.modal-close').onclick = closeReportModal;
+            reportModal.querySelector('.modal-cancel').onclick = closeReportModal;
+
+            const reportForm = document.getElementById('reportCommentForm');
+            if (reportForm) {
+                reportForm.onsubmit = function(e) {
+                    e.preventDefault();
+                    const reason = document.getElementById('reportCommentReason').value;
+                    const desc = this.querySelector('textarea')?.value || '';
+                    if (!reason) { alert('Выберите причину'); return; }
+
+                    fetch(`${BASE_PATH}/api/report-comment/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
+                        body: `comment_id=${currentReportCommentId}&reason=${encodeURIComponent(reason)}&description=${encodeURIComponent(desc)}`
+                    })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.status === 'success') { alert('Жалоба отправлена'); closeReportModal(); }
+                        else alert('Ошибка: ' + (d.error || 'Не удалось'));
+                    })
+                    .catch(() => alert('Ошибка соединения'));
+                };
+            }
+        }
+
+        // Модалка удаления
+        const deleteModal = document.getElementById('deleteCommentModal');
+        if (deleteModal) {
+            deleteModal.querySelector('.delete-modal-close').onclick = closeDeleteModal;
+            deleteModal.querySelector('.delete-cancel-btn').onclick = closeDeleteModal;
+            deleteModal.querySelector('.delete-confirm-btn').onclick = async function() {
+                if (!currentDeleteCommentId) return;
+                try {
+                    const r = await fetch(`${BASE_PATH}/delete-comment/${currentDeleteCommentId}/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrftoken }
+                    });
+                    const d = await r.json();
+                    if (d.status === 'success') {
+                        document.getElementById(`comment-${currentDeleteCommentId}`)?.remove();
+                        closeDeleteModal();
+                    } else alert('Ошибка при удалении');
+                } catch(e) { alert('Ошибка'); }
+            };
+        }
+
+        // Модалка редактирования
+        const editModal = document.getElementById('editCommentModal');
+        if (editModal) {
+            editModal.querySelector('.edit-modal-close').onclick = closeEditModal;
+            editModal.querySelector('.edit-cancel-btn').onclick = closeEditModal;
+
+            const editForm = document.getElementById('editCommentForm');
+            if (editForm) {
+                editForm.onsubmit = async function(e) {
+                    e.preventDefault();
+                    const newContent = document.getElementById('editCommentTextarea').value.trim();
+                    if (!newContent) { alert('Введите текст'); return; }
+
+                    const btn = this.querySelector('.edit-submit-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'СОХРАНЕНИЕ...';
+                    btn.disabled = true;
+
+                    try {
+                        const r = await fetch(`${BASE_PATH}/comment/edit/${currentEditCommentId}/`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
+                            body: `content=${encodeURIComponent(newContent)}`
+                        });
+
+                        if (r.ok || r.redirected) {
+                            const contentDiv = document.getElementById(`comment-content-${currentEditCommentId}`);
+                            if (contentDiv) contentDiv.innerHTML = escapeHtml(newContent).replace(/\n/g, '<br>');
+
+                            const header = document.querySelector(`#comment-${currentEditCommentId} .comment-author-info`);
+                            if (header && !header.querySelector('.comment-modified')) {
+                                const modified = document.createElement('div');
+                                modified.className = 'comment-modified';
+                                modified.textContent = '(изменён)';
+                                header.appendChild(modified);
+                            }
+                            closeEditModal();
+                        } else alert('Ошибка сохранения');
+                    } catch(e) { alert('Ошибка'); }
+                    finally { btn.textContent = originalText; btn.disabled = false; }
+                };
+            }
+        }
+
+        window.onclick = (e) => {
+            if (e.target === reportModal) closeReportModal();
+            if (e.target === deleteModal) closeDeleteModal();
+            if (e.target === editModal) closeEditModal();
+        };
+    }
+
+    // ========== ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ ОБРАБОТЧИКОВ ==========
     window.initializeCommentHandlers = function(container) {
-        // Меню с тремя точками
+        // ТРОЕТОЧИЕ - ОСНОВНОЕ ИСПРАВЛЕНИЕ ТУТ!
         container.querySelectorAll('.comment-menu-btn').forEach(btn => {
-            if (btn.hasListener) return;
+            if (btn._handler) return;
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const dropdown = this.nextElementSibling;
                 document.querySelectorAll('.comment-dropdown').forEach(d => {
-                    if (d !== dropdown) d.style.display = 'none';
+                    if (d !== dropdown) d.classList.remove('show');
                 });
-                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                dropdown.classList.toggle('show');
             });
-            btn.hasListener = true;
+            btn._handler = true;
         });
 
-        // Кнопки "ОТКЛИКНУТЬСЯ"
+        // Кнопки ответа
         container.querySelectorAll('.reply-toggle').forEach(btn => {
-            if (btn.hasListener) return;
+            if (btn._handler) return;
             btn.addEventListener('click', function() {
-                const commentId = this.dataset.commentId;
-                const replyForm = document.getElementById(`reply-form-${commentId}`);
-                if (replyForm) {
-                    document.querySelectorAll('.reply-form').forEach(form => {
-                        if (form.id !== `reply-form-${commentId}`) {
-                            form.style.display = 'none';
-                        }
+                const form = document.getElementById(`reply-form-${this.dataset.commentId}`);
+                if (form) {
+                    document.querySelectorAll('.reply-form').forEach(f => {
+                        if (f.id !== `reply-form-${this.dataset.commentId}`) f.style.display = 'none';
                     });
-                    replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+                    form.style.display = form.style.display === 'none' ? 'block' : 'none';
                 }
             });
-            btn.hasListener = true;
+            btn._handler = true;
         });
 
-        // Отправка ответов - теперь ищем .submit-reply
+        // Отправка ответов
         container.querySelectorAll('.submit-reply').forEach(btn => {
-            if (btn.hasListener) return;
+            if (btn._handler) return;
             btn.addEventListener('click', async function() {
                 const parentId = this.dataset.parentId;
-                const replyFormDiv = document.getElementById(`reply-form-${parentId}`);
-                const textarea = replyFormDiv.querySelector('.reply-textarea');
+                const formDiv = document.getElementById(`reply-form-${parentId}`);
+                const textarea = formDiv.querySelector('.reply-textarea');
                 const content = textarea.value.trim();
+                if (!content) { alert('Введите текст'); return; }
 
-                if (!content) {
-                    alert('Введите текст ответа');
-                    return;
-                }
-
-                const originalText = btn.textContent;
-                btn.textContent = 'ОТПРАВКА...';
-                btn.disabled = true;
+                const originalText = this.textContent;
+                this.textContent = 'ОТПРАВКА...';
+                this.disabled = true;
 
                 try {
-                    const response = await fetch(`${BASE_PATH}/add-reply-ajax/`, {
+                    const r = await fetch(`${BASE_PATH}/add-reply-ajax/`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRFToken': csrftoken
-                        },
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
                         body: `parent_id=${parentId}&content=${encodeURIComponent(content)}`
                     });
-
-                    const data = await response.json();
+                    const data = await r.json();
 
                     if (data.status === 'success') {
                         textarea.value = '';
-                        replyFormDiv.style.display = 'none';
+                        formDiv.style.display = 'none';
 
-                        const authorName = data.author_name || data.author_username;
+                        const parentComment = document.getElementById(`comment-${parentId}`);
+                        let replies = parentComment.querySelector('.replies');
+                        if (!replies) {
+                            replies = document.createElement('div');
+                            replies.className = 'replies';
+                            parentComment.appendChild(replies);
+                        }
 
-                        const newCommentHtml = `
+                        replies.insertAdjacentHTML('beforeend', `
                             <div class="comment" id="comment-${data.comment_id}">
                                 <div class="comment-header">
                                     <div class="comment-author-info">
-                                        <a href="${BASE_PATH}/profile/${data.author_username}/" class="comment-author-name">${escapeHtml(authorName).toUpperCase()}</a>
+                                        <a href="${BASE_PATH}/profile/${data.author_username}/" class="comment-author-name">${escapeHtml(data.author_name || data.author_username).toUpperCase()}</a>
                                         <div class="comment-date">${data.created_at}</div>
                                     </div>
                                     <div class="comment-menu">
                                         <button class="comment-menu-btn">⋯</button>
-                                        <div class="comment-dropdown" style="display: none;">
+                                        <div class="comment-dropdown">
                                             <button class="delete-comment-btn" data-comment-id="${data.comment_id}">УДАЛИТЬ</button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="comment-content">${escapeHtml(data.content).replace(/\n/g, '<br>')}</div>
+                                <div class="comment-content" id="comment-content-${data.comment_id}">${escapeHtml(data.content).replace(/\n/g, '<br>')}</div>
                                 <div class="comment-actions">
                                     <button class="reply-toggle" data-comment-id="${data.comment_id}">ОТКЛИКНУТЬСЯ</button>
                                 </div>
@@ -404,108 +968,96 @@
                                     <button class="submit-reply" data-parent-id="${data.comment_id}">ОТПРАВИТЬ</button>
                                 </div>
                             </div>
-                        `;
-
-                        const parentComment = document.getElementById(`comment-${parentId}`);
-                        let repliesContainer = parentComment.querySelector('.replies');
-
-                        if (!repliesContainer) {
-                            repliesContainer = document.createElement('div');
-                            repliesContainer.className = 'replies';
-                            parentComment.appendChild(repliesContainer);
-                        }
-
-                        repliesContainer.insertAdjacentHTML('beforeend', newCommentHtml);
-                        const newComment = repliesContainer.lastElementChild;
-                        window.initializeCommentHandlers(newComment);
-                    } else {
-                        alert('Ошибка: ' + (data.error || 'Не удалось отправить ответ'));
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Произошла ошибка при отправке');
-                } finally {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }
+                        `);
+                        window.initializeCommentHandlers(replies.lastElementChild);
+                    } else alert('Ошибка: ' + (data.error || 'Не удалось'));
+                } catch(e) { alert('Ошибка'); }
+                finally { this.textContent = originalText; this.disabled = false; }
             });
-            btn.hasListener = true;
+            btn._handler = true;
         });
 
-        // Удаление комментариев
+        // Удаление (с модалкой)
         container.querySelectorAll('.delete-comment-btn').forEach(btn => {
-            if (btn.hasListener) return;
+            if (btn._handler) return;
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const commentId = this.dataset.commentId;
-                if (confirm('Удалить комментарий?')) {
-                    fetch(`${BASE_PATH}/delete-comment/${commentId}/`, {
-                        method: 'POST',
-                        headers: { 'X-CSRFToken': csrftoken }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            const commentElement = document.getElementById(`comment-${commentId}`);
-                            if (commentElement) commentElement.remove();
-                        } else {
-                            alert('Ошибка при удалении');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Произошла ошибка при удалении');
-                    });
-                }
+                this.closest('.comment-dropdown')?.classList.remove('show');
+
+                const commentDiv = document.getElementById(`comment-${commentId}`);
+                const author = commentDiv.querySelector('.comment-author-name')?.textContent || '';
+                const content = document.getElementById(`comment-content-${commentId}`)?.textContent || '';
+                const date = commentDiv.querySelector('.comment-date')?.textContent || '';
+                showDeleteModal(commentId, author, content, date);
             });
-            btn.hasListener = true;
+            btn._handler = true;
         });
 
-        // Выдача предупреждения
+        // Редактирование (с модалкой)
+        container.querySelectorAll('.edit-comment-btn').forEach(btn => {
+            if (btn._handler) return;
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const commentId = this.dataset.commentId;
+                this.closest('.comment-dropdown')?.classList.remove('show');
+
+                const content = document.getElementById(`comment-content-${commentId}`)?.textContent || '';
+                showEditModal(commentId, content);
+            });
+            btn._handler = true;
+        });
+
+        // Жалоба
+        container.querySelectorAll('.report-comment-btn').forEach(btn => {
+            if (btn._handler) return;
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.closest('.comment-dropdown')?.classList.remove('show');
+                openReportModal(this.dataset.commentId);
+            });
+            btn._handler = true;
+        });
+
+        // Предупреждение
         container.querySelectorAll('.warn-user-btn').forEach(btn => {
-            if (btn.hasListener) return;
+            if (btn._handler) return;
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const userId = this.dataset.userId;
-                if (confirm('Выдать предупреждение пользователю?')) {
+                if (confirm('Выдать предупреждение?')) {
                     fetch(`${BASE_PATH}/warn-user/`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRFToken': csrftoken
-                        },
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
                         body: `user_id=${userId}`
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'warned') {
-                            alert(`⚠️ Предупреждение выдано. У пользователя ${data.warnings_count}/3 предупреждений.`);
-                            if (data.is_banned) alert('🚫 Пользователь заблокирован!');
-                            const dropdown = btn.closest('.comment-dropdown');
-                            if (dropdown) dropdown.style.display = 'none';
-                        } else {
-                            alert('Ошибка: ' + (data.error || 'Не удалось выдать предупреждение'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Произошла ошибка');
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.status === 'warned') {
+                            alert(`⚠️ Предупреждение. ${d.warnings_count}/3`);
+                            if (d.is_banned) alert('🚫 Пользователь заблокирован');
+                            this.closest('.comment-dropdown')?.classList.remove('show');
+                        } else alert('Ошибка');
                     });
                 }
             });
-            btn.hasListener = true;
+            btn._handler = true;
         });
     };
 
+    // Закрытие дропдаунов при клике вне
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.comment-menu')) {
-            document.querySelectorAll('.comment-dropdown').forEach(d => d.style.display = 'none');
+            document.querySelectorAll('.comment-dropdown').forEach(d => d.classList.remove('show'));
         }
     });
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => window.initializeCommentHandlers(document));
-    } else {
+    // СТАРТ
+    document.addEventListener('DOMContentLoaded', function() {
+        initModals();
         window.initializeCommentHandlers(document);
-    }
+        window.__commentHandlersReady = true;
+    });
+})();
 </script>
+{% endif %}
