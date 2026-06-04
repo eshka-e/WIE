@@ -9,11 +9,17 @@ def generate_verification_token():
 
 def send_verification_email(user, token):
     """Отправляет письмо с ссылкой подтверждения"""
-    verification_url = f"http://127.0.0.1:8000/verify-email/{token}/"
+    # Используем домен сервера, а не localhost
+    verification_url = f"http://62.109.13.38/verify-email/{token}/"
+
+    # Безопасно получаем имя пользователя
+    username = user.username
+    if hasattr(user, 'profile') and user.profile and user.profile.display_name:
+        username = user.profile.display_name
 
     send_mail(
         subject='Подтверждение email на WHOisE',
-        message=f'Привет, {user.profile.display_name or user.username}!\n\n'
+        message=f'Привет, {username}!\n\n'
                 f'Перейди по ссылке, чтобы подтвердить email:\n{verification_url}\n\n'
                 f'Если ты не регистрировался на WHOisE — просто проигнорируй это письмо.',
         from_email=settings.DEFAULT_FROM_EMAIL,

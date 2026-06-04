@@ -4,41 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a820307f-927b-4bc0-8aa3-0ad8fe519a3c" name="Changes" comment="subscription pages, a system of bans and warnings">
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/delete_comment_modal.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/edit_comment_modal.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templatetags/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WIEapp/templatetags/video_tags.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/js/resonance.js" afterDir="false" />
+    <list default="true" id="a820307f-927b-4bc0-8aa3-0ad8fe519a3c" name="Changes" comment="end">
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WHOisE/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/WHOisE/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_already_verified.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_already_verified.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_verified.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_verified.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_verify_failed.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/email_verify_failed.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_complete.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_complete.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_confirm.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_confirm.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_done.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/password_reset_done.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/verify_email_sent.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/verify_email_sent.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/impulse_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/space_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/space_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/stream.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/impulses/stream.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/comment_tree.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/comment_tree.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/impulse_cards.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/include/impulse_cards.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/landing.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/landing.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/notifications.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/notifications.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/profile/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/search/faq.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/search/faq.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/spaces_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/spaces_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/auth.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/auth.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -169,7 +139,7 @@
       <workItem from="1780506040141" duration="537000" />
       <workItem from="1780507084513" duration="1590000" />
       <workItem from="1780530335181" duration="377000" />
-      <workItem from="1780531224554" duration="2698000" />
+      <workItem from="1780531224554" duration="13842000" />
     </task>
     <task id="LOCAL-00001" summary="start and setting">
       <option name="closed" value="true" />
@@ -211,7 +181,23 @@
       <option name="project" value="LOCAL" />
       <updated>1779550916091</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="fix and modal">
+      <option name="closed" value="true" />
+      <created>1780535150374</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1780535150374</updated>
+    </task>
+    <task id="LOCAL-00007" summary="end">
+      <option name="closed" value="true" />
+      <created>1780543944902</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1780543944902</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -245,6 +231,8 @@
     <MESSAGE value="registration edits,&#10;error pages, spaces, I don't remember yet" />
     <MESSAGE value="error pages, profile, black-list, I don't remember yet" />
     <MESSAGE value="subscription pages, a system of bans and warnings" />
-    <option name="LAST_COMMIT_MESSAGE" value="subscription pages, a system of bans and warnings" />
+    <MESSAGE value="fix and modal" />
+    <MESSAGE value="end" />
+    <option name="LAST_COMMIT_MESSAGE" value="end" />
   </component>
 </project>
