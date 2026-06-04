@@ -6,17 +6,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WHOisE — ВХОД</title>
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
-    <style>
-        /* ТОЛЬКО адаптив */
-        @media (max-width: 768px) {
-            .auth-logo img {
-                max-width: 100%;
-                height: auto;
-            }
+   <style>
+    /* ТОЛЬКО АДАПТИВ (базовые стили из auth.css не трогаем) */
 
-            }
+    /* ПЛАНШЕТЫ И МОБИЛЬНЫЕ */
+    @media (max-width: 768px) {
+        .auth-container {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
         }
-    </style>
+
+        .auth-logo img {
+            max-width: 100%;
+            height: auto;
+            max-height: 150px;
+        }
+
+        .form-group input {
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        .submit-btn {
+            font-size: 18px;
+            padding: 10px;
+        }
+
+        .auth-footer p {
+            font-size: 12px;
+        }
+    }
+
+    /* МАЛЕНЬКИЕ ТЕЛЕФОНЫ */
+    @media (max-width: 480px) {
+        .auth-container {
+            width: 95%;
+            padding: 15px;
+        }
+
+        .auth-logo img {
+            max-height: 120px;
+        }
+
+        .form-group input {
+            font-size: 12px;
+            padding: 8px;
+        }
+
+        .submit-btn {
+            font-size: 16px;
+            padding: 8px;
+        }
+
+        .auth-footer p {
+            font-size: 11px;
+        }
+
+        .auth-footer {
+            margin-top: 20px;
+        }
+    }
+
+    /* ОЧЕНЬ МАЛЕНЬКИЕ */
+    @media (max-width: 320px) {
+        .auth-logo img {
+            max-height: 100px;
+        }
+
+        .form-group input {
+            font-size: 11px;
+        }
+
+        .submit-btn {
+            font-size: 14px;
+        }
+    }
+</style>
 </head>
 <body>
     <div class="auth-container">

@@ -4,11 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a820307f-927b-4bc0-8aa3-0ad8fe519a3c" name="Changes" comment="end">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+    <list default="true" id="a820307f-927b-4bc0-8aa3-0ad8fe519a3c" name="Changes" comment="end v2">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WHOisE/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/WHOisE/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIEapp/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/auth/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/landing.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/landing.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WIEapp/templates/WIEapp/search/faq.html" beforeDir="false" afterPath="$PROJECT_DIR$/WIEapp/templates/WIEapp/search/faq.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -139,7 +141,7 @@
       <workItem from="1780506040141" duration="537000" />
       <workItem from="1780507084513" duration="1590000" />
       <workItem from="1780530335181" duration="377000" />
-      <workItem from="1780531224554" duration="13842000" />
+      <workItem from="1780531224554" duration="20720000" />
     </task>
     <task id="LOCAL-00001" summary="start and setting">
       <option name="closed" value="true" />
@@ -197,7 +199,15 @@
       <option name="project" value="LOCAL" />
       <updated>1780543944902</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="end v2">
+      <option name="closed" value="true" />
+      <created>1780555090147</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1780555090147</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -233,6 +243,7 @@
     <MESSAGE value="subscription pages, a system of bans and warnings" />
     <MESSAGE value="fix and modal" />
     <MESSAGE value="end" />
-    <option name="LAST_COMMIT_MESSAGE" value="end" />
+    <MESSAGE value="end v2" />
+    <option name="LAST_COMMIT_MESSAGE" value="end v2" />
   </component>
 </project>

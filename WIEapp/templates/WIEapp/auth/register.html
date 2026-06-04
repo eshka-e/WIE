@@ -3,25 +3,89 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WHOisE — ВХОД</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>WHOisE — РЕГИСТРАЦИЯ</title>
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
     <style>
-        /* Адаптив */
+        /* ТОЛЬКО АДАПТИВ */
+
+        /* ПЛАНШЕТЫ И МОБИЛЬНЫЕ */
         @media (max-width: 768px) {
+            .auth-container {
+                width: 90%;
+                max-width: 400px;
+                padding: 15px;
+            }
+
+            .auth-card {
+                padding: 0;
+            }
+
             .auth-logo img {
                 max-width: 100%;
                 height: auto;
-            }
-
-            .submit-btn {
-                width: 100%;
-                box-sizing: border-box;
+                max-height: 150px;
             }
 
             .form-group input {
                 width: 100%;
                 box-sizing: border-box;
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .submit-btn {
+                width: 100%;
+                box-sizing: border-box;
+                font-size: 18px;
+                padding: 10px;
+            }
+
+            .auth-footer p {
+                font-size: 12px;
+            }
+        }
+
+        /* МАЛЕНЬКИЕ ТЕЛЕФОНЫ */
+        @media (max-width: 480px) {
+            .auth-container {
+                width: 95%;
+                padding: 10px;
+            }
+
+            .auth-logo img {
+                max-height: 120px;
+            }
+
+            .form-group input {
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            .submit-btn {
+                font-size: 16px;
+                padding: 8px;
+            }
+
+            .auth-footer p {
+                font-size: 11px;
+            }
+        }
+
+        /* ОЧЕНЬ МАЛЕНЬКИЕ ТЕЛЕФОНЫ */
+        @media (max-width: 320px) {
+            .auth-logo img {
+                max-height: 100px;
+            }
+
+            .form-group input {
+                font-size: 11px;
+                padding: 7px;
+            }
+
+            .submit-btn {
+                font-size: 14px;
+                padding: 7px;
             }
         }
     </style>

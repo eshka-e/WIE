@@ -223,17 +223,15 @@ body {
 }
 
 @media (max-width: 480px) {
-    .status-panel.auth .panel-section:first-child {
-        display: none;
-    }
+
 
     .status-panel.guest .panel-section {
-        font-size: 14px;
+        font-size: 12px;
         padding: 0.25rem 0.5rem;
     }
 
     .panel-section {
-        font-size: 14px;
+        font-size: 12px;
         padding: 0.25rem 0.5rem;
     }
 }
